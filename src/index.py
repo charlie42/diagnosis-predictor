@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
 import data
 import models
@@ -6,6 +7,7 @@ import models
 MODELS_FROM_FILE = 1
 THRESHOLDS_FROM_FILE = 1
 BETA = 3
+THRESHOLD_POSITIVE_EXAMPLES = 150
 
 data_processed_dir = "data/processed/"
 models_dir = "models/"
@@ -14,9 +16,8 @@ full_dataset = pd.read_csv(data_processed_dir + "item_lvl_w_impairment.csv")
 
 # Get list of column names with "Diag: " prefix, where number of 
 # positive examples is > threshold
-threshold_positive_examples = 70
 diag_cols = [x for x in full_dataset.columns if x.startswith("Diag: ") and 
-             full_dataset[x].sum() > threshold_positive_examples] 
+             full_dataset[x].sum() > THRESHOLD_POSITIVE_EXAMPLES] 
 
 # Create datasets for each diagnosis (different input and output columns)
 datasets = data.create_datasets(full_dataset, diag_cols)
@@ -50,4 +51,12 @@ else:
 
 # Print performances of models on validation set
 performance_table = models.check_performance(best_classifiers, datasets, best_thresholds, beta = BETA, use_test_set=False)
-print(performance_table)
+print(performance_table[['Diag','Recall (Sensitivity)','TNR (Specificity)','ROC AUC Mean CV']].sort_values("ROC AUC Mean CV"))
+
+# Filter only well performing diagnoses
+# ROC AUC reference: https://gpsych.bmj.com/content/gpsych/30/3/207.full.pdf
+well_performing_diags = models.find_well_performing_diags(performance_table, min_roc_auc_cv=0.8)
+print(well_performing_diags)
+
+print(set(diag_cols) - set(well_performing_diags))
+

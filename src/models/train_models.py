@@ -14,7 +14,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 
 from sklearn.model_selection import RandomizedSearchCV
-from sklearn.metrics import precision_recall_curve
+
+import sys, os, inspect
 
 def get_base_models_and_param_grids():
     
@@ -122,29 +123,6 @@ def find_best_classifier_for_diag(X_train, y_train):
     
     return best_classifier
 
-# Calculate probability threshold
-def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val, b):
-    from numpy import nanargmax
-    
-    # Fit model on validation set
-    classifier.fit(X_train_train, y_train_train)
-    
-    # Get predicted probabilities values
-    y_val_pred_prob = classifier.predict_proba(X_val)
-    
-    # Calculate precision_recall_curve
-    precisions, recalls, thresholds = precision_recall_curve(y_val, y_val_pred_prob[:,1])
-    
-    # Calculate F-scores
-    fscores = ((1+b**2) * precisions * recalls) / ((b**2 * precisions) + recalls)
-    
-    # Locate the index of the largest F-score
-    ix = nanargmax(fscores)
-    
-    threshold = thresholds[ix]
-    
-    return threshold
-
 # Find best classifier
 def find_best_classifiers(datasets, diag_cols):
     best_classifiers = {}
@@ -158,22 +136,37 @@ def find_best_classifiers(datasets, diag_cols):
         best_classifiers[diag] = best_classifier_for_diag
     return best_classifiers
 
-# Find best thresholds
-def find_best_thresholds(beta, best_classifiers, datasets, diag_cols):
-    best_thresholds = {}
-    for diag in best_classifiers:
-        print(diag)
-        best_classifier_for_diag = best_classifiers[diag]
-        X_train_train, y_train_train, X_val, y_val = \
-            datasets[diag]["X_train_train"], \
-            datasets[diag]["y_train_train"], \
-            datasets[diag]["X_val"], \
-            datasets[diag]["y_val"]
-        threshold = calculate_threshold(
-            best_classifier_for_diag, 
-            X_train_train, y_train_train, X_val, y_val, 
-            beta
-        )
-        best_thresholds[diag] = threshold
-    print(best_thresholds)
-    return best_thresholds
+def main(beta, threshold_positive_examples):
+
+    currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    parentdir = os.path.dirname(currentdir)
+    sys.path.insert(0, parentdir)
+    print(sys.path)
+    import data
+
+    BETA = beta
+
+    data_processed_dir = "data/processed/"
+    models_dir = "models/"
+
+    full_dataset = pd.read_csv(data_processed_dir + "item_lvl_w_impairment.csv")
+
+    beta, threshold_positive_examples = int(beta), int(threshold_positive_examples)
+
+    # Get list of column names with "Diag: " prefix, where number of 
+    # positive examples is > threshold
+    diag_cols = [x for x in full_dataset.columns if x.startswith("Diag: ") and 
+                full_dataset[x].sum() > threshold_positive_examples] 
+
+    # Create datasets for each diagnosis (different input and output columns)
+    datasets = data.create_datasets(full_dataset, diag_cols)
+
+    # Find best models for each diagnosis
+    best_classifiers = find_best_classifiers(datasets, diag_cols)
+
+    # Save best classifiers and thresholds 
+    from joblib import dump
+    dump(best_classifiers, models_dir+'best-classifiers.joblib', compress=1)
+
+if __name__ == "__main__":
+    main(sys.argv[1])
