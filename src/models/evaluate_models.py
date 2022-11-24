@@ -102,26 +102,13 @@ def get_metrics(classifier, threshold, X, y, beta):
     
     return metrics
 
-# Do cross-validation to get more reliable ROC AUC scores (f1 harder to obtain with cross validation - need to change threshold)
-def get_cv_auc_values(best_classifiers, datasets):
-    auc_cv_mean = []
-    auc_cv_std = []
-    for diag in best_classifiers:    
-        cv = StratifiedKFold(n_splits=5)
-        classifier = best_classifiers[diag]
-        X_train, y_train = datasets[diag]["X_train"], datasets[diag]["y_train"]
-        auc = cross_val_score(classifier, X_train, y_train, cv=cv, scoring='roc_auc', n_jobs=-1)
-        auc_cv_mean.append(auc.mean())
-        auc_cv_std.append(auc.std())
-    return (auc_cv_mean, auc_cv_std)
-
 def add_number_of_positive_examples(results, datasets):
     for diag in datasets:
         full_dataset_y = datasets[diag]["y_train"].append(datasets[diag]["y_test"]) # Reconstruct full dataset from train and test
         results.loc[results["Diag"] == diag, "# of Positive Examples"] = full_dataset_y.sum()
     return results
 
-def check_performance(best_classifiers, datasets, best_thresholds, beta, use_test_set=False):
+def check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta, use_test_set=False):
     results = []
     for diag in best_classifiers:
         print(diag)
@@ -137,14 +124,12 @@ def check_performance(best_classifiers, datasets, best_thresholds, beta, use_tes
             diag, 
             *metrics])
 
+        if use_test_set == False: # If using validation set, also use cross validation AUC from grid search
+            results.append([scores_of_best_classifiers[diag]])
+            metric_names.append("CV AUC")
+
     results = pd.DataFrame(results, columns=["Diag"]+metric_names)
     results = add_number_of_positive_examples(results, datasets)
-
-    if use_test_set == False: # If using validation set, also get cross validation AUC
-        auc_cv_mean, auc_cv_std = get_cv_auc_values(best_classifiers, datasets)
-        results["ROC AUC Mean CV"] = auc_cv_mean
-        results["ROC AUC Std CV"] = auc_cv_std
-        results["(ROC AUC Mean CV) - 1 SD"] = np.array(auc_cv_mean) - np.array(auc_cv_std)
 
     return results.sort_values(by="ROC AUC", ascending=False)
 
@@ -155,7 +140,7 @@ def find_well_performing_diags(results, min_roc_auc_cv):
     ]["Diag"].values
     return well_performing_diags
 
-def main(beta = 3, threshold_positive_examples = 150):
+def main(beta = 3, performance_margin = 0.02, auc_threshold = 0.8):
 
     # Need this to be able to import local packages
     import sys, os, inspect
@@ -172,13 +157,16 @@ def main(beta = 3, threshold_positive_examples = 150):
 
     full_dataset = pd.read_csv(data_processed_dir + "item_lvl_w_impairment.csv")
 
-    # Get list of column names with "Diag: " prefix, where number of 
-    # positive examples is > threshold
-    diag_cols = [x for x in full_dataset.columns if x.startswith("Diag: ") and 
-                full_dataset[x].sum() > threshold_positive_examples] 
-
     from joblib import load
     best_classifiers = load(models_dir+'best-classifiers.joblib')
+    scores_of_best_classifiers = load(models_dir+'scores-of-best-classifiers.joblib')
+    sds_of_scores_of_best_classifiers = load(models_dir+'sds-of-scores-of-best-classifiers.joblib')
+
+    # Get list of column names with "Diag: " prefix, where ROC AUC is over threshold and variance under threshold
+    # ROC AUC reference: https://gpsych.bmj.com/content/gpsych/30/3/207.full.pd
+    diag_cols = [x for x in sds_of_scores_of_best_classifiers.keys() if  
+                sds_of_scores_of_best_classifiers[x] <= performance_margin and 
+                scores_of_best_classifiers[x] >= auc_threshold]
 
     datasets = data.create_datasets(full_dataset, diag_cols)
 
@@ -192,9 +180,9 @@ def main(beta = 3, threshold_positive_examples = 150):
     dump(best_thresholds, models_dir+'best-thresholds.joblib', compress=1)
 
     # Print performances of models on validation set
-    performance_table = models.check_performance(best_classifiers, datasets, best_thresholds, beta=beta, use_test_set=False)
+    performance_table = models.check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta=beta, use_test_set=False)
     print(performance_table[['Diag','Recall (Sensitivity)','TNR (Specificity)','ROC AUC Mean CV']].sort_values("ROC AUC Mean CV"))
-    performance_table.to_csv(reports_dir+"performance_table_all_featuers.csv", index=False)    
+    performance_table.to_csv(reports_dir+"performance_table_all_features.csv", index=False)    
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2], sys.argv[3])
