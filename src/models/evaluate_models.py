@@ -1,10 +1,14 @@
+import os
+os.environ["PYTHONWARNINGS"] = "ignore::UserWarning" # Seems to be the only way to suppress multi-thread sklearn warnings
+
 import math
-from sklearn.metrics import confusion_matrix, roc_auc_score, precision_recall_curve
-from sklearn.model_selection import StratifiedKFold
-from sklearn.model_selection import cross_val_score
 import pandas as pd
 import numpy as np
 import sys
+
+from sklearn.metrics import confusion_matrix, roc_auc_score, precision_recall_curve
+from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import cross_val_score
 
 # Calculate probability threshold
 def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val, b):
@@ -151,7 +155,7 @@ def find_well_performing_diags(results, min_roc_auc_cv):
     ]["Diag"].values
     return well_performing_diags
 
-def main(beta, threshold_positive_examples):
+def main(beta = 3, threshold_positive_examples = 150):
 
     # Need this to be able to import local packages
     import sys, os, inspect
