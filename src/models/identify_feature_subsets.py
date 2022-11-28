@@ -127,9 +127,9 @@ def get_importances_from_sfs(sfs_objects):
         importances[diag] = importances_df
     return importances
 
-def get_optimal_nbs_features_from_sfs(sfs_importances):
+def get_optimal_nbs_features_from_sfs(sfs_importances, diag_cols):
     optimal_nbs_features = {}
-    for diag in sfs_importances.keys():
+    for diag in diag_cols:
         importances_df = sfs_importances[diag]
         optimal_nb_features = find_elbow(importances_df["ROC AUC"])
         optimal_nbs_features[diag] = optimal_nb_features
@@ -165,7 +165,7 @@ def write_performances_on_sfs_subsets_to_file(performances):
 
 def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets, best_classifiers, best_thresholds, beta, number_of_features_to_check):
     performances_on_sfs_subsets = {}
-    for diag in sfs_objects.keys():
+    for diag in datasets.keys():
         print(diag)
         performances_on_sfs_subsets[diag] = {}
 
@@ -216,11 +216,12 @@ def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets,
 
     return performances_on_sfs_subsets
 
-def main(beta = 3, auc_threshold = 0.8, sfs_importances_from_file = 1, number_of_features_to_check = 100):
+def main(beta = 3, auc_threshold = 0.8, sfs_importances_from_file = 1, number_of_features_to_check = 100, performance_margin = 0.03):
     beta = float(beta)
     auc_threshold = float(auc_threshold)
     sfs_importances_from_file = int(sfs_importances_from_file)
     number_of_features_to_check = int(number_of_features_to_check)
+    performance_margin = float(performance_margin)
 
     full_dataset = pd.read_csv(data_processed_dir + "item_lvl_w_impairment.csv")
 
@@ -231,8 +232,12 @@ def main(beta = 3, auc_threshold = 0.8, sfs_importances_from_file = 1, number_of
     
     # Get list of column names with "Diag: " prefix, where ROC AUC is over threshold and variance under threshold
     # ROC AUC reference: https://gpsych.bmj.com/content/gpsych/30/3/207.full.pd
+    # diag_cols = [x for x in sds_of_scores_of_best_classifiers.keys() if  
+    #             sds_of_scores_of_best_classifiers[x] <= performance_margin and 
+    #             scores_of_best_classifiers[x] >= auc_threshold]
+
     diag_cols = [x for x in sds_of_scores_of_best_classifiers.keys() if  
-                scores_of_best_classifiers[x] - sds_of_scores_of_best_classifiers[x] >= auc_threshold]
+        scores_of_best_classifiers[x] - sds_of_scores_of_best_classifiers[x] >= auc_threshold]
     print("Diagnoses that passed the threshold: ")
     print(diag_cols)
 
@@ -246,7 +251,7 @@ def main(beta = 3, auc_threshold = 0.8, sfs_importances_from_file = 1, number_of
 
     sfs_objects = get_sfs_objects(sfs_importances_from_file, best_classifiers, datasets, diag_cols, number_of_features_to_check)
     importances_from_sfs = get_importances_from_sfs(sfs_objects)
-    optimal_nbs_features = get_optimal_nbs_features_from_sfs(importances_from_sfs)
+    optimal_nbs_features = get_optimal_nbs_features_from_sfs(importances_from_sfs, diag_cols)
     plot_importances_from_sfs(importances_from_sfs, optimal_nbs_features, number_of_features_to_check)
     performances_on_sfs_subsets = get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets, best_classifiers, best_thresholds, beta, number_of_features_to_check)
     write_performances_on_sfs_subsets_to_file(performances_on_sfs_subsets)
