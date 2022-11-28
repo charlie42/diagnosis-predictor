@@ -6,28 +6,28 @@ import pandas as pd
 import numpy as np
 import sys
 
-from sklearn.metrics import confusion_matrix, roc_auc_score, precision_recall_curve
+from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 
 # Calculate probability threshold
 def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val, b):
     from numpy import nanargmax
-    
-    # Fit model on validation set
+
+    # Fit model on train set
     classifier.fit(X_train_train, y_train_train)
     
     # Get predicted probabilities values
     y_val_pred_prob = classifier.predict_proba(X_val)
+
+    # calculate roc curve
+    fpr, tpr, thresholds = roc_curve(y_val, y_val_pred_prob[:,1])
+
+    # calculate the g-mean for each threshold
+    gmeans = np.sqrt(tpr * (1-fpr))
     
-    # Calculate precision_recall_curve
-    precisions, recalls, thresholds = precision_recall_curve(y_val, y_val_pred_prob[:,1])
-    
-    # Calculate F-scores
-    fscores = ((1+b**2) * precisions * recalls) / ((b**2 * precisions) + recalls)
-    
-    # Locate the index of the largest F-score
-    ix = nanargmax(fscores)
+    # locate the index of the largest g-mean
+    ix = nanargmax(gmeans)
     
     threshold = thresholds[ix]
     
@@ -76,8 +76,8 @@ def get_matrix_metrics(real_values,pred_values,beta):
     check_Neg2 = FPR + TNR
     LRPos      = round( Recall/FPR,4 ) 
     LRNeg      = round( FNR / TNR ,4 )
-    DOR        = round( LRPos/LRNeg)
-    #DOR        = 1 # FIX, LINE ABOVE
+    #DOR        = round( LRPos/LRNeg)
+    DOR        = 1 # FIX, LINE ABOVE
     F1         = round ( 2 * ((Precision*Recall)/(Precision+Recall)),4)
     FBeta      = round ( (1+beta**2)*((Precision*Recall)/((beta**2 * Precision)+ Recall)) ,4)
     MCC        = round ( ((TP*TN)-(FP*FN))/math.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))  ,4)
@@ -121,10 +121,6 @@ def check_performance(best_classifiers, datasets, best_thresholds, scores_of_bes
 
         metrics, metric_names = get_metrics(classifier, threshold, X, y, beta)
         
-        if use_test_set == False: # If using validation set, also use cross validation AUC from grid search
-            metrics.append(scores_of_best_classifiers[diag])
-            metric_names.append("ROC AUC Mean CV")
-
         results.append([
             diag, 
             *metrics])
@@ -133,6 +129,12 @@ def check_performance(best_classifiers, datasets, best_thresholds, scores_of_bes
     results = add_number_of_positive_examples(results, datasets)
 
     return results.sort_values(by="ROC AUC", ascending=False)
+
+def get_auc_cv_from_grid_search(reports_dir):
+    auc_cv_from_grid_search = pd.read_csv(reports_dir + "df_of_best_classifiers_and_their_scores.csv")
+    auc_cv_from_grid_search = auc_cv_from_grid_search[["Diag", "Best score", "SD of best score", "Score - SD"]]
+    auc_cv_from_grid_search.columns = ["Diag", "ROC AUC Mean CV", "ROC AUC SD CV", "ROC AUC Mean CV - SD"]
+    return auc_cv_from_grid_search
 
 # Get diagnoses with good performance
 def find_well_performing_diags(results, min_roc_auc_cv):
@@ -185,7 +187,9 @@ def main(beta = 3, performance_margin = 0.02, auc_threshold = 0.8):
     dump(best_thresholds, models_dir+'best-thresholds.joblib', compress=1)
 
     # Print performances of models on validation set
-    performance_table = models.check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta=beta, use_test_set=False)
+    roc_auc_cv_from_grid_search = get_auc_cv_from_grid_search(reports_dir)
+    performance_table = check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta=beta, use_test_set=False)
+    performance_table = performance_table.merge(roc_auc_cv_from_grid_search, on="Diag")
     print(performance_table[['Diag','Recall (Sensitivity)','TNR (Specificity)','ROC AUC Mean CV']].sort_values("ROC AUC Mean CV"))
     performance_table.to_csv(reports_dir+"performance_table_all_features.csv", index=False)    
 
