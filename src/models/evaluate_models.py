@@ -25,7 +25,7 @@ def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val, 
 
     # calculate the g-mean for each threshold
     gmeans = np.sqrt(tpr * (1-fpr))
-    
+
     # locate the index of the largest g-mean
     ix = nanargmax(gmeans)
     
@@ -108,13 +108,13 @@ def add_number_of_positive_examples(results, datasets):
         results.loc[results["Diag"] == diag, "# of Positive Examples"] = full_dataset_y.sum()
     return results
 
-def check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta, use_test_set=False):
+def check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta, use_test_set):
     results = []
     for diag in datasets.keys():
         print(diag)
         classifier = best_classifiers[diag]
         threshold = best_thresholds[diag]
-        if use_test_set:
+        if use_test_set == 1:
             X, y = datasets[diag]["X_test"], datasets[diag]["y_test"]
         else:
             X, y = datasets[diag]["X_val"], datasets[diag]["y_val"]
@@ -130,9 +130,9 @@ def check_performance(best_classifiers, datasets, best_thresholds, scores_of_bes
 
     return results.sort_values(by="ROC AUC", ascending=False)
 
-def get_auc_cv_from_grid_search(reports_dir):
+def get_auc_cv_from_grid_search(reports_dir, diag_cols):
     auc_cv_from_grid_search = pd.read_csv(reports_dir + "df_of_best_classifiers_and_their_scores.csv")
-    auc_cv_from_grid_search = auc_cv_from_grid_search[["Diag", "Best score", "SD of best score", "Score - SD"]]
+    auc_cv_from_grid_search = auc_cv_from_grid_search[auc_cv_from_grid_search["Diag"].isin(diag_cols)][["Diag", "Best score", "SD of best score", "Score - SD"]]
     auc_cv_from_grid_search.columns = ["Diag", "ROC AUC Mean CV", "ROC AUC SD CV", "ROC AUC Mean CV - SD"]
     return auc_cv_from_grid_search
 
@@ -143,7 +143,7 @@ def find_well_performing_diags(results, min_roc_auc_cv):
     ]["Diag"].values
     return well_performing_diags
 
-def main(beta = 3, performance_margin = 0.02, auc_threshold = 0.8):
+def main(beta = 3, performance_margin = 0.02, auc_threshold = 0.8, use_test_set=1):
 
     # Need this to be able to import local packages
     import sys, os, inspect
@@ -155,6 +155,7 @@ def main(beta = 3, performance_margin = 0.02, auc_threshold = 0.8):
     beta = float(beta)
     performance_margin = float(performance_margin)
     auc_threshold = float(auc_threshold)
+    use_test_set = int(use_test_set)
 
     models_dir = "models/"
     data_processed_dir = "data/processed/"
@@ -169,9 +170,12 @@ def main(beta = 3, performance_margin = 0.02, auc_threshold = 0.8):
 
     # Get list of column names with "Diag: " prefix, where ROC AUC is over threshold and variance under threshold
     # ROC AUC reference: https://gpsych.bmj.com/content/gpsych/30/3/207.full.pd
+    # diag_cols = [x for x in sds_of_scores_of_best_classifiers.keys() if  
+    #             sds_of_scores_of_best_classifiers[x] <= performance_margin and 
+    #             scores_of_best_classifiers[x] >= auc_threshold]
+
     diag_cols = [x for x in sds_of_scores_of_best_classifiers.keys() if  
-                sds_of_scores_of_best_classifiers[x] <= performance_margin and 
-                scores_of_best_classifiers[x] >= auc_threshold]
+        scores_of_best_classifiers[x] - sds_of_scores_of_best_classifiers[x] >= auc_threshold]
     print("Diagnoses that passed the threshold: ")
     print(diag_cols)
 
@@ -187,10 +191,10 @@ def main(beta = 3, performance_margin = 0.02, auc_threshold = 0.8):
     dump(best_thresholds, models_dir+'best-thresholds.joblib', compress=1)
 
     # Print performances of models on validation set
-    roc_auc_cv_from_grid_search = get_auc_cv_from_grid_search(reports_dir)
-    performance_table = check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta=beta, use_test_set=False)
-    performance_table = performance_table.merge(roc_auc_cv_from_grid_search, on="Diag")
-    print(performance_table[['Diag','Recall (Sensitivity)','TNR (Specificity)','ROC AUC Mean CV']].sort_values("ROC AUC Mean CV"))
+    roc_auc_cv_from_grid_search = get_auc_cv_from_grid_search(reports_dir, diag_cols)
+    performance_table = check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta=beta, use_test_set=use_test_set)
+    print(roc_auc_cv_from_grid_search)
+    print(performance_table[['Diag','Recall (Sensitivity)','TNR (Specificity)','ROC AUC']].sort_values("ROC AUC"))
     performance_table.to_csv(reports_dir+"performance_table_all_features.csv", index=False)    
 
 if __name__ == "__main__":
