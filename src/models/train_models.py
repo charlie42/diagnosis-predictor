@@ -157,7 +157,7 @@ def build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of
     return best_classifiers_and_score_sds
 
 def main(beta = 3, performance_margin = 0.02, models_from_file = 1):
-    beta = int(beta)
+    beta = float(beta)
     models_from_file = int(models_from_file)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
 

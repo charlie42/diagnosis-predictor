@@ -144,14 +144,11 @@ def plot_importances_from_sfs(sfs_importances, optimal_nb_features, number_of_fe
         plot_importances_from_sfs_per_diag(sfs_importances[diag], diag, optimal_nb_features, number_of_features_to_check)
 
 def get_best_thresholds(beta, best_classifiers, datasets):
-    if os.path.exists(models_dir+'best-thresholds.joblib'):
-        best_thresholds = load(models_dir+'best-thresholds.joblib')
-    else:
-        best_thresholds = models.find_best_thresholds(
-            beta=beta, 
-            best_classifiers=best_classifiers, 
-            datasets=datasets
-            )
+    best_thresholds = models.find_best_thresholds(
+        beta=beta, 
+        best_classifiers=best_classifiers, 
+        datasets=datasets
+        )
     return best_thresholds
 
 def fit_classifier_on_subset_of_features(best_classifiers, diag, X, y):
@@ -181,31 +178,31 @@ def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets,
         
         metrics_on_sfs_subsets = []
         # Get performance for model on all features
-        metrics = models.get_metrics(best_classifier, best_threshold, X_test, y_test, beta)
+        metrics, metric_names = models.get_metrics(best_classifier, best_threshold, X_test, y_test, beta)
         metrics_on_sfs_subsets.append([
             len(X_train.columns),
             metrics[-1], 
-            metrics[models.metric_names.index("Recall (Sensitivity)")],
-            metrics[models.metric_names.index("TNR (Specificity)")]])
+            metrics[metric_names.index("Recall (Sensitivity)")],
+            metrics[metric_names.index("TNR (Specificity)")]])
 
         # Get performance for model on optimal number of features
         # Create new pipeline with the params of the best classifier (need to re-train the imputer on less features)
         new_classifier = fit_classifier_on_subset_of_features(best_classifiers, diag, X_train[get_top_n_feaures(optimal_nb_features, sfs_objects, diag)], y_train)
-        metrics = models.get_metrics(new_classifier, best_threshold, X_test[get_top_n_feaures(optimal_nb_features, sfs_objects, diag)], y_test, beta)
+        metrics, metric_names = models.get_metrics(new_classifier, best_threshold, X_test[get_top_n_feaures(optimal_nb_features, sfs_objects, diag)], y_test, beta)
         metrics_on_sfs_subsets.append([
             optimal_nb_features,
             metrics[-1], 
-            metrics[models.metric_names.index("Recall (Sensitivity)")],
-            metrics[models.metric_names.index("TNR (Specificity)")]])
+            metrics[metric_names.index("Recall (Sensitivity)")],
+            metrics[metric_names.index("TNR (Specificity)")]])
         
         # Get performance for model on top X features checked
         new_classifier = fit_classifier_on_subset_of_features(best_classifiers, diag, X_train[get_top_n_feaures(number_of_features_to_check, sfs_objects, diag)], y_train)
-        metrics = models.get_metrics(new_classifier, best_threshold, X_test[get_top_n_feaures(number_of_features_to_check, sfs_objects, diag)], y_test, beta)
+        metrics, metric_names = models.get_metrics(new_classifier, best_threshold, X_test[get_top_n_feaures(number_of_features_to_check, sfs_objects, diag)], y_test, beta)
         metrics_on_sfs_subsets.append([
             number_of_features_to_check,
             metrics[-1], 
-            metrics[models.metric_names.index("Recall (Sensitivity)")],
-            metrics[models.metric_names.index("TNR (Specificity)")]])
+            metrics[metric_names.index("Recall (Sensitivity)")],
+            metrics[metric_names.index("TNR (Specificity)")]])
         
         metrics_on_sfs_subsets_df = pd.DataFrame(metrics_on_sfs_subsets, columns=[
             "Number of features",
@@ -220,7 +217,7 @@ def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets,
     return performances_on_sfs_subsets
 
 def main(beta = 3, auc_threshold = 0.8, sfs_importances_from_file = 1, number_of_features_to_check = 100):
-    beta = int(beta)
+    beta = float(beta)
     auc_threshold = float(auc_threshold)
     sfs_importances_from_file = int(sfs_importances_from_file)
     number_of_features_to_check = int(number_of_features_to_check)
@@ -236,6 +233,8 @@ def main(beta = 3, auc_threshold = 0.8, sfs_importances_from_file = 1, number_of
     # ROC AUC reference: https://gpsych.bmj.com/content/gpsych/30/3/207.full.pd
     diag_cols = [x for x in sds_of_scores_of_best_classifiers.keys() if  
                 scores_of_best_classifiers[x] - sds_of_scores_of_best_classifiers[x] >= auc_threshold]
+    print("Diagnoses that passed the threshold: ")
+    print(diag_cols)
 
     # Create datasets for each diagnosis (different input and output columns)
     datasets = data.create_datasets(full_dataset, diag_cols)

@@ -36,8 +36,8 @@ def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val, 
 # Find best thresholds
 def find_best_thresholds(beta, best_classifiers, datasets):
     best_thresholds = {}
-    for diag in best_classifiers:
-        print(diag)
+    for diag in datasets.keys():
+        print("Finding best threshold for", diag)
         best_classifier_for_diag = best_classifiers[diag]
         X_train_train, y_train_train, X_val, y_val = \
             datasets[diag]["X_train_train"], \
@@ -52,8 +52,6 @@ def find_best_thresholds(beta, best_classifiers, datasets):
         best_thresholds[diag] = threshold
     print(best_thresholds)
     return best_thresholds
-
-metric_names = ['TP','TN','FP','FN','Prevalence','Accuracy','Precision','NPV','FDR','FOR','check_Pos','check_Neg','Recall (Sensitivity)','FPR','FNR','TNR (Specificity)','check_Pos2','check_Neg2','LR+','LR-','DOR','F1','FBeta','MCC','BM','MK','Predicted Positive Ratio','ROC AUC']   
 
 def get_matrix_metrics(real_values,pred_values,beta):
     CM = confusion_matrix(real_values,pred_values)
@@ -88,19 +86,21 @@ def get_matrix_metrics(real_values,pred_values,beta):
     Predicted_Positive_Ratio = round( (TP+FP) / Population,2)
     
     mat_met = [TP,TN,FP,FN,Prevalence,Accuracy,Precision,NPV,FDR,FOR,check_Pos,check_Neg,Recall,FPR,FNR,TNR,check_Pos2,check_Neg2,LRPos,LRNeg,DOR,F1,FBeta,MCC,BM,MK,Predicted_Positive_Ratio]
-    return (mat_met)
+    metric_names = ['TP','TN','FP','FN','Prevalence','Accuracy','Precision','NPV','FDR','FOR','check_Pos','check_Neg','Recall (Sensitivity)','FPR','FNR','TNR (Specificity)','check_Pos2','check_Neg2','LR+','LR-','DOR','F1','FBeta','MCC','BM','MK','Predicted Positive Ratio','ROC AUC']   
+
+    return (mat_met, metric_names)
 
 def get_metrics(classifier, threshold, X, y, beta):
        
     y_pred_prob = classifier.predict_proba(X)
     y_pred = (y_pred_prob[:,1] >= threshold).astype(bool) 
 
-    metrics = get_matrix_metrics(y, y_pred, beta=beta)
+    metrics, metric_names = get_matrix_metrics(y, y_pred, beta=beta)
 
     roc_auc = roc_auc_score(y, y_pred_prob[:,1])
     metrics.append(roc_auc)
     
-    return metrics
+    return metrics, metric_names
 
 def add_number_of_positive_examples(results, datasets):
     for diag in datasets:
@@ -110,7 +110,7 @@ def add_number_of_positive_examples(results, datasets):
 
 def check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta, use_test_set=False):
     results = []
-    for diag in best_classifiers:
+    for diag in datasets.keys():
         print(diag)
         classifier = best_classifiers[diag]
         threshold = best_thresholds[diag]
@@ -119,14 +119,15 @@ def check_performance(best_classifiers, datasets, best_thresholds, scores_of_bes
         else:
             X, y = datasets[diag]["X_val"], datasets[diag]["y_val"]
 
-        metrics = get_metrics(classifier, threshold, X, y, beta)
+        metrics, metric_names = get_metrics(classifier, threshold, X, y, beta)
+        
+        if use_test_set == False: # If using validation set, also use cross validation AUC from grid search
+            metrics.append(scores_of_best_classifiers[diag])
+            metric_names.append("ROC AUC Mean CV")
+
         results.append([
             diag, 
             *metrics])
-
-        if use_test_set == False: # If using validation set, also use cross validation AUC from grid search
-            results.append([scores_of_best_classifiers[diag]])
-            metric_names.append("CV AUC")
 
     results = pd.DataFrame(results, columns=["Diag"]+metric_names)
     results = add_number_of_positive_examples(results, datasets)
@@ -149,7 +150,9 @@ def main(beta = 3, performance_margin = 0.02, auc_threshold = 0.8):
     sys.path.insert(0, parentdir)
     import models, data
 
-    beta, threshold_positive_examples = int(beta), int(threshold_positive_examples)
+    beta = float(beta)
+    performance_margin = float(performance_margin)
+    auc_threshold = float(auc_threshold)
 
     models_dir = "models/"
     data_processed_dir = "data/processed/"
@@ -167,6 +170,8 @@ def main(beta = 3, performance_margin = 0.02, auc_threshold = 0.8):
     diag_cols = [x for x in sds_of_scores_of_best_classifiers.keys() if  
                 sds_of_scores_of_best_classifiers[x] <= performance_margin and 
                 scores_of_best_classifiers[x] >= auc_threshold]
+    print("Diagnoses that passed the threshold: ")
+    print(diag_cols)
 
     datasets = data.create_datasets(full_dataset, diag_cols)
 
