@@ -37,7 +37,6 @@ def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val, 
 def find_best_thresholds(beta, best_classifiers, datasets):
     best_thresholds = {}
     for diag in datasets.keys():
-        print("Finding best threshold for", diag)
         best_classifier_for_diag = best_classifiers[diag]
         X_train_train, y_train_train, X_val, y_val = \
             datasets[diag]["X_train_train"], \
@@ -50,7 +49,7 @@ def find_best_thresholds(beta, best_classifiers, datasets):
             beta
         )
         best_thresholds[diag] = threshold
-    print(best_thresholds)
+    print("Thesholds: ", best_thresholds)
     return best_thresholds
 
 def get_matrix_metrics(real_values,pred_values,beta):
@@ -143,7 +142,7 @@ def find_well_performing_diags(results, min_roc_auc_cv):
     ]["Diag"].values
     return well_performing_diags
 
-def main(beta = 3, performance_margin = 0.02, auc_threshold = 0.8, use_test_set=1):
+def main(beta = 2.5, performance_margin = 0.02, auc_threshold = 0.8, use_test_set=1):
 
     # Need this to be able to import local packages
     import sys, os, inspect
