@@ -193,8 +193,10 @@ def main(beta = 2.5, performance_margin = 0.02, auc_threshold = 0.8, use_test_se
     roc_auc_cv_from_grid_search = get_auc_cv_from_grid_search(reports_dir, diag_cols)
     performance_table = check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta=beta, use_test_set=use_test_set)
     print(roc_auc_cv_from_grid_search)
-    print(performance_table[['Diag','Recall (Sensitivity)','TNR (Specificity)','ROC AUC']].sort_values("ROC AUC"))
-    performance_table.to_csv(reports_dir+"performance_table_all_features.csv", index=False)    
+    print(performance_table[['Diag','Recall (Sensitivity)','TNR (Specificity)','ROC AUC']].sort_values("ROC AUC").reset_index(drop=True))
+
+    if use_test_set == 1:
+        performance_table.to_csv(reports_dir+"performance_table_all_features.csv", index=False)    
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], sys.argv[3])
