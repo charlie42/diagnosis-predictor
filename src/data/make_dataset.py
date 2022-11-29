@@ -319,8 +319,6 @@ def main(first_assessment_to_drop):
 
     full = remove_admin_cols(full)
 
-    #print(full)
-
     # Get ID columns (contain quetsionnaire names, e.g. 'ACE,EID', will be used to check if an assessment is filled)
     EID_cols = [x for x in full.columns if ",EID" in x]
 
