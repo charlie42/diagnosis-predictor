@@ -294,7 +294,7 @@ def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets,
 
     return performances_on_sfs_subsets
 
-def main(beta = 3, auc_threshold = 0.8, number_of_features_to_check = 100, performance_margin = 0.03, sfs_importances_from_file = 1):
+def main(beta = 2.5, auc_threshold = 0.8, number_of_features_to_check = 100, performance_margin = 0.02, sfs_importances_from_file = 1):
     beta = float(beta)
     auc_threshold = float(auc_threshold)
     sfs_importances_from_file = int(sfs_importances_from_file)

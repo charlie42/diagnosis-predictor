@@ -1,3 +1,6 @@
+import os
+os.environ["PYTHONWARNINGS"] = "ignore::UserWarning" # Seems to be the only way to suppress multi-thread sklearn warnings
+
 import numpy as np
 import pandas as pd
 
@@ -15,7 +18,7 @@ from sklearn.pipeline import make_pipeline
 
 from sklearn.model_selection import RandomizedSearchCV
 
-import sys, os, inspect
+import sys, inspect
 
 def get_base_models_and_param_grids():
     
@@ -93,6 +96,9 @@ def get_best_classifier(base_model, grid, X_train, y_train):
     # If chosen model is SVM add a predict_proba parameter (not needed for grid search, and slows it down significantly)
     if 'svc' in best_estimator.named_steps.keys():
         best_estimator.set_params(svc__probability=True)
+        
+        cv_results = pd.DataFrame(rs.cv_results_) #DEBUG
+        cv_results.to_csv("reports/cv_results.csv") #DEBUG  
 
     return (best_estimator, best_score, sd_of_score_of_best_estimator)
 
@@ -156,7 +162,7 @@ def build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of
     best_classifiers_and_score_sds["Score - SD"] = best_classifiers_and_score_sds['Best score'] - best_classifiers_and_score_sds['SD of best score'] 
     return best_classifiers_and_score_sds
 
-def main(beta = 3, performance_margin = 0.02, models_from_file = 1):
+def main(beta = 2.5, performance_margin = 0.02, models_from_file = 1):
     beta = float(beta)
     models_from_file = int(models_from_file)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
