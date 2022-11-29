@@ -351,7 +351,8 @@ def main(first_assessment_to_drop):
     # Plot cumulative distribution of assessments
     plot_comul_number_of_examples(cumul_number_of_examples_df, data_statistics_dir)
 
-    ### => The first drop-off in number of respondents is at SCARED_SR, the first assessment with an age restriction. Second drop off is at CPIC.
+    ### => The first drop-off in number of respondents is at ICU_P, 
+    # then SCARED_SR (the biggest drop off, and it's the first assessment with an age restriction). Last drop off is at CPIC.
     
     # List of most popular assessments until the first one from the drop list 
     EID_columns_until_dropped = [x for x in EID_columns_by_popularity[:EID_columns_by_popularity.index(first_assessment_to_drop+",EID")]]
@@ -387,7 +388,10 @@ def main(first_assessment_to_drop):
     data_up_to_dropped = add_missingness_markers(data_up_to_dropped, 5, missing_values_df)
 
     # Remove rows where output vars are not present: WIAT,WIAT_Num_Stnd, WISC,WISC_Coding_Scaled, WISC,WISC_SS_Scaled, WISC,WISC_FSIQ, WIAT,WIAT_Word_Stnd 
-    data_up_to_dropped = data_up_to_dropped.dropna(subset = ["WIAT,WIAT_Num_Stnd", "WISC,WISC_Coding_Scaled", "WISC,WISC_SS_Scaled", "WISC,WISC_FSIQ", "WIAT,WIAT_Word_Stnd"])
+    if first_assessment_to_drop == "ICU_P":  # Less people tool WISC than ICU_P, so when limiting assessments to ICU_P we don't have WISC columns
+        data_up_to_dropped = data_up_to_dropped.dropna(subset = ["WIAT,WIAT_Num_Stnd", "WIAT,WIAT_Word_Stnd"])
+    else:
+        data_up_to_dropped = data_up_to_dropped.dropna(subset = ["WIAT,WIAT_Num_Stnd", "WISC,WISC_Coding_Scaled", "WISC,WISC_SS_Scaled", "WISC,WISC_FSIQ", "WIAT,WIAT_Word_Stnd"])
 
     # Transform diagnosis columns
     data_up_to_dropped = transform_dx_cols(data_up_to_dropped)
