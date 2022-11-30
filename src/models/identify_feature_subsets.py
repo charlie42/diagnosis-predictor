@@ -320,7 +320,7 @@ def main(beta = 2.5, auc_threshold = 0.8, number_of_features_to_check = 100, per
     print(diag_cols)
 
     # Create datasets for each diagnosis (different input and output columns)
-    datasets = data.create_datasets(full_dataset, diag_cols)
+    datasets = data.create_datasets(full_dataset, diag_cols, split_percentage=0.3)
 
     importances_from_models = get_importances_from_models(best_classifiers, datasets, diag_cols)
     plot_importances_from_models(importances_from_models)

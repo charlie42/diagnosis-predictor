@@ -142,7 +142,7 @@ def find_well_performing_diags(results, min_roc_auc_cv):
     ]["Diag"].values
     return well_performing_diags
 
-def main(beta = 2.5, performance_margin = 0.02, auc_threshold = 0.8, use_test_set=1):
+def main(beta = 2.5, auc_threshold = 0.8, use_test_set=1):
 
     # Need this to be able to import local packages
     import sys, os, inspect
@@ -152,7 +152,6 @@ def main(beta = 2.5, performance_margin = 0.02, auc_threshold = 0.8, use_test_se
     import models, data
 
     beta = float(beta)
-    performance_margin = float(performance_margin)
     auc_threshold = float(auc_threshold)
     use_test_set = int(use_test_set)
 
@@ -178,7 +177,7 @@ def main(beta = 2.5, performance_margin = 0.02, auc_threshold = 0.8, use_test_se
     print("Diagnoses that passed the threshold: ")
     print(diag_cols)
 
-    datasets = data.create_datasets(full_dataset, diag_cols)
+    datasets = data.create_datasets(full_dataset, diag_cols, split_percentage=0.3)
 
     # Find best probability thresholds for each diagnosis
     best_thresholds = find_best_thresholds(

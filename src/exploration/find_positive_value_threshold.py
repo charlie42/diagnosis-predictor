@@ -31,7 +31,7 @@ def main(performance_margin = 0.02, models_from_file = 1):
                 full_dataset[x].sum() > threshold_positive_examples] 
 
     # Create datasets for each diagnosis (different input and output columns)
-    datasets = data.create_datasets(full_dataset, diag_cols)
+    datasets = data.create_datasets(full_dataset, diag_cols, split_percentage = 0.3)
 
     # Either load models from file or find best models from scratch
     if models_from_file == 0:
