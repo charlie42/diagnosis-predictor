@@ -143,9 +143,8 @@ def plot_importances_from_sfs(sfs_importances, optimal_nb_features, number_of_fe
     for diag in sfs_importances.keys():
         plot_importances_from_sfs_per_diag(sfs_importances[diag], diag, optimal_nb_features, number_of_features_to_check)
 
-def get_best_thresholds(beta, best_classifiers, datasets):
+def get_best_thresholds(best_classifiers, datasets):
     best_thresholds = models.find_best_thresholds(
-        beta=beta, 
         best_classifiers=best_classifiers, 
         datasets=datasets
         )
@@ -197,7 +196,7 @@ def re_train_models_on_feature_subsets(sfs_objects, optimal_nbs_features, datase
         classifiers_on_feature_subsets[diag][number_of_features_to_check] = new_classifier
     return classifiers_on_feature_subsets
 
-def calculate_thresholds_for_feature_subsets(sfs_objects, classifiers_on_feature_subsets, datasets, optimal_nbs_features, number_of_features_to_check, beta):
+def calculate_thresholds_for_feature_subsets(sfs_objects, classifiers_on_feature_subsets, datasets, optimal_nbs_features, number_of_features_to_check):
     thresholds_on_feature_subsets = {}
     for diag in datasets.keys():
 
@@ -214,8 +213,7 @@ def calculate_thresholds_for_feature_subsets(sfs_objects, classifiers_on_feature
             X_train[top_n_features], 
             y_train,
             X_val[top_n_features], 
-            y_val,
-            beta
+            y_val
             )
         top_n_features = get_top_n_feaures(number_of_features_to_check, sfs_objects, diag)
         thresholds_on_feature_subsets[diag][number_of_features_to_check] = models.calculate_threshold(
@@ -223,19 +221,18 @@ def calculate_thresholds_for_feature_subsets(sfs_objects, classifiers_on_feature
             X_train[top_n_features], 
             y_train,
             X_val[top_n_features], 
-            y_val,
-            beta
+            y_val
             )
     return thresholds_on_feature_subsets
 
-def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets, best_classifiers, beta, number_of_features_to_check, use_test_set=0):
+def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets, best_classifiers, number_of_features_to_check, use_test_set=0):
     
     classifiers_on_feature_subsets = re_train_models_on_feature_subsets(sfs_objects, optimal_nbs_features, datasets, best_classifiers, number_of_features_to_check)
-    thresholds_on_feature_subsets = calculate_thresholds_for_feature_subsets(sfs_objects, classifiers_on_feature_subsets, datasets, optimal_nbs_features, number_of_features_to_check, beta)
+    thresholds_on_feature_subsets = calculate_thresholds_for_feature_subsets(sfs_objects, classifiers_on_feature_subsets, datasets, optimal_nbs_features, number_of_features_to_check)
 
     performances_on_sfs_subsets = {}
 
-    best_thresholds_all_features = get_best_thresholds(beta, best_classifiers, datasets)
+    best_thresholds_all_features = get_best_thresholds(best_classifiers, datasets)
     
     for diag in datasets.keys():
         print(diag)
@@ -252,7 +249,7 @@ def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets,
         # Get performance for model on all features
         best_classifier = best_classifiers[diag]
         best_threshold = best_thresholds_all_features[diag]
-        metrics, metric_names = models.get_metrics(best_classifier, best_threshold, X_test, y_test, beta)
+        metrics, metric_names = models.get_metrics(best_classifier, best_threshold, X_test, y_test)
         metrics_on_sfs_subsets.append([
             len(X_test.columns),
             metrics[-1], 
@@ -264,7 +261,7 @@ def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets,
         top_n_features = get_top_n_feaures(optimal_nb_features, sfs_objects, diag)
         new_classifier = classifiers_on_feature_subsets[diag][optimal_nb_features]
         new_threshold = thresholds_on_feature_subsets[diag][optimal_nb_features]
-        metrics, metric_names = models.get_metrics(new_classifier, new_threshold, X_test[top_n_features], y_test, beta)
+        metrics, metric_names = models.get_metrics(new_classifier, new_threshold, X_test[top_n_features], y_test)
         metrics_on_sfs_subsets.append([
             optimal_nb_features,
             metrics[-1], 
@@ -275,7 +272,7 @@ def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets,
         top_n_features = get_top_n_feaures(number_of_features_to_check, sfs_objects, diag)
         new_classifier = classifiers_on_feature_subsets[diag][number_of_features_to_check]
         new_threshold = thresholds_on_feature_subsets[diag][number_of_features_to_check]
-        metrics, metric_names = models.get_metrics(new_classifier, new_threshold, X_test[top_n_features], y_test, beta)
+        metrics, metric_names = models.get_metrics(new_classifier, new_threshold, X_test[top_n_features], y_test)
         metrics_on_sfs_subsets.append([
             number_of_features_to_check,
             metrics[-1], 
@@ -294,8 +291,7 @@ def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets,
 
     return performances_on_sfs_subsets
 
-def main(beta = 2.5, auc_threshold = 0.8, number_of_features_to_check = 100, performance_margin = 0.02, sfs_importances_from_file = 1):
-    beta = float(beta)
+def main(auc_threshold = 0.8, number_of_features_to_check = 100, performance_margin = 0.02, sfs_importances_from_file = 1):
     auc_threshold = float(auc_threshold)
     sfs_importances_from_file = int(sfs_importances_from_file)
     number_of_features_to_check = int(number_of_features_to_check)
@@ -329,9 +325,9 @@ def main(beta = 2.5, auc_threshold = 0.8, number_of_features_to_check = 100, per
     importances_from_sfs = get_importances_from_sfs(sfs_objects)
     optimal_nbs_features = get_optimal_nbs_features_from_sfs(importances_from_sfs, diag_cols)
     plot_importances_from_sfs(importances_from_sfs, optimal_nbs_features, number_of_features_to_check)
-    performances_on_sfs_subsets = get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets, best_classifiers, beta, number_of_features_to_check, use_test_set=1)
+    performances_on_sfs_subsets = get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets, best_classifiers, number_of_features_to_check, use_test_set=1)
     write_performances_on_sfs_subsets_to_file(performances_on_sfs_subsets)
     write_top_n_features_to_file(sfs_objects, optimal_nbs_features, number_of_features_to_check)
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
