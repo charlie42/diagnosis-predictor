@@ -20,6 +20,8 @@ from sklearn.model_selection import RandomizedSearchCV
 
 import sys, inspect
 
+from joblib import load, dump
+
 def get_base_models_and_param_grids():
     
     # Define base models
@@ -73,7 +75,7 @@ def get_base_models_and_param_grids():
     return base_models_and_param_grids
 
 def get_best_classifier(base_model, grid, X_train, y_train):
-    cv = StratifiedKFold(n_splits=10)
+    cv = StratifiedKFold(n_splits=6)
     rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=100, n_jobs = -1)
     
     rs.fit(X_train, y_train) # On train_set, not train_train_set because do cross-validation
@@ -187,9 +189,10 @@ def main(performance_margin = 0.02, models_from_file = 1):
 
     # Create datasets for each diagnosis (different input and output columns)
     datasets = data.create_datasets(full_dataset, diag_cols, split_percentage)
+    dump(datasets, models_dir+'datasets.joblib', compress=1)
 
     if models_from_file == 1:
-        from joblib import load
+        
         best_classifiers = load(models_dir+'best-classifiers.joblib')
         scores_of_best_classifiers = load(models_dir+'scores-of-best-classifiers.joblib')
         sds_of_scores_of_best_classifiers = load(models_dir+'sds-of-scores-of-best-classifiers.joblib')
@@ -198,7 +201,6 @@ def main(performance_margin = 0.02, models_from_file = 1):
         best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers = find_best_classifiers_and_scores(datasets, diag_cols, performance_margin)
         
         # Save best classifiers and thresholds 
-        from joblib import dump
         dump(best_classifiers, models_dir+'best-classifiers.joblib', compress=1)
         dump(scores_of_best_classifiers, models_dir+'scores-of-best-classifiers.joblib', compress=1)
         dump(sds_of_scores_of_best_classifiers, models_dir+'sds-of-scores-of-best-classifiers.joblib', compress=1)
