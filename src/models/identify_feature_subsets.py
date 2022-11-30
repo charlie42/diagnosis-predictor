@@ -316,7 +316,7 @@ def main(auc_threshold = 0.8, number_of_features_to_check = 100, performance_mar
     print(diag_cols)
 
     # Create datasets for each diagnosis (different input and output columns)
-    datasets = data.create_datasets(full_dataset, diag_cols, split_percentage=0.3)
+    datasets = load(models_dir+'datasets.joblib')
 
     importances_from_models = get_importances_from_models(best_classifiers, datasets, diag_cols)
     plot_importances_from_models(importances_from_models)

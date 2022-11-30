@@ -172,7 +172,7 @@ def main(auc_threshold = 0.8, use_test_set=1):
     print("Diagnoses that passed the threshold: ")
     print(diag_cols)
 
-    datasets = data.create_datasets(full_dataset, diag_cols, split_percentage=0.3)
+    datasets = load(models_dir+'datasets.joblib')
 
     # Find best probability thresholds for each diagnosis
     best_thresholds = find_best_thresholds(
