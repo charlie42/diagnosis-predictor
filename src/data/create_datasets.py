@@ -38,16 +38,16 @@ def get_input_and_output_cols_for_diag(full_dataset, diag):
     
     return input_cols, output_col
 
-def create_datasets(full_dataset, diag_cols):
+def create_datasets(full_dataset, diag_cols, split_percentage):
     datasets = {}
     for diag in diag_cols:
         
         input_cols, output_col = get_input_and_output_cols_for_diag(full_dataset, diag)
         
         # Split train, validation, and test sets
-        X_train, X_test, y_train, y_test = train_test_split(full_dataset[input_cols], full_dataset[output_col], test_size=0.3, random_state=1)
-        X_train_train, X_val, y_train_train, y_val = train_test_split(X_train, y_train, test_size=0.3, random_state=1) 
-
+        X_train, X_test, y_train, y_test = train_test_split(full_dataset[input_cols], full_dataset[output_col], test_size=split_percentage, stratify=full_dataset[output_col], random_state=1)
+        X_train_train, X_val, y_train_train, y_val = train_test_split(X_train, y_train, test_size=split_percentage, stratify=y_train, random_state=1)
+    
         datasets[diag] = { "X_train": X_train,
                         "X_test": X_test,
                         "y_train": y_train,
