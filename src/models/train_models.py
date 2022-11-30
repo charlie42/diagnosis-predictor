@@ -61,17 +61,17 @@ def get_base_models_and_param_grids():
         "randomforestclassifier__class_weight": ['balanced', None]
     }
     svc_param_grid = {
-        'svc__C': loguniform(1e-03, 1e+02),
-        'svc__gamma': loguniform(1e-03, 1e+02),
+        'svc__C': loguniform(1e-1, 1e3),
+        'svc__gamma': loguniform(1e-04, 1e+01),
         'svc__degree': uniform(2, 5),
         'svc__kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
         "svc__class_weight": ['balanced', None]
     }
     lr_param_grid = {
-        'logisticregression__C': loguniform(1e-5, 100),
+        'logisticregression__C': loguniform(1e-5, 1e4),
         'logisticregression__penalty': ['l1', 'l2', 'elasticnet'],
         'logisticregression__class_weight': ['balanced', None],
-        'logisticregression__l1_ratio': loguniform(0.5, 1)
+        'logisticregression__l1_ratio': uniform(0, 1)
     }
     
     base_models_and_param_grids = [
