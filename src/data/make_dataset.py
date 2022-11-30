@@ -102,9 +102,9 @@ def get_relevant_id_cols_by_popularity(assessment_answer_counts):
     # Get relevant assessments: 
     #   relevant cognitive tests, Questionnaire Measures of Emotional and Cognitive Status, and 
     #   Questionnaire Measures of Family Structure, Stress, and Trauma (from Assessment_List_Jan2019.xlsx)
-    relevant_EID_list = [x+",EID" for x in ["Basic_Demos", "WIAT", "NIH_Scores", "SympChck", "SCQ", "Barratt", 
+    relevant_EID_list = [x+",EID" for x in ["Basic_Demos", "NIH_Scores", "SympChck", "SCQ", "Barratt", 
         "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "APQ_P", "PCIAT", "DTS", "ESWAN", "MFQ_P", "APQ_SR", 
-        "WISC", "WHODAS_P", "CIS_P", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_SR", 
+        "WHODAS_P", "CIS_P", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_SR", 
         "C3SR", "CCSC", "CPIC", "YSR", "PhenX_SchoolRisk", "CBCL_Pre", "SRS_Pre", "ASR"]]
 
     # Get relevant ID columns sorted by popularity    
@@ -144,17 +144,6 @@ def get_data_up_to_dropped(full_wo_underscore, EID_columns_until_dropped, column
         "Diagnosis_ClinicianConsensus,DX_07", "Diagnosis_ClinicianConsensus,DX_08", "Diagnosis_ClinicianConsensus,DX_09", 
         "Diagnosis_ClinicianConsensus,DX_10"]
     data_up_to_dropped = full_wo_underscore.loc[full_wo_underscore[EID_columns_until_dropped].dropna(how="any").index][columns_until_dropped+["ID"]+diag_colunms]
-
-    return data_up_to_dropped
-
-def remove_irrelevant_output_cols(data_up_to_dropped):
-    WIAT_cols_to_keep = ["WIAT,WIAT_Word_Stnd", "WIAT,WIAT_Num_Stnd"]
-    WIAT_cols_to_drop = [x for x in data_up_to_dropped.columns if "WIAT" in x and x not in WIAT_cols_to_keep] 
-    data_up_to_dropped = data_up_to_dropped.drop(WIAT_cols_to_drop, axis=1)
-
-    WISC_cols_to_keep = ["WISC,WISC_Coding_Scaled", "WISC,WISC_SS_Scaled", "WISC,WISC_FSIQ"]
-    WISC_cols_to_drop = [x for x in data_up_to_dropped.columns if "WISC" in x and x not in WISC_cols_to_keep] 
-    data_up_to_dropped = data_up_to_dropped.drop(WISC_cols_to_drop, axis=1)
 
     return data_up_to_dropped
 
@@ -365,9 +354,6 @@ def main(first_assessment_to_drop):
     # Remove EID columns: not needed anymore
     data_up_to_dropped = data_up_to_dropped.drop(EID_columns_until_dropped, axis=1)
 
-    # Remove non-used output columns (WISC and WIAT)
-    data_up_to_dropped = remove_irrelevant_output_cols(data_up_to_dropped)
-
     # Aggregare demographics input columns: remove per parent data from Barratt
     data_up_to_dropped = data_up_to_dropped.drop(["Barratt,Barratt_P1_Edu", "Barratt,Barratt_P1_Occ", "Barratt,Barratt_P2_Edu", "Barratt,Barratt_P2_Occ"], axis=1)
 
@@ -386,12 +372,6 @@ def main(first_assessment_to_drop):
 
     # Add missingness marker for columns with more than 5% missing data 
     data_up_to_dropped = add_missingness_markers(data_up_to_dropped, 5, missing_values_df)
-
-    # Remove rows where output vars are not present: WIAT,WIAT_Num_Stnd, WISC,WISC_Coding_Scaled, WISC,WISC_SS_Scaled, WISC,WISC_FSIQ, WIAT,WIAT_Word_Stnd 
-    if first_assessment_to_drop == "ICU_P":  # Less people tool WISC than ICU_P, so when limiting assessments to ICU_P we don't have WISC columns
-        data_up_to_dropped = data_up_to_dropped.dropna(subset = ["WIAT,WIAT_Num_Stnd", "WIAT,WIAT_Word_Stnd"])
-    else:
-        data_up_to_dropped = data_up_to_dropped.dropna(subset = ["WIAT,WIAT_Num_Stnd", "WISC,WISC_Coding_Scaled", "WISC,WISC_SS_Scaled", "WISC,WISC_FSIQ", "WIAT,WIAT_Word_Stnd"])
 
     # Transform diagnosis columns
     data_up_to_dropped = transform_dx_cols(data_up_to_dropped)

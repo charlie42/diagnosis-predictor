@@ -26,9 +26,7 @@ def customize_input_cols_per_diag(input_cols, diag):
 def get_input_and_output_cols_for_diag(full_dataset, diag):
     
     input_cols = [x for x in full_dataset.columns if 
-                        not x.startswith("WIAT")
-                        and not x.startswith("WISC")
-                        and not x in ["WHODAS_P,WHODAS_P_Total", "CIS_P,CIS_P_Score", "WHODAS_SR,WHODAS_SR_Score", "CIS_SR,CIS_SR_Total"]
+                        not x in ["WHODAS_P,WHODAS_P_Total", "CIS_P,CIS_P_Score", "WHODAS_SR,WHODAS_SR_Score", "CIS_SR,CIS_SR_Total"]
                         and not x == diag
                         and not x == "Diag: No Diagnosis Given"]
     
