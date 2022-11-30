@@ -23,7 +23,6 @@ import sys, inspect
 def get_base_models_and_param_grids():
     
     # Define base models
-    dt = DecisionTreeClassifier()
     rf = RandomForestClassifier()
     svc = svm.SVC()
     lr = LogisticRegression(solver="saga")
@@ -35,21 +34,12 @@ def get_base_models_and_param_grids():
     scaler = StandardScaler()
 
     # Make pipelines
-    dt_pipe = make_pipeline(imputer, scaler, dt)
     rf_pipe = make_pipeline(imputer, scaler, rf)
     svc_pipe = make_pipeline(imputer, scaler, svc)
     lr_pipe = make_pipeline(imputer, scaler, lr)
     
     # Define parameter grids to search for each pipe
     from scipy.stats import loguniform, uniform
-    dt_param_grid = {
-        "decisiontreeclassifier__min_samples_split": np.random.randint(2, 20, 30),
-        "decisiontreeclassifier__max_depth": np.random.randint(1, 30, 30),
-        "decisiontreeclassifier__min_samples_leaf": np.random.randint(1, 20, 30),
-        "decisiontreeclassifier__max_leaf_nodes": np.random.randint(2, 50, 30),
-        "decisiontreeclassifier__criterion": ['gini', 'entropy'],
-        "decisiontreeclassifier__class_weight": ['balanced', None]
-    }
     rf_param_grid = {
         'randomforestclassifier__max_depth' : np.random.randint(5, 150, 30),
         'randomforestclassifier__min_samples_split': np.random.randint(2, 50, 30),
@@ -75,7 +65,6 @@ def get_base_models_and_param_grids():
     }
     
     base_models_and_param_grids = [
-        (dt_pipe, dt_param_grid),
         (rf_pipe, rf_param_grid),
         (svc_pipe, svc_param_grid),
         (lr_pipe, lr_param_grid),
@@ -84,7 +73,7 @@ def get_base_models_and_param_grids():
     return base_models_and_param_grids
 
 def get_best_classifier(base_model, grid, X_train, y_train):
-    cv = StratifiedKFold(n_splits=3)
+    cv = StratifiedKFold(n_splits=10)
     rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=100, n_jobs = -1)
     
     rs.fit(X_train, y_train) # On train_set, not train_train_set because do cross-validation
@@ -171,8 +160,7 @@ def build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of
     best_classifiers_and_score_sds["Score - SD"] = best_classifiers_and_score_sds['Best score'] - best_classifiers_and_score_sds['SD of best score'] 
     return best_classifiers_and_score_sds
 
-def main(beta = 2.5, performance_margin = 0.02, models_from_file = 1):
-    beta = float(beta)
+def main(performance_margin = 0.02, models_from_file = 1):
     models_from_file = int(models_from_file)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
 
@@ -220,4 +208,4 @@ def main(beta = 2.5, performance_margin = 0.02, models_from_file = 1):
     print(df_of_best_classifiers_and_their_score_sds)
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(sys.argv[1], sys.argv[2])

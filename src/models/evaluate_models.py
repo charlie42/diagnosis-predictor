@@ -7,11 +7,9 @@ import numpy as np
 import sys
 
 from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
-from sklearn.model_selection import StratifiedKFold
-from sklearn.model_selection import cross_val_score
 
 # Calculate probability threshold
-def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val, b):
+def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val):
     from numpy import nanargmax
 
     # Fit model on train set
@@ -34,7 +32,7 @@ def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val, 
     return threshold
 
 # Find best thresholds
-def find_best_thresholds(beta, best_classifiers, datasets):
+def find_best_thresholds(best_classifiers, datasets):
     best_thresholds = {}
     for diag in datasets.keys():
         best_classifier_for_diag = best_classifiers[diag]
@@ -46,13 +44,12 @@ def find_best_thresholds(beta, best_classifiers, datasets):
         threshold = calculate_threshold(
             best_classifier_for_diag, 
             X_train_train, y_train_train, X_val, y_val, 
-            beta
         )
         best_thresholds[diag] = threshold
     print("Thesholds: ", best_thresholds)
     return best_thresholds
 
-def get_matrix_metrics(real_values,pred_values,beta):
+def get_matrix_metrics(real_values,pred_values):
     CM = confusion_matrix(real_values,pred_values)
     TN = CM[0][0]+0.01 # +0.01 To avoid division by 0 errors
     FN = CM[1][0]+0.01
@@ -78,23 +75,22 @@ def get_matrix_metrics(real_values,pred_values,beta):
     #DOR        = round( LRPos/LRNeg)
     DOR        = 1 # FIX, LINE ABOVE
     F1         = round ( 2 * ((Precision*Recall)/(Precision+Recall)),4)
-    FBeta      = round ( (1+beta**2)*((Precision*Recall)/((beta**2 * Precision)+ Recall)) ,4)
     MCC        = round ( ((TP*TN)-(FP*FN))/math.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))  ,4)
     BM         = Recall+TNR-1
     MK         = Precision+NPV-1   
     Predicted_Positive_Ratio = round( (TP+FP) / Population,2)
     
-    mat_met = [TP,TN,FP,FN,Prevalence,Accuracy,Precision,NPV,FDR,FOR,check_Pos,check_Neg,Recall,FPR,FNR,TNR,check_Pos2,check_Neg2,LRPos,LRNeg,DOR,F1,FBeta,MCC,BM,MK,Predicted_Positive_Ratio]
-    metric_names = ['TP','TN','FP','FN','Prevalence','Accuracy','Precision','NPV','FDR','FOR','check_Pos','check_Neg','Recall (Sensitivity)','FPR','FNR','TNR (Specificity)','check_Pos2','check_Neg2','LR+','LR-','DOR','F1','FBeta','MCC','BM','MK','Predicted Positive Ratio','ROC AUC']   
+    mat_met = [TP,TN,FP,FN,Prevalence,Accuracy,Precision,NPV,FDR,FOR,check_Pos,check_Neg,Recall,FPR,FNR,TNR,check_Pos2,check_Neg2,LRPos,LRNeg,DOR,F1,MCC,BM,MK,Predicted_Positive_Ratio]
+    metric_names = ['TP','TN','FP','FN','Prevalence','Accuracy','Precision','NPV','FDR','FOR','check_Pos','check_Neg','Recall (Sensitivity)','FPR','FNR','TNR (Specificity)','check_Pos2','check_Neg2','LR+','LR-','DOR','F1','MCC','BM','MK','Predicted Positive Ratio','ROC AUC']   
 
     return (mat_met, metric_names)
 
-def get_metrics(classifier, threshold, X, y, beta):
+def get_metrics(classifier, threshold, X, y):
        
     y_pred_prob = classifier.predict_proba(X)
     y_pred = (y_pred_prob[:,1] >= threshold).astype(bool) 
 
-    metrics, metric_names = get_matrix_metrics(y, y_pred, beta=beta)
+    metrics, metric_names = get_matrix_metrics(y, y_pred)
 
     roc_auc = roc_auc_score(y, y_pred_prob[:,1])
     metrics.append(roc_auc)
@@ -107,7 +103,7 @@ def add_number_of_positive_examples(results, datasets):
         results.loc[results["Diag"] == diag, "# of Positive Examples"] = full_dataset_y.sum()
     return results
 
-def check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta, use_test_set):
+def check_performance(best_classifiers, datasets, best_thresholds, use_test_set):
     results = []
     for diag in datasets.keys():
         print(diag)
@@ -118,7 +114,7 @@ def check_performance(best_classifiers, datasets, best_thresholds, scores_of_bes
         else:
             X, y = datasets[diag]["X_val"], datasets[diag]["y_val"]
 
-        metrics, metric_names = get_metrics(classifier, threshold, X, y, beta)
+        metrics, metric_names = get_metrics(classifier, threshold, X, y)
         
         results.append([
             diag, 
@@ -142,16 +138,15 @@ def find_well_performing_diags(results, min_roc_auc_cv):
     ]["Diag"].values
     return well_performing_diags
 
-def main(beta = 2.5, auc_threshold = 0.8, use_test_set=1):
+def main(auc_threshold = 0.8, use_test_set=1):
 
     # Need this to be able to import local packages
     import sys, os, inspect
     currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     parentdir = os.path.dirname(currentdir)
     sys.path.insert(0, parentdir)
-    import models, data
+    import data
 
-    beta = float(beta)
     auc_threshold = float(auc_threshold)
     use_test_set = int(use_test_set)
 
@@ -181,7 +176,6 @@ def main(beta = 2.5, auc_threshold = 0.8, use_test_set=1):
 
     # Find best probability thresholds for each diagnosis
     best_thresholds = find_best_thresholds(
-            beta=beta, 
             best_classifiers=best_classifiers, 
             datasets=datasets
     )
@@ -190,7 +184,7 @@ def main(beta = 2.5, auc_threshold = 0.8, use_test_set=1):
 
     # Print performances of models on validation set
     roc_auc_cv_from_grid_search = get_auc_cv_from_grid_search(reports_dir, diag_cols)
-    performance_table = check_performance(best_classifiers, datasets, best_thresholds, scores_of_best_classifiers, beta=beta, use_test_set=use_test_set)
+    performance_table = check_performance(best_classifiers, datasets, best_thresholds, use_test_set=use_test_set)
     print(roc_auc_cv_from_grid_search)
     print(performance_table[['Diag','Recall (Sensitivity)','TNR (Specificity)','ROC AUC']].sort_values("ROC AUC").reset_index(drop=True))
 
@@ -198,4 +192,4 @@ def main(beta = 2.5, auc_threshold = 0.8, use_test_set=1):
         performance_table.to_csv(reports_dir+"performance_table_all_features.csv", index=False)    
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(sys.argv[1], sys.argv[2])
