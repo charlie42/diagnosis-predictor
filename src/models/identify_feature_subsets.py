@@ -66,6 +66,8 @@ def get_sfs_objects(sfs_importances_from_file, best_classifiers, datasets, diag_
                 forward=True, 
                 scoring='roc_auc',
                 cv=cv,
+                floating=False, 
+                verbose=1,
                 n_jobs=-1)
 
             X_train, y_train = datasets[diag]["X_train_train"], datasets[diag]["y_train_train"]
@@ -178,7 +180,7 @@ def write_top_n_features_to_file(sfs_objects, optimal_nbs_features, number_of_fe
 
 def re_train_models_on_feature_subsets(sfs_objects, optimal_nbs_features, datasets, best_classifiers, number_of_features_to_check):
     classifiers_on_feature_subsets = {}
-    for diag in datasets.keys():
+    for diag in sfs_objects.keys():
         optimal_nb_features = optimal_nbs_features[diag]
 
         X_train, y_train = datasets[diag]["X_train_train"], datasets[diag]["y_train_train"]
@@ -198,7 +200,7 @@ def re_train_models_on_feature_subsets(sfs_objects, optimal_nbs_features, datase
 
 def calculate_thresholds_for_feature_subsets(sfs_objects, classifiers_on_feature_subsets, datasets, optimal_nbs_features, number_of_features_to_check):
     thresholds_on_feature_subsets = {}
-    for diag in datasets.keys():
+    for diag in sfs_objects.keys():
 
         X_train, y_train = datasets[diag]["X_train_train"], datasets[diag]["y_train_train"]
         X_val, y_val = datasets[diag]["X_val"], datasets[diag]["y_val"]
@@ -234,7 +236,7 @@ def get_performances_on_sfs_subsets(sfs_objects, optimal_nbs_features, datasets,
 
     best_thresholds_all_features = get_best_thresholds(best_classifiers, datasets)
     
-    for diag in datasets.keys():
+    for diag in sfs_objects.keys():
         print(diag)
         performances_on_sfs_subsets[diag] = {}
 
