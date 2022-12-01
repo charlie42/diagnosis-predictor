@@ -53,6 +53,10 @@ def get_base_models_and_param_grids():
         "randomforestclassifier__class_weight": ['balanced', None]
     }
     svc_param_grid = {
+        'svc__C': [0.1, 0.2, 0.3, 0.4, 0.5, 1, 5, 10],
+        "svc__class_weight": ['balanced', None]
+    }
+    svc_param_grid = {
         'svc__C': loguniform(1e-1, 1e3),
         'svc__gamma': loguniform(1e-04, 1e+01),
         'svc__degree': uniform(2, 5),
@@ -68,7 +72,7 @@ def get_base_models_and_param_grids():
     
     base_models_and_param_grids = [
         (rf_pipe, rf_param_grid),
-        (svc_pipe, svc_param_grid),
+        #(svc_pipe, svc_param_grid),
         (lr_pipe, lr_param_grid),
     ]
     
@@ -76,8 +80,9 @@ def get_base_models_and_param_grids():
 
 def get_best_classifier(base_model, grid, X_train, y_train):
     cv = StratifiedKFold(n_splits=6)
-    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=100, n_jobs = -1)
+    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=100, n_jobs = -1, verbose=1)
     
+    print("Fitting", base_model, "...")
     rs.fit(X_train, y_train) # On train_set, not train_train_set because do cross-validation
     
     best_estimator = rs.best_estimator_
@@ -87,9 +92,6 @@ def get_best_classifier(base_model, grid, X_train, y_train):
     # If chosen model is SVM add a predict_proba parameter (not needed for grid search, and slows it down significantly)
     if 'svc' in best_estimator.named_steps.keys():
         best_estimator.set_params(svc__probability=True)
-        
-        cv_results = pd.DataFrame(rs.cv_results_) #DEBUG
-        cv_results.to_csv("reports/cv_results.csv") #DEBUG  
 
     return (best_estimator, best_score, sd_of_score_of_best_estimator)
 

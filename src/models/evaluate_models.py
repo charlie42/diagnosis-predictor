@@ -103,9 +103,9 @@ def add_number_of_positive_examples(results, datasets):
         results.loc[results["Diag"] == diag, "# of Positive Examples"] = full_dataset_y.sum()
     return results
 
-def check_performance(best_classifiers, datasets, best_thresholds, use_test_set):
+def check_performance(best_classifiers, datasets, best_thresholds, use_test_set, diag_cols):
     results = []
-    for diag in datasets.keys():
+    for diag in diag_cols:
         print(diag)
         classifier = best_classifiers[diag]
         threshold = best_thresholds[diag]
@@ -184,7 +184,7 @@ def main(auc_threshold = 0.8, use_test_set=1):
 
     # Print performances of models on validation set
     roc_auc_cv_from_grid_search = get_auc_cv_from_grid_search(reports_dir, diag_cols)
-    performance_table = check_performance(best_classifiers, datasets, best_thresholds, use_test_set=use_test_set)
+    performance_table = check_performance(best_classifiers, datasets, best_thresholds, use_test_set=use_test_set, diag_cols=diag_cols)
     print(roc_auc_cv_from_grid_search)
     print(performance_table[['Diag','Recall (Sensitivity)','TNR (Specificity)','ROC AUC']].sort_values("ROC AUC").reset_index(drop=True))
 
