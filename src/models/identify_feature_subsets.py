@@ -60,7 +60,7 @@ def get_sfs_objects(sfs_importances_from_file, best_classifiers, datasets, diag_
             print(diag)
             diag_classifier = best_classifiers[diag]
 
-            cv = StratifiedKFold(n_splits=3)
+            cv = StratifiedKFold(n_splits=6)
             sfs = SequentialFeatureSelector(diag_classifier, 
                 k_features=number_of_features_to_check,
                 forward=True, 
