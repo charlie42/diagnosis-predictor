@@ -25,7 +25,7 @@ from joblib import load, dump
 def get_base_models_and_param_grids():
     
     # Define base models
-    rf = RandomForestClassifier()
+    rf = RandomForestClassifier(n_estimators=400)
     svc = svm.SVC()
     lr = LogisticRegression(solver="saga")
     
@@ -45,7 +45,6 @@ def get_base_models_and_param_grids():
     rf_param_grid = {
         'randomforestclassifier__max_depth' : np.random.randint(5, 150, 30),
         'randomforestclassifier__min_samples_split': np.random.randint(2, 50, 30),
-        'randomforestclassifier__n_estimators': np.random.randint(50, 400, 10),
         'randomforestclassifier__min_samples_leaf': np.random.randint(1, 20, 30),
         'randomforestclassifier__max_features': ['auto', 'sqrt', 'log2', 0.25, 0.5, 0.75, 1.0],
         'randomforestclassifier__criterion': ['gini', 'entropy'],
@@ -79,8 +78,8 @@ def get_base_models_and_param_grids():
     return base_models_and_param_grids
 
 def get_best_classifier(base_model, grid, X_train, y_train):
-    cv = StratifiedKFold(n_splits=6)
-    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=100, n_jobs = -1, verbose=1)
+    cv = StratifiedKFold(n_splits=10)
+    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=200, n_jobs = -1, verbose=1)
     
     print("Fitting", base_model, "...")
     rs.fit(X_train, y_train) # On train_set, not train_train_set because do cross-validation
