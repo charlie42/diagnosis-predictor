@@ -16,7 +16,7 @@ Arguments: performance_margin = 0.02, models_from_file = 1
 
 ## 3 step:
 
-`python -W ignore src/models/evaluate_models.py 0.8 1`
+`python -W ignore src/models/evaluate_original_models.py 0.8 1`
 
 Arguments: auc_threshold = 0.8, use_test_set=1
 
@@ -25,3 +25,10 @@ Arguments: auc_threshold = 0.8, use_test_set=1
 `python -W ignore src/models/identify_feature_subsets.py 0.8 100 0.02 0`
 
 Arguments: auc_threshold = 0.8, number_of_features_to_check = 100, performance_margin = 0.02, sfs_importances_from_file = 1
+
+## 5 step
+
+`python -W ignore src/models/evaluate_models_on_feature_subsets.py 100`
+
+Arguments: number_of_features_to_check = 100
+
