@@ -7,13 +7,14 @@ sys.excepthook = ultratb.FormattedTB(color_scheme='Neutral', call_pdb=False)
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.base import clone
 
-from joblib import load
+from joblib import dump, load
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -108,10 +109,11 @@ def get_performances_on_feature_subsets_per_output(diag, sfs_objects, classifier
 
     return metrics_on_sfs_subsets
 
-def format_output(performances_on_sfs_subsets, number_of_features_to_check):
+def make_performance_table(performances_on_sfs_subsets, number_of_features_to_check):
     performances_on_sfs_subsets = pd.DataFrame.from_dict(performances_on_sfs_subsets)
     performances_on_sfs_subsets.index = range(1, number_of_features_to_check+1)
     performances_on_sfs_subsets = performances_on_sfs_subsets.rename(columns={"index": "Diagnosis"})
+    
     return performances_on_sfs_subsets
 
 def get_performances_on_feature_subsets(sfs_objects, datasets, best_classifiers, number_of_features_to_check, use_test_set):
@@ -124,24 +126,47 @@ def get_performances_on_feature_subsets(sfs_objects, datasets, best_classifiers,
     for diag in sfs_objects.keys():
         performances_on_sfs_subsets[diag] = get_performances_on_feature_subsets_per_output(diag, sfs_objects, classifiers_on_feature_subsets, thresholds_on_feature_subsets, datasets, number_of_features_to_check, use_test_set)
 
-    return format_output(performances_on_sfs_subsets, number_of_features_to_check)
+    return performances_on_sfs_subsets
 
-def write_performances_on_sfs_subsets_to_file(performances):
-    for diag in performances.keys():
-        path = reports_dir + "feature_importances_from_sfs/"
-        if not os.path.exists(path):
-            os.mkdir(path)
-        performances[diag].to_csv(path + diag.replace('/', ' ') + ".csv") # :TODO - remove slashes from diagnosis names in preprocessing
+def get_diags_in_order_of_auc_on_max_features(performance_table):
+    roc_table =  performance_table.applymap(lambda x: x[0])
+    return roc_table.columns[roc_table.loc[roc_table.first_valid_index()].argsort()[::-1]]
 
-def main(number_of_features_to_check = 100):
+def make_auc_table(performance_table):
+    roc_table = performance_table.applymap(lambda x: x[0])
+    # Inverse order of rows
+    roc_table = roc_table.iloc[::-1]
+    # Sort columns by score on 100 features (first row)
+    new_columns = get_diags_in_order_of_auc_on_max_features(performance_table)
+    roc_table[new_columns].to_csv(reports_dir+'auc_on_sfs_subsets.csv')
+
+def make_sens_spec_table(performance_table):
+    sens_spec_table = performance_table.applymap(lambda x: str(x[1]) + "," + str(x[2]))
+    # Inverse order of rows
+    sens_spec_table = sens_spec_table.iloc[::-1]
+    # Sort columns by score on 100 features (first row)
+    new_columns = get_diags_in_order_of_auc_on_max_features(performance_table)
+    sens_spec_table[new_columns].to_csv(reports_dir+'sens_spec_on_sfs_subsets.csv')
+
+def main(number_of_features_to_check = 100, models_from_file = 1):
     number_of_features_to_check = int(number_of_features_to_check)
+    models_from_file = int(models_from_file)
 
     sfs_objects = load(models_dir+'sfs_importances_objects.joblib')
     datasets = load(models_dir+'datasets.joblib')
     best_classifiers = load(models_dir+'best-classifiers.joblib')
 
-    performances_on_sfs_subsets = get_performances_on_feature_subsets(sfs_objects, datasets, best_classifiers, number_of_features_to_check, use_test_set = 1)
-    performances_on_sfs_subsets.to_csv(reports_dir+'performances_on_sfs_subsets.csv')
+    if models_from_file == 1:
+        performances_on_sfs_subsets = load(models_dir+'performances_on_sfs_subsets.joblib')    
+    else:
+        performances_on_sfs_subsets = get_performances_on_feature_subsets(sfs_objects, datasets, best_classifiers, number_of_features_to_check, use_test_set = 1)
+        dump(performances_on_sfs_subsets, models_dir+'performances_on_sfs_subsets.joblib')
+
+    performance_table = make_performance_table(performances_on_sfs_subsets, number_of_features_to_check)
+    performance_table.to_csv(reports_dir+'performances_on_sfs_subsets.csv')
+
+    make_auc_table(performance_table)
+    make_sens_spec_table(performance_table)
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])
