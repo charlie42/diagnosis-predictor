@@ -144,6 +144,17 @@ def get_performances_on_feature_subsets_per_output(diag, importances, classifier
 
     return metrics_on_subsets
 
+def get_performances_on_feature_subsets(features_in_importance_order, datasets, best_classifiers, number_of_features_to_check, use_test_set):
+    classifiers_on_feature_subsets = re_train_models_on_feature_subsets(features_in_importance_order, datasets, best_classifiers, number_of_features_to_check)
+    thresholds_on_feature_subsets = calculate_thresholds_for_feature_subsets(features_in_importance_order, classifiers_on_feature_subsets, datasets, number_of_features_to_check)
+
+    performances_on_subsets = {}
+    
+    for diag in features_in_importance_order.keys():
+        performances_on_subsets[diag] = get_performances_on_feature_subsets_per_output(diag, features_in_importance_order, classifiers_on_feature_subsets, thresholds_on_feature_subsets, datasets, number_of_features_to_check, use_test_set)
+
+    return performances_on_subsets
+
 
 def main(number_of_features_to_check = 100, models_from_file = 1):
     number_of_features_to_check = int(number_of_features_to_check)
