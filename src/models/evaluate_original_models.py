@@ -107,6 +107,7 @@ def check_performance(best_classifiers, datasets, best_thresholds, use_test_set,
     results = []
     for diag in diag_cols:
         print(diag)
+        print(list(best_classifiers[diag].named_steps.keys())[-1])
         classifier = best_classifiers[diag]
         threshold = best_thresholds[diag]
         if use_test_set == 1:
