@@ -167,10 +167,13 @@ def main(auc_threshold = 0.8, number_of_features_to_check = 100, sfs_importances
     datasets = load(models_dir+'datasets.joblib')
 
     importances_from_models = get_importances_from_models(best_classifiers, datasets, diag_cols)
+    dump(importances_from_models, models_dir+'fi-from-models.joblib')
+    print(importances_from_models)
     plot_importances_from_models(importances_from_models)
 
     sfs_objects = get_sfs_objects(sfs_importances_from_file, best_classifiers, datasets, diag_cols, number_of_features_to_check)
     importances_from_sfs = get_importances_from_sfs(sfs_objects)
+    print(importances_from_sfs)
     optimal_nbs_features = get_optimal_nbs_features_from_sfs(importances_from_sfs, diag_cols)
     plot_importances_from_sfs(importances_from_sfs, optimal_nbs_features, number_of_features_to_check)
     write_top_n_features_to_file(sfs_objects, optimal_nbs_features, number_of_features_to_check)
