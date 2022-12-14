@@ -25,7 +25,7 @@ from joblib import load, dump
 def get_base_models_and_param_grids():
     
     # Define base models
-    rf = RandomForestClassifier(n_estimators=400)
+    rf = RandomForestClassifier(n_estimators=200)
     svc = svm.SVC()
     lr = LogisticRegression(solver="saga")
     
@@ -78,8 +78,8 @@ def get_base_models_and_param_grids():
     return base_models_and_param_grids
 
 def get_best_classifier(base_model, grid, X_train, y_train):
-    cv = StratifiedKFold(n_splits=10)
-    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=200, n_jobs = -1, verbose=1)
+    cv = StratifiedKFold(n_splits=3)
+    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=100, n_jobs = -1, verbose=1)
     
     print("Fitting", base_model, "...")
     rs.fit(X_train, y_train) # On train_set, not train_train_set because do cross-validation
@@ -87,6 +87,14 @@ def get_best_classifier(base_model, grid, X_train, y_train):
     best_estimator = rs.best_estimator_
     best_score = rs.best_score_
     sd_of_score_of_best_estimator = rs.cv_results_['std_test_score'][rs.best_index_]
+
+    ##DEBUG
+    if list(best_estimator.named_steps.keys())[-1] == "randomforestclassifier":
+        importances = best_estimator.named_steps[list(best_estimator.named_steps.keys())[-1]].feature_importances_
+        importances = pd.DataFrame(zip(X_train.columns, importances), columns=["Feature", "Importance"])
+        importances = importances[importances["Importance"]>0].sort_values(by="Importance", ascending=False).reset_index(drop=True)
+        print(list(importances["Feature"].iloc[:20]))
+    ##/DEBUG
     
     # If chosen model is SVM add a predict_proba parameter (not needed for grid search, and slows it down significantly)
     if 'svc' in best_estimator.named_steps.keys():
@@ -163,8 +171,9 @@ def build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of
     best_classifiers_and_score_sds["Score - SD"] = best_classifiers_and_score_sds['Best score'] - best_classifiers_and_score_sds['SD of best score'] 
     return best_classifiers_and_score_sds
 
-def main(performance_margin = 0.02, models_from_file = 1):
+def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_file = 1):
     models_from_file = int(models_from_file)
+    use_other_diags_as_input = int(use_other_diags_as_input)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
 
     currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -187,7 +196,7 @@ def main(performance_margin = 0.02, models_from_file = 1):
     print(diag_cols)
 
     # Create datasets for each diagnosis (different input and output columns)
-    datasets = data.create_datasets(full_dataset, diag_cols, split_percentage)
+    datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
     dump(datasets, models_dir+'datasets.joblib', compress=1)
 
     if models_from_file == 1:
@@ -209,4 +218,4 @@ def main(performance_margin = 0.02, models_from_file = 1):
     print(df_of_best_classifiers_and_their_score_sds)
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2], sys.argv[3])
