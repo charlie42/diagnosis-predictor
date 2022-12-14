@@ -171,6 +171,8 @@ def main(auc_threshold = 0.8, use_test_set=1):
         scores_of_best_classifiers[x] - sds_of_scores_of_best_classifiers[x] >= auc_threshold]
     print("Diagnoses that passed the threshold: ")
     print(diag_cols)
+    print("Diagnoses that didn't pass the threshold: ")
+    print(set(sds_of_scores_of_best_classifiers.keys()) - set(diag_cols))
 
     datasets = load(models_dir+'datasets.joblib')
 

@@ -124,14 +124,14 @@ def find_best_classifier_for_diag_and_its_score(X_train, y_train, performance_ma
     
     return best_classifier, best_score, sd_of_score_of_best_classifier
 
-def find_diags_w_enough_positive_examples_in_train_set(full_dataset, all_diags, split_percentage, min_pos_examples_test_set):
-    diags_w_enough_positive_examples_in_train_set = []
+def find_diags_w_enough_positive_examples_in_test_set(full_dataset, all_diags, split_percentage, min_pos_examples_test_set):
+    diags_w_enough_positive_examples_in_test_set = []
     for diag in all_diags:
         positive_examples_full_ds = full_dataset[full_dataset[diag] == 1].shape[0]
         positive_examples_test_set = positive_examples_full_ds * split_percentage * split_percentage
         if positive_examples_test_set >= min_pos_examples_test_set:
-            diags_w_enough_positive_examples_in_train_set.append(diag)
-    return diags_w_enough_positive_examples_in_train_set
+            diags_w_enough_positive_examples_in_test_set.append(diag)
+    return diags_w_enough_positive_examples_in_test_set
 
 # Find best classifier
 def find_best_classifiers_and_scores(datasets, diag_cols, performance_margin):
@@ -181,11 +181,9 @@ def main(performance_margin = 0.02, models_from_file = 1):
     # Get list of column names with "Diag: " prefix, where number of 
     # positive examples is > threshold
     min_pos_examples_test_set = 20
-    #diag_cols = [x for x in full_dataset.columns if x.startswith("Diag: ") and 
-    #            full_dataset[x].sum() > threshold_positive_examples] 
     split_percentage = 0.3
     all_diags = [x for x in full_dataset.columns if x.startswith("Diag: ")]
-    diag_cols = find_diags_w_enough_positive_examples_in_train_set(full_dataset, all_diags, split_percentage, min_pos_examples_test_set)
+    diag_cols = find_diags_w_enough_positive_examples_in_test_set(full_dataset, all_diags, split_percentage, min_pos_examples_test_set)
     print(diag_cols)
 
     # Create datasets for each diagnosis (different input and output columns)
