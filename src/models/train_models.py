@@ -171,6 +171,14 @@ def build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of
     best_classifiers_and_score_sds["Score - SD"] = best_classifiers_and_score_sds['Best score'] - best_classifiers_and_score_sds['SD of best score'] 
     return best_classifiers_and_score_sds
 
+def dumb_classifiers(models_dir, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers, use_other_diags_as_input):
+    # Append a flag to file name if other diagnoses were used as input
+    appendix_use_other_diags_as_input = "using-other-diags-as-input" if use_other_diags_as_input else ""
+    if use_other_diags_as_input == 1:
+        dump(best_classifiers, models_dir+'best-classifiers'+appendix_use_other_diags_as_input+'.joblib', compress=1)
+        dump(scores_of_best_classifiers, models_dir+'scores-of-best-classifiers.joblib'+appendix_use_other_diags_as_input+'.joblib', compress=1)
+        dump(sds_of_scores_of_best_classifiers, models_dir+'sds-of-scores-of-best-classifiers'+appendix_use_other_diags_as_input+'.joblib', compress=1)
+
 def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_file = 1):
     models_from_file = int(models_from_file)
     use_other_diags_as_input = int(use_other_diags_as_input)
@@ -209,10 +217,8 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_fi
         best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers = find_best_classifiers_and_scores(datasets, diag_cols, performance_margin)
         
         # Save best classifiers and thresholds 
-        dump(best_classifiers, models_dir+'best-classifiers.joblib', compress=1)
-        dump(scores_of_best_classifiers, models_dir+'scores-of-best-classifiers.joblib', compress=1)
-        dump(sds_of_scores_of_best_classifiers, models_dir+'sds-of-scores-of-best-classifiers.joblib', compress=1)
-
+        dumb_classifiers(models_dir, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers, use_other_diags_as_input)
+       
     df_of_best_classifiers_and_their_score_sds = build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers, full_dataset)
     df_of_best_classifiers_and_their_score_sds.to_csv(reports_dir + "df_of_best_classifiers_and_their_scores.csv")
     print(df_of_best_classifiers_and_their_score_sds)
