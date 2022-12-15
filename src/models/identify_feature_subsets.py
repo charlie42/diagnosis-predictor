@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, inspect
 os.environ["PYTHONWARNINGS"] = "ignore::UserWarning" # Seems to be the only way to suppress multi-thread sklearn warnings
 
 # Colorful error messages
@@ -13,39 +13,43 @@ from sklearn.model_selection import StratifiedKFold
 
 from joblib import dump, load
 
+# To import from parent directory
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+
+import models
+
 data_processed_dir = "data/processed/"
 models_dir = "models/"
 reports_dir = "reports/"
 
-def get_diags_with_lr(best_classifiers):
-    diags = []
+def get_base_model_from_classifier(classifier):
+    return list(classifier.named_steps.keys())[-1]
+
+def get_feature_subsets(best_classifiers, datasets, number_of_features_to_check):
+    # If base model is LR, get feature subsets from LR coefficients (top n features), otherwise from SFS
+    feature_subsets = {}
     for diag in best_classifiers.keys():
-        if list(best_classifiers[diag].named_steps.keys())[-1] == "logisticregression":
-            diags.append(diag)
-    return diags
+        base_model = get_base_model_from_classifier(best_classifiers[diag])
+        print(diag, base_model)
+        if base_model == "logisticregression":
+            feature_subsets[diag] = models.get_feature_subsets_from_lr(diag, best_classifiers, datasets, number_of_features_to_check)
+        else:
+            feature_subsets[diag] = models.get_feature_subsets_from_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
+    return feature_subsets
 
-def get_features_in_importance_order(best_classifiers, datasets, diag_cols):
-    features = {}
-    for diag in diag_cols:
-        X_train = datasets[diag]["X_train"]
-        importances = best_classifiers[diag].named_steps[list(best_classifiers[diag].named_steps.keys())[-1]].coef_
-        importances = pd.DataFrame(zip(X_train.columns, abs(importances[0])), columns=["Feature", "Importance"])
-        importances = importances[importances["Importance"]>0].sort_values(by="Importance", ascending=False).reset_index(drop=True)
-        features[diag] = list(importances["Feature"])
-    return features
 
-def main():
+def main(number_of_features_to_check = 100):
+    number_of_features_to_check = int(number_of_features_to_check)
+
     from joblib import load
     best_classifiers = load(models_dir+'best-classifiers.joblib')
-    
-    # Get diagnoses which use logistic regression as base model
-    diag_cols = get_diags_with_lr(best_classifiers)
-    print(diag_cols)
 
     datasets = load(models_dir+'datasets.joblib')
 
-    features_in_importance_order = get_features_in_importance_order(best_classifiers, datasets, diag_cols)
-    dump(features_in_importance_order, models_dir+'features-in-importance-order.joblib')
+    feature_subsets = get_feature_subsets(best_classifiers, datasets, number_of_features_to_check)
+    dump(feature_subsets, models_dir+'feature-subsets.joblib')
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])
