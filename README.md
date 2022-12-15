@@ -22,9 +22,9 @@ Arguments: auc_threshold = 0.8, use_test_set=1
 
 ## 4 step:
 
-`python -W ignore src/models/identify_feature_subsets.py 100`
+`python -W ignore src/models/identify_feature_subsets.py 50`
 
-Arguments: number_of_features_to_check = 100
+Arguments: number_of_features_to_check = 50
 
 ## 5 step
 

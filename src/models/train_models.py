@@ -6,7 +6,6 @@ import pandas as pd
 
 from sklearn.model_selection import StratifiedKFold
 
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from sklearn.linear_model import LogisticRegression
@@ -25,7 +24,7 @@ from joblib import load, dump
 def get_base_models_and_param_grids():
     
     # Define base models
-    rf = RandomForestClassifier(n_estimators=200)
+    rf = RandomForestClassifier(n_estimators=400)
     svc = svm.SVC()
     lr = LogisticRegression(solver="saga")
     
@@ -52,10 +51,6 @@ def get_base_models_and_param_grids():
         "randomforestclassifier__class_weight": ['balanced', None]
     }
     svc_param_grid = {
-        'svc__C': [0.1, 0.2, 0.3, 0.4, 0.5, 1, 5, 10],
-        "svc__class_weight": ['balanced', None]
-    }
-    svc_param_grid = {
         'svc__C': loguniform(1e-1, 1e3),
         'svc__gamma': loguniform(1e-04, 1e+01),
         'svc__degree': uniform(2, 5),
@@ -71,15 +66,15 @@ def get_base_models_and_param_grids():
     
     base_models_and_param_grids = [
         (rf_pipe, rf_param_grid),
-        #(svc_pipe, svc_param_grid),
+        (svc_pipe, svc_param_grid),
         (lr_pipe, lr_param_grid),
     ]
     
     return base_models_and_param_grids
 
 def get_best_classifier(base_model, grid, X_train, y_train):
-    cv = StratifiedKFold(n_splits=3)
-    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=100, n_jobs = -1, verbose=1)
+    cv = StratifiedKFold(n_splits=10)
+    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=200, n_jobs = -1, verbose=1)
     
     print("Fitting", base_model, "...")
     rs.fit(X_train, y_train) # On train_set, not train_train_set because do cross-validation
@@ -88,14 +83,6 @@ def get_best_classifier(base_model, grid, X_train, y_train):
     best_score = rs.best_score_
     sd_of_score_of_best_estimator = rs.cv_results_['std_test_score'][rs.best_index_]
 
-    ##DEBUG
-    if list(best_estimator.named_steps.keys())[-1] == "randomforestclassifier":
-        importances = best_estimator.named_steps[list(best_estimator.named_steps.keys())[-1]].feature_importances_
-        importances = pd.DataFrame(zip(X_train.columns, importances), columns=["Feature", "Importance"])
-        importances = importances[importances["Importance"]>0].sort_values(by="Importance", ascending=False).reset_index(drop=True)
-        print(list(importances["Feature"].iloc[:20]))
-    ##/DEBUG
-    
     # If chosen model is SVM add a predict_proba parameter (not needed for grid search, and slows it down significantly)
     if 'svc' in best_estimator.named_steps.keys():
         best_estimator.set_params(svc__probability=True)

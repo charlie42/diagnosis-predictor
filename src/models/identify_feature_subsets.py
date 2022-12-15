@@ -34,7 +34,7 @@ def get_feature_subsets(best_classifiers, datasets, number_of_features_to_check)
     return feature_subsets
 
 
-def main(number_of_features_to_check = 100):
+def main(number_of_features_to_check = 50):
     number_of_features_to_check = int(number_of_features_to_check)
 
     from joblib import load
