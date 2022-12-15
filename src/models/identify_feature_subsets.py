@@ -5,13 +5,7 @@ os.environ["PYTHONWARNINGS"] = "ignore::UserWarning" # Seems to be the only way 
 from IPython.core import ultratb
 sys.excepthook = ultratb.FormattedTB(color_scheme='Neutral', call_pdb=False)
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
-from sklearn.model_selection import StratifiedKFold
-
-from joblib import dump, load
+from joblib import dump
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
