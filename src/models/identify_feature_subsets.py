@@ -57,4 +57,4 @@ def main(number_of_features_to_check = 50, importances_from_file = 0):
         dump(feature_subsets, models_dir+'feature-subsets.joblib')
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])
