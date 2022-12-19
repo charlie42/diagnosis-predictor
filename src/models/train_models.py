@@ -130,7 +130,7 @@ def get_base_models_and_param_grids():
     
     base_models_and_param_grids = [
         (rf_pipe, rf_param_grid),
-        (svc_pipe, svc_param_grid),
+        #(svc_pipe, svc_param_grid),
         (lr_pipe, lr_param_grid),
     ]
     if DEBUG_MODE:
