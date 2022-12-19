@@ -238,8 +238,9 @@ def dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_cla
     dump(scores_of_best_classifiers, dirs["reports_dir"]+'scores-of-best-classifiers.joblib', compress=1)
     dump(sds_of_scores_of_best_classifiers, dirs["reports_dir"]+'sds-of-scores-of-best-classifiers.joblib', compress=1)
 
-def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_file = 1):
-    input_questionnaires = ["ASSQ", "SRS", "SCQ"]
+def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_file = 1):
+    #input_questionnaires = ["ASSQ", "SRS", "SCQ"]
+    input_questionnaires = ["ASSQ"]
     diag = "Diag: Autism Spectrum Disorder"
 
     models_from_file = int(models_from_file)
