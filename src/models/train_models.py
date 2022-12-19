@@ -27,7 +27,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util, data, models, util
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 def build_params_dict_for_dir_name(other_diags_as_input):
 
@@ -239,6 +239,9 @@ def dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_cla
     dump(sds_of_scores_of_best_classifiers, dirs["reports_dir"]+'sds-of-scores-of-best-classifiers.joblib', compress=1)
 
 def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_file = 1):
+    input_questionnaires = ["ASSQ", "SRS", "SCQ"]
+    diag = "Diag: Autism Spectrum Disorder"
+
     models_from_file = int(models_from_file)
     use_other_diags_as_input = int(use_other_diags_as_input)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
@@ -275,7 +278,7 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
         dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers)
     else: 
         # Create datasets for each diagnosis (different input and output columns)
-        datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
+        datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input, input_questionnaires)
         print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
 
         dump(datasets, dirs["output_data_dir"]+'datasets.joblib', compress=1)

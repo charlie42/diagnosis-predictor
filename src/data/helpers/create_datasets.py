@@ -23,29 +23,19 @@ def customize_input_cols_per_diag(input_cols, diag):
                       
     return input_cols
 
-def get_input_and_output_cols_for_diag(full_dataset, diag, use_other_diags_as_input):
+def get_input_and_output_cols_for_diag(full_dataset, diag, use_other_diags_as_input, input_questionnaires):
     
-    if use_other_diags_as_input == 1:
-        input_cols = [x for x in full_dataset.columns if 
-                            not x in ["WHODAS_P,WHODAS_P_Total", "CIS_P,CIS_P_Score", "WHODAS_SR,WHODAS_SR_Score", "CIS_SR,CIS_SR_Total"]
-                            and not x == diag
-                            and not x == "Diag.No Diagnosis Given"]
-    else:
-        input_cols = [x for x in full_dataset.columns if 
-                            not x in ["WHODAS_P,WHODAS_P_Total", "CIS_P,CIS_P_Score", "WHODAS_SR,WHODAS_SR_Score", "CIS_SR,CIS_SR_Total"]
-                            and not x.startswith("Diag.")]
-    
-    input_cols = customize_input_cols_per_diag(input_cols, diag)
+    input_cols = [x for x in full_dataset.columns if x.split(",")[0] in input_questionnaires]
     
     output_col = diag
     
     return input_cols, output_col
 
-def create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input):
+def create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input, input_questionnaire):
     datasets = {}
     for diag in diag_cols:
         
-        input_cols, output_col = get_input_and_output_cols_for_diag(full_dataset, diag, use_other_diags_as_input)
+        input_cols, output_col = get_input_and_output_cols_for_diag(full_dataset, diag, use_other_diags_as_input, input_questionnaire)
         
         # Split train, validation, and test sets
         X_train, X_test, y_train, y_test = train_test_split(full_dataset[input_cols], full_dataset[output_col], test_size=split_percentage, stratify=full_dataset[output_col], random_state=1)
