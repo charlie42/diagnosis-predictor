@@ -22,7 +22,11 @@ Arguments: use_test_set=1
 
 ## 4 step:
 
+<<<<<<< HEAD
 `python -W ignore src/models/identify_feature_subsets.py 126 0`
+=======
+`python -W ignore src/models/identify_feature_subsets.py 50 0 0`
+>>>>>>> 58ce8ef (assq srs scq cv 3 subsets)
 
 Arguments: number_of_features_to_check = 126, importances_from_file = 0
 
