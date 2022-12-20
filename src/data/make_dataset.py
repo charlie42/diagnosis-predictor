@@ -41,8 +41,6 @@ def set_up_directories(first_assessment_to_drop):
     data_output_dir = data_dir + "data/make_dataset/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(data_output_dir)
 
-    util.create_dir_if_not_exists(data_statistics_dir+"figures/")
-
     return data_statistics_dir, data_output_dir
     
 def remove_admin_cols(full):
