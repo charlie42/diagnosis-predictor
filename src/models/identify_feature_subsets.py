@@ -24,7 +24,7 @@ def set_up_directories(keep_old_importances=0):
     util.create_dir_if_not_exists(output_reports_dir)
 
     if keep_old_importances == 0:
-        util.clean_dirs([output_reports_dir]) # Remove old models and reports
+        util.clean_dirs([output_reports_dir]) # Remove old reports
 
     return {"input_data_dir": input_data_dir,  "models_dir": models_dir, "input_reports_dir": input_reports_dir, "output_reports_dir": output_reports_dir}
 
@@ -45,13 +45,8 @@ def get_feature_subsets(ignore_non_lr_diags, best_classifiers, datasets, number_
 
 def write_feature_subsets_to_text_file(feature_subsets, output_reports_dir):
     path = output_reports_dir+"feature-subsets/"
-    util.create_dir_if_not_exists(path)
-    for diag in feature_subsets.keys():
-        diag_path = path + diag + '/'
-        util.create_dir_if_not_exists(diag_path)
-        with open(diag_path+'feature-subsets.txt', 'w') as file:
-            file.write(json.dumps(feature_subsets[diag], indent=2))
-
+    util.write_two_lvl_dict_to_file(feature_subsets, path)
+    
 def main(number_of_features_to_check = 50, importances_from_file = 0, ignore_non_lr_diags = 0):
     number_of_features_to_check = int(number_of_features_to_check)
     importances_from_file = int(importances_from_file)
