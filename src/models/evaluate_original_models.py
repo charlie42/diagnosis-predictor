@@ -1,4 +1,4 @@
-import os
+import os, inspect
 os.environ["PYTHONWARNINGS"] = "ignore::UserWarning" # Seems to be the only way to suppress multi-thread sklearn warnings
 
 import math
@@ -7,6 +7,24 @@ import numpy as np
 import sys
 
 from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
+
+# To import from parent directory
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+import util
+
+def set_up_directories():
+    input_data_dir = "data/train_models/"
+    models_dir = "models/train_models/"
+    input_reports_dir = "reports/train_models/"
+
+    output_reports_dir = "reports/evaluate_original_models/"
+    util.create_dir_if_not_exists(output_reports_dir)
+
+    util.clean_dirs([output_reports_dir]) # Remove old reports
+
+    return {"input_data_dir": input_data_dir, "models_dir": models_dir, "input_reports_dir": input_reports_dir, "output_reports_dir": output_reports_dir}
 
 # Calculate probability threshold
 def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val):
@@ -140,34 +158,18 @@ def find_well_performing_diags(results, min_roc_auc_cv):
     return well_performing_diags
 
 def main(auc_threshold = 0.8, use_test_set=1):
-
-    # Need this to be able to import local packages
-    import sys, os, inspect
-    currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-    parentdir = os.path.dirname(currentdir)
-    sys.path.insert(0, parentdir)
-    import data
-
     auc_threshold = float(auc_threshold)
     use_test_set = int(use_test_set)
 
-    models_dir = "models/"
-    data_processed_dir = "data/processed/"
-    reports_dir = "reports/"
-
-    full_dataset = pd.read_csv(data_processed_dir + "item_lvl_w_impairment.csv")
+    dirs = set_up_directories()
 
     from joblib import load
-    best_classifiers = load(models_dir+'best-classifiers.joblib')
-    scores_of_best_classifiers = load(models_dir+'scores-of-best-classifiers.joblib')
-    sds_of_scores_of_best_classifiers = load(models_dir+'sds-of-scores-of-best-classifiers.joblib')
+    best_classifiers = load(dirs["models_dir"]+'best-classifiers.joblib')
+    scores_of_best_classifiers = load(dirs["input_reports_dir"]+'scores-of-best-classifiers.joblib')
+    sds_of_scores_of_best_classifiers = load(dirs["input_reports_dir"]+'sds-of-scores-of-best-classifiers.joblib')
 
-    # Get list of column names with "Diag: " prefix, where ROC AUC is over threshold and variance under threshold
-    # ROC AUC reference: https://gpsych.bmj.com/content/gpsych/30/3/207.full.pd
-    # diag_cols = [x for x in sds_of_scores_of_best_classifiers.keys() if  
-    #             sds_of_scores_of_best_classifiers[x] <= performance_margin and 
-    #             scores_of_best_classifiers[x] >= auc_threshold]
-
+    # Get list of column names with "Diag: " prefix, where (AUROC - 1 standard deviation) is over threshold 
+    # AUROC reference: https://gpsych.bmj.com/content/gpsych/30/3/207.full.pd
     diag_cols = [x for x in sds_of_scores_of_best_classifiers.keys() if  
         scores_of_best_classifiers[x] - sds_of_scores_of_best_classifiers[x] >= auc_threshold]
     print("Diagnoses that passed the threshold: ")
@@ -175,7 +177,7 @@ def main(auc_threshold = 0.8, use_test_set=1):
     print("Diagnoses that didn't pass the threshold: ")
     print(set(sds_of_scores_of_best_classifiers.keys()) - set(diag_cols))
 
-    datasets = load(models_dir+'datasets.joblib')
+    datasets = load(dirs["input_data_dir"]+'datasets.joblib')
 
     # Find best probability thresholds for each diagnosis
     best_thresholds = find_best_thresholds(
@@ -183,16 +185,16 @@ def main(auc_threshold = 0.8, use_test_set=1):
             datasets=datasets
     )
     from joblib import dump
-    dump(best_thresholds, models_dir+'best-thresholds.joblib', compress=1)
+    dump(best_thresholds, dirs["models_dir"]+'best-thresholds.joblib', compress=1)
 
     # Print performances of models on validation set
-    roc_auc_cv_from_grid_search = get_auc_cv_from_grid_search(reports_dir, diag_cols)
+    roc_auc_cv_from_grid_search = get_auc_cv_from_grid_search(dirs["input_reports_dir"], diag_cols)
     performance_table = check_performance(best_classifiers, datasets, best_thresholds, use_test_set=use_test_set, diag_cols=diag_cols)
     print(roc_auc_cv_from_grid_search)
     print(performance_table[['Diag','Recall (Sensitivity)','TNR (Specificity)','ROC AUC']].sort_values("ROC AUC").reset_index(drop=True))
 
     if use_test_set == 1:
-        performance_table.to_csv(reports_dir+"performance_table_all_features.csv", index=False)    
+        performance_table.to_csv(dirs["output_reports_dir"]+"performance_table_all_features.csv", index=False)    
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])

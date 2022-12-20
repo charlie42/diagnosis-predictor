@@ -27,14 +27,14 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import data, util
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 def set_up_directories(keep_old_models=0):
 
-    data_input_dir = "data/processed/"
+    input_data_dir = "data/make_dataset/"
 
-    data_output_dir = "data/train_models"
-    util.create_dir_if_not_exists(data_output_dir)
+    output_data_dir = "data/train_models/"
+    util.create_dir_if_not_exists(output_data_dir)
 
     models_dir = "models/" + "train_models/"
     util.create_dir_if_not_exists(models_dir)
@@ -45,7 +45,7 @@ def set_up_directories(keep_old_models=0):
     if keep_old_models == 0:
         util.clean_dirs([models_dir, reports_dir]) # Remove old models and reports
 
-    return {"data_input_dir": data_input_dir, "data_output_dir": data_output_dir, "models_dir": models_dir, "reports_dir": reports_dir}
+    return {"input_data_dir": input_data_dir, "output_data_dir": output_data_dir, "models_dir": models_dir, "reports_dir": reports_dir}
     
 def get_base_models_and_param_grids():
     
@@ -199,7 +199,7 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_fi
 
     dirs = set_up_directories(keep_old_models = models_from_file)
 
-    full_dataset = pd.read_csv(dirs["data_input_dir"] + "item_lvl_w_impairment.csv")
+    full_dataset = pd.read_csv(dirs["input_data_dir"] + "item_lvl_w_impairment.csv")
 
     # Get list of column names with "Diag: " prefix, where number of 
     # positive examples is > threshold
@@ -211,15 +211,17 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_fi
         diag_cols = diag_cols[:2]
     print(diag_cols)
 
-    # Create datasets for each diagnosis (different input and output columns)
-    datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
-    dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)
-
     if models_from_file == 1:
+        datasets = load(dirs["output_data_dir"]+'datasets.joblib')
+
         best_classifiers = load(dirs["models_dir"]+'best-classifiers.joblib')
         scores_of_best_classifiers = load(dirs["reports_dir"]+'scores-of-best-classifiers.joblib')
         sds_of_scores_of_best_classifiers = load(dirs["reports_dir"]+'sds-of-scores-of-best-classifiers.joblib')
     else: 
+        # Create datasets for each diagnosis (different input and output columns)
+        datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
+        dump(datasets, dirs["output_data_dir"]+'datasets.joblib', compress=1)
+
         # Find best models for each diagnosis
         best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers = find_best_classifiers_and_scores(datasets, diag_cols, performance_margin)
         
