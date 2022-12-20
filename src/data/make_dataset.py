@@ -47,11 +47,13 @@ def set_up_directories():
     data_statistics_dir = "reports/make_dataset/"
     util.create_dir_if_not_exists(data_statistics_dir)
 
-    data_output_dir = "data/processed/"
+    data_output_dir = "data/make_dataset/"
     util.create_dir_if_not_exists(data_output_dir)
 
     util.clean_dirs([data_statistics_dir, data_output_dir]) # Remove old models and reports
 >>>>>>> 3a87fde (CODE: refactor - add debug flag and clean models and reports dir in train_models)
+
+    util.create_dir_if_not_exists(data_statistics_dir+"figures/")
 
     return data_statistics_dir, data_output_dir
     
