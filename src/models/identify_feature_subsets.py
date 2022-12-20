@@ -13,7 +13,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
-import models
+import models, util
 
 data_processed_dir = "data/processed/"
 models_dir = "models/"
@@ -34,16 +34,12 @@ def get_feature_subsets(ignore_non_lr_diags, best_classifiers, datasets, number_
             feature_subsets[diag] = models.get_feature_subsets_from_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
     return feature_subsets
 
-def create_dir_if_not_exists(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
 def write_feature_subsets_to_text_file(feature_subsets):
     path = reports_dir+"feature-subsets/"
-    create_dir_if_not_exists(path)
+    util.create_dir_if_not_exists(path)
     for diag in feature_subsets.keys():
         diag_path = path + diag + '/'
-        create_dir_if_not_exists(diag_path)
+        util.create_dir_if_not_exists(diag_path)
         with open(diag_path+'feature-subsets.txt', 'w') as file:
             file.write(json.dumps(feature_subsets[diag], indent=2))
 

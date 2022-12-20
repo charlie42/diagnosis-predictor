@@ -21,10 +21,36 @@ import sys, inspect
 
 from joblib import load, dump
 
+# To import from parent directory
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+import data, util
+
+DEBUG_MODE = False
+
+def set_up_directories(keep_old_models=0):
+
+    data_input_dir = "data/processed/"
+
+    data_output_dir = "data/train_models"
+    util.create_dir_if_not_exists(data_output_dir)
+
+    models_dir = "models/" + "train_models/"
+    util.create_dir_if_not_exists(models_dir)
+
+    reports_dir = "reports/" + "train_models/"
+    util.create_dir_if_not_exists(reports_dir)
+
+    if keep_old_models == 0:
+        util.clean_dirs([models_dir, reports_dir]) # Remove old models and reports
+
+    return {"data_input_dir": data_input_dir, "data_output_dir": data_output_dir, "models_dir": models_dir, "reports_dir": reports_dir}
+    
 def get_base_models_and_param_grids():
     
     # Define base models
-    rf = RandomForestClassifier(n_estimators=200) # DEBUG n_estimators=400
+    rf = RandomForestClassifier(n_estimators=200 if DEBUG_MODE else 400)
     svc = svm.SVC()
     lr = LogisticRegression(solver="saga")
     
@@ -69,12 +95,14 @@ def get_base_models_and_param_grids():
         #(svc_pipe, svc_param_grid), # DEBUG uncomment
         (lr_pipe, lr_param_grid),
     ]
+    if DEBUG_MODE:
+        base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
     
     return base_models_and_param_grids
 
 def get_best_classifier(base_model, grid, X_train, y_train):
-    cv = StratifiedKFold(n_splits=3) # DEBUG n_splits=10
-    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=100, n_jobs = -1, verbose=1) # DEBUG n_iter=200
+    cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 10)
+    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
     
     print("Fitting", base_model, "...")
     rs.fit(X_train, y_train) # On train_set, not train_train_set because do cross-validation
@@ -158,29 +186,20 @@ def build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of
     best_classifiers_and_score_sds["Score - SD"] = best_classifiers_and_score_sds['Best score'] - best_classifiers_and_score_sds['SD of best score'] 
     return best_classifiers_and_score_sds
 
-def dumb_classifiers(models_dir, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers, use_other_diags_as_input):
-    # Append a flag to file name if other diagnoses were used as input
-    appendix_use_other_diags_as_input = "using-other-diags-as-input" if use_other_diags_as_input else ""
-    if use_other_diags_as_input == 1:
-        dump(best_classifiers, models_dir+'best-classifiers'+appendix_use_other_diags_as_input+'.joblib', compress=1)
-        dump(scores_of_best_classifiers, models_dir+'scores-of-best-classifiers.joblib'+appendix_use_other_diags_as_input+'.joblib', compress=1)
-        dump(sds_of_scores_of_best_classifiers, models_dir+'sds-of-scores-of-best-classifiers'+appendix_use_other_diags_as_input+'.joblib', compress=1)
+def dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers):
+    print(dirs["models_dir"])
+    dump(best_classifiers, dirs["models_dir"]+'best-classifiers.joblib', compress=1)
+    dump(scores_of_best_classifiers, dirs["reports_dir"]+'scores-of-best-classifiers.joblib', compress=1)
+    dump(sds_of_scores_of_best_classifiers, dirs["reports_dir"]+'sds-of-scores-of-best-classifiers.joblib', compress=1)
 
 def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_file = 1):
     models_from_file = int(models_from_file)
     use_other_diags_as_input = int(use_other_diags_as_input)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
 
-    currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-    parentdir = os.path.dirname(currentdir)
-    sys.path.insert(0, parentdir)
-    import data
+    dirs = set_up_directories(keep_old_models = models_from_file)
 
-    data_processed_dir = "data/processed/"
-    models_dir = "models/"
-    reports_dir = "reports/"
-
-    full_dataset = pd.read_csv(data_processed_dir + "item_lvl_w_impairment.csv")
+    full_dataset = pd.read_csv(dirs["data_input_dir"] + "item_lvl_w_impairment.csv")
 
     # Get list of column names with "Diag: " prefix, where number of 
     # positive examples is > threshold
@@ -188,26 +207,27 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_fi
     split_percentage = 0.3
     all_diags = [x for x in full_dataset.columns if x.startswith("Diag: ")]
     diag_cols = find_diags_w_enough_positive_examples_in_test_set(full_dataset, all_diags, split_percentage, min_pos_examples_test_set)
+    if DEBUG_MODE: # Only use first two diagnoses for debugging
+        diag_cols = diag_cols[:2]
     print(diag_cols)
 
     # Create datasets for each diagnosis (different input and output columns)
     datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
-    dump(datasets, models_dir+'datasets.joblib', compress=1)
+    dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)
 
     if models_from_file == 1:
-        
-        best_classifiers = load(models_dir+'best-classifiers.joblib')
-        scores_of_best_classifiers = load(models_dir+'scores-of-best-classifiers.joblib')
-        sds_of_scores_of_best_classifiers = load(models_dir+'sds-of-scores-of-best-classifiers.joblib')
+        best_classifiers = load(dirs["models_dir"]+'best-classifiers.joblib')
+        scores_of_best_classifiers = load(dirs["reports_dir"]+'scores-of-best-classifiers.joblib')
+        sds_of_scores_of_best_classifiers = load(dirs["reports_dir"]+'sds-of-scores-of-best-classifiers.joblib')
     else: 
         # Find best models for each diagnosis
         best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers = find_best_classifiers_and_scores(datasets, diag_cols, performance_margin)
         
         # Save best classifiers and thresholds 
-        dumb_classifiers(models_dir, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers, use_other_diags_as_input)
+        dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers)
        
     df_of_best_classifiers_and_their_score_sds = build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers, full_dataset)
-    df_of_best_classifiers_and_their_score_sds.to_csv(reports_dir + "df_of_best_classifiers_and_their_scores.csv")
+    df_of_best_classifiers_and_their_score_sds.to_csv(dirs["reports_dir"] + "df_of_best_classifiers_and_their_scores.csv")
     print(df_of_best_classifiers_and_their_score_sds)
 
 if __name__ == "__main__":
