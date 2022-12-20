@@ -15,6 +15,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util
+<<<<<<< HEAD
 
 def build_output_dir_name(first_assessment_to_drop):
     # Part with the datetime
@@ -40,6 +41,17 @@ def set_up_directories(first_assessment_to_drop):
 
     data_output_dir = data_dir + "data/make_dataset/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(data_output_dir)
+=======
+
+def set_up_directories():
+    data_statistics_dir = "reports/make_dataset/"
+    util.create_dir_if_not_exists(data_statistics_dir)
+
+    data_output_dir = "data/processed/"
+    util.create_dir_if_not_exists(data_output_dir)
+
+    util.clean_dirs([data_statistics_dir, data_output_dir]) # Remove old models and reports
+>>>>>>> 3a87fde (CODE: refactor - add debug flag and clean models and reports dir in train_models)
 
     return data_statistics_dir, data_output_dir
     
@@ -311,7 +323,11 @@ def export_datasets(data_up_to_dropped, data_up_to_dropped_item_lvl, data_up_to_
 def main(only_assessment_distribution, first_assessment_to_drop):
     only_assessment_distribution = int(only_assessment_distribution)
 
+<<<<<<< HEAD
     data_statistics_dir, data_output_dir = set_up_directories(first_assessment_to_drop)
+=======
+    data_statistics_dir, data_output_dir = set_up_directories()
+>>>>>>> 3a87fde (CODE: refactor - add debug flag and clean models and reports dir in train_models)
 
     # LORIS saved query (all data)
     full = pd.read_csv("data/raw/LORIS-release-10.csv", dtype=object)

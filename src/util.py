@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 import os, shutil, json, numpy
 
 # File Utilities
+=======
+import os, shutil
+
+>>>>>>> 3a87fde (CODE: refactor - add debug flag and clean models and reports dir in train_models)
 def clean_dir(folder):
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
