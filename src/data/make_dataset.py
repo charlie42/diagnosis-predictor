@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 from re import M
-import os
+import os, inspect
 import matplotlib.pyplot as plt
 import sys
 
@@ -20,10 +20,12 @@ def set_up_directories():
     data_statistics_dir = "reports/make_dataset/"
     util.create_dir_if_not_exists(data_statistics_dir)
 
-    data_output_dir = "data/processed/"
+    data_output_dir = "data/make_dataset/"
     util.create_dir_if_not_exists(data_output_dir)
 
     util.clean_dirs([data_statistics_dir, data_output_dir]) # Remove old models and reports
+
+    util.create_dir_if_not_exists(data_statistics_dir+"figures/")
 
     return data_statistics_dir, data_output_dir
 
