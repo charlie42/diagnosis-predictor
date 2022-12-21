@@ -1,2 +1,0 @@
-Diag,TP,TN,FP,FN,Prevalence,Accuracy,Precision,NPV,FDR,FOR,check_Pos,check_Neg,Recall (Sensitivity),FPR,FNR,TNR (Specificity),check_Pos2,check_Neg2,LR+,LR-,DOR,F1,MCC,BM,MK,Predicted Positive Ratio,ROC AUC,# of Positive Examples
-Diag: Autism Spectrum Disorder,127.01,643.01,175.01,30.01,0.16,0.7897,0.4205,0.9554,0.5795,0.0446,1.0,1.0,0.8089,0.2139,0.1911,0.7861,1.0,1.0,3.7817,0.2431,1,0.5533,0.4729,0.595,0.3759000000000001,0.31,0.863100151059754,524.0
