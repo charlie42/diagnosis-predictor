@@ -50,11 +50,7 @@ def set_up_directories(keep_old_models=0):
 def get_base_models_and_param_grids():
     
     # Define base models
-<<<<<<< HEAD
     rf = RandomForestClassifier(n_estimators=200 if DEBUG_MODE else 400)
-=======
-    rf = RandomForestClassifier(n_estimators=200) # DEBUG n_estimators=400
->>>>>>> a3ad16b (get feature subsets without diag cv 3)
     svc = svm.SVC()
     lr = LogisticRegression(solver="saga")
     
@@ -105,13 +101,8 @@ def get_base_models_and_param_grids():
     return base_models_and_param_grids
 
 def get_best_classifier(base_model, grid, X_train, y_train):
-<<<<<<< HEAD
     cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 10)
     rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
-=======
-    cv = StratifiedKFold(n_splits=3) # DEBUG n_splits=10
-    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=100, n_jobs = -1, verbose=1) # DEBUG n_iter=200
->>>>>>> a3ad16b (get feature subsets without diag cv 3)
     
     print("Fitting", base_model, "...")
     rs.fit(X_train, y_train) # On train_set, not train_train_set because do cross-validation
