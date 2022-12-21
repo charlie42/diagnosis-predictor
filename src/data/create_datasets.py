@@ -17,7 +17,7 @@ def customize_input_cols_per_diag(input_cols, diag):
                                                          "Diag: Unspecified Attention-Deficit/Hyperactivity Disorder"]]
     if diag == "Diag: ADHD-Inattentive Type":
         input_cols = [x for x in input_cols if x not in ["Diag: ADHD-Combined Type", 
-                                                         "ADHD-Hyperactive/Impulsive Type",
+                                                         "Diag: ADHD-Hyperactive/Impulsive Type",
                                                          "Diag: Other Specified Attention-Deficit/Hyperactivity Disorder",
                                                          "Diag: Unspecified Attention-Deficit/Hyperactivity Disorder"]]
                       
