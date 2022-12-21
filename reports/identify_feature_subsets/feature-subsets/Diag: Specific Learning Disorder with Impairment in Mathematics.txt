@@ -1,0 +1,474 @@
+{
+  "1": [
+    "Diag: Specific Learning Disorder with Impairment in Reading"
+  ],
+  "2": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression"
+  ],
+  "3": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker"
+  ],
+  "4": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age"
+  ],
+  "5": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06"
+  ],
+  "6": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55"
+  ],
+  "7": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder"
+  ],
+  "8": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "9": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "10": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "11": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "12": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "13": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "14": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "15": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "16": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "17": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "18": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "19": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "20": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "21": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "22": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "23": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "24": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "25": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "26": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "27": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "28": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "29": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "30": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "31": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "32": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "33": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "34": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "35": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "36": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "37": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "38": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "39": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "40": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "41": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "42": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "43": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "44": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "45": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "46": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "47": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "48": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "49": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ],
+  "50": [
+    "Diag: Specific Learning Disorder with Impairment in Reading",
+    "Diag: Specific Learning Disorder with Impairment in Written Expression",
+    "NIH_Scores,NIH7_Flanker",
+    "Basic_Demos,Age",
+    "SWAN,SWAN_06",
+    "CBCL,CBCL_55",
+    "Diag: Unspecified Depressive Disorder",
+    "Diag: Child Onset Fluency Disorder (Stuttering)"
+  ]
+}
