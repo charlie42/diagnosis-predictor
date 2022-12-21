@@ -1,7 +1,0 @@
-,Diag,Model type,Best classifier,Best score,SD of best score,Number of positive examples,Score - SD
-0,Diag: Autism Spectrum Disorder,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
-                ('standardscaler', StandardScaler()),
-                ('logisticregression',
-                 LogisticRegression(C=0.0014819919008871281,
-                                    l1_ratio=0.5050002875337325,
-                                    solver='saga'))])",0.8598222014616131,0.01403806760492533,524,0.8457841338566878
