@@ -1,0 +1,35 @@
+,Respondents,Assessments,N of Assessments,Last Assessment
+0,3613,['Basic_Demos'],1,Basic_Demos
+1,3600,"['Basic_Demos', 'NIH_Scores']",2,NIH_Scores
+2,3551,"['Basic_Demos', 'NIH_Scores', 'SympChck']",3,SympChck
+3,3541,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ']",4,SCQ
+4,3505,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt']",5,Barratt
+5,3488,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ']",6,ASSQ
+6,3451,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P']",7,ARI_P
+7,3406,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ']",8,SDQ
+8,3332,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN']",9,SWAN
+9,3250,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS']",10,SRS
+10,3248,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL']",11,CBCL
+11,3059,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P']",12,ICU_P
+12,2844,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P']",13,APQ_P
+13,2827,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT']",14,PCIAT
+14,2825,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS']",15,DTS
+15,2796,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN']",16,ESWAN
+16,2659,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P']",17,MFQ_P
+17,2493,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR']",18,APQ_SR
+18,2324,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P']",19,WHODAS_P
+19,2324,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P']",20,CIS_P
+20,2185,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI']",21,PSI
+21,2114,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS']",22,RBS
+22,2097,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood']",23,PhenX_Neighborhood
+23,2066,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood', 'WHODAS_SR']",24,WHODAS_SR
+24,2041,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood', 'WHODAS_SR', 'CIS_SR']",25,CIS_SR
+25,1564,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood', 'WHODAS_SR', 'CIS_SR', 'SCARED_SR']",26,SCARED_SR
+26,1555,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood', 'WHODAS_SR', 'CIS_SR', 'SCARED_SR', 'C3SR']",27,C3SR
+27,1525,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood', 'WHODAS_SR', 'CIS_SR', 'SCARED_SR', 'C3SR', 'CCSC']",28,CCSC
+28,1255,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood', 'WHODAS_SR', 'CIS_SR', 'SCARED_SR', 'C3SR', 'CCSC', 'CPIC']",29,CPIC
+29,647,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood', 'WHODAS_SR', 'CIS_SR', 'SCARED_SR', 'C3SR', 'CCSC', 'CPIC', 'YSR']",30,YSR
+30,482,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood', 'WHODAS_SR', 'CIS_SR', 'SCARED_SR', 'C3SR', 'CCSC', 'CPIC', 'YSR', 'PhenX_SchoolRisk']",31,PhenX_SchoolRisk
+31,0,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood', 'WHODAS_SR', 'CIS_SR', 'SCARED_SR', 'C3SR', 'CCSC', 'CPIC', 'YSR', 'PhenX_SchoolRisk', 'CBCL_Pre']",32,CBCL_Pre
+32,0,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood', 'WHODAS_SR', 'CIS_SR', 'SCARED_SR', 'C3SR', 'CCSC', 'CPIC', 'YSR', 'PhenX_SchoolRisk', 'CBCL_Pre', 'SRS_Pre']",33,SRS_Pre
+33,0,"['Basic_Demos', 'NIH_Scores', 'SympChck', 'SCQ', 'Barratt', 'ASSQ', 'ARI_P', 'SDQ', 'SWAN', 'SRS', 'CBCL', 'ICU_P', 'APQ_P', 'PCIAT', 'DTS', 'ESWAN', 'MFQ_P', 'APQ_SR', 'WHODAS_P', 'CIS_P', 'PSI', 'RBS', 'PhenX_Neighborhood', 'WHODAS_SR', 'CIS_SR', 'SCARED_SR', 'C3SR', 'CCSC', 'CPIC', 'YSR', 'PhenX_SchoolRisk', 'CBCL_Pre', 'SRS_Pre', 'ASR']",34,ASR
