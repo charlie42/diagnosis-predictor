@@ -2,77 +2,78 @@
 0,Diag: Oppositional Defiant Disorder,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.008403015852612446,
-                                    class_weight='balanced',
-                                    l1_ratio=0.07875540439258422,
-                                    penalty='elasticnet', solver='saga'))])",0.7574099306675025,0.009904579432293906,469,0.7475053512352086
+                 LogisticRegression(C=0.02304929943187449,
+                                    l1_ratio=0.2776996145202614,
+                                    penalty='elasticnet', solver='saga'))])",0.8716604132719002,0.023480759508111432,469,0.8481796537637888
 1,Diag: Specific Phobia,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.017209277511973653,
-                                    l1_ratio=0.25932897749553085,
-                                    penalty='elasticnet', solver='saga'))])",0.619328266275177,0.02645620283354882,306,0.5928720634416282
+                 LogisticRegression(C=0.013745980541155178,
+                                    class_weight='balanced',
+                                    l1_ratio=0.9720880299703255,
+                                    penalty='elasticnet', solver='saga'))])",0.7163174613534915,0.043418009896472896,306,0.6728994514570186
 2,Diag: No Diagnosis Given,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.2547738991367239,
-                                    l1_ratio=0.5686206707314114, penalty='l1',
-                                    solver='saga'))])",0.79408763133547,0.011075210450174816,276,0.7830124208852952
+                 LogisticRegression(C=0.004309807825793728,
+                                    class_weight='balanced',
+                                    l1_ratio=0.20755490010843092,
+                                    penalty='elasticnet', solver='saga'))])",0.8302844010809608,0.03145366957514744,276,0.7988307315058134
 3,Diag: ADHD-Inattentive Type,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.08944476669621126,
-                                    class_weight='balanced',
-                                    l1_ratio=0.13814730037230816, penalty='l1',
-                                    solver='saga'))])",0.6495434136490764,0.0038357183599356083,919,0.6457076952891408
+                 LogisticRegression(C=0.05398906808805166,
+                                    l1_ratio=0.10228891534584517, penalty='l1',
+                                    solver='saga'))])",0.732196601157247,0.014112073210332927,919,0.7180845279469141
 4,Diag: Language Disorder,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.006425179154151184,
-                                    l1_ratio=0.39775484224180857,
-                                    solver='saga'))])",0.6972186424100805,0.028029313409670967,458,0.6691893290004095
+                 LogisticRegression(C=0.0027625477979072314,
+                                    class_weight='balanced',
+                                    l1_ratio=0.2792774694276944,
+                                    solver='saga'))])",0.6802989446824238,0.0072757476182921015,458,0.6730231970641317
 5,Diag: Specific Learning Disorder with Impairment in Reading,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.0034936507399266595,
-                                    l1_ratio=0.09127555385003927,
-                                    solver='saga'))])",0.6149416718255175,0.012560934740110719,619,0.6023807370854068
+                 LogisticRegression(C=0.019880816666289512,
+                                    class_weight='balanced',
+                                    l1_ratio=0.46247870635659294,
+                                    penalty='elasticnet', solver='saga'))])",0.5981249672937984,0.007478592833357322,619,0.5906463744604411
 6,Diag: ADHD-Combined Type,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.03861790869460967,
-                                    l1_ratio=0.3852178387319354,
-                                    penalty='elasticnet', solver='saga'))])",0.7937442980901982,0.0273010520248671,931,0.7664432460653311
+                 LogisticRegression(C=0.02239336958267041,
+                                    l1_ratio=0.6029394031406734,
+                                    penalty='elasticnet', solver='saga'))])",0.840433692497229,0.011914331946106594,931,0.8285193605511224
 7,Diag: Generalized Anxiety Disorder,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.0012180681048754721,
-                                    class_weight='balanced',
-                                    l1_ratio=0.13038419482777053,
-                                    solver='saga'))])",0.7315436530232405,0.02000271158423471,512,0.7115409414390058
+                 LogisticRegression(C=0.004971986464285889,
+                                    l1_ratio=0.7683480463402262,
+                                    solver='saga'))])",0.8364185571010702,0.011868587325866884,512,0.8245499697752032
 8,Diag: Social Anxiety (Social Phobia),logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.001693728449751257,
+                 LogisticRegression(C=0.002647513846489733,
                                     class_weight='balanced',
-                                    l1_ratio=0.01349071439627858,
-                                    solver='saga'))])",0.7896776989939512,0.031760271915977925,334,0.7579174270779733
+                                    l1_ratio=0.2845406812502095,
+                                    solver='saga'))])",0.8082927011671707,0.02810099545333595,334,0.7801917057138347
 9,Diag: Specific Learning Disorder with Impairment in Mathematics,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.0068283531090226396,
-                                    l1_ratio=0.7923565496080202,
-                                    solver='saga'))])",0.5656030233552793,0.026958732953787277,294,0.5386442904014921
+                 LogisticRegression(C=0.004052432805902014,
+                                    class_weight='balanced',
+                                    l1_ratio=0.9244351707849007,
+                                    solver='saga'))])",0.6414627250534214,0.019234859768877437,294,0.622227865284544
 10,Diag: Enuresis,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.09758851390558526,
-                                    l1_ratio=0.765394245364172,
-                                    penalty='elasticnet', solver='saga'))])",0.6031560389941893,0.006186345145970421,278,0.596969693848219
+                 LogisticRegression(C=0.051815515209367335,
+                                    l1_ratio=0.5878032501425526, penalty='l1',
+                                    solver='saga'))])",0.8167667432118298,0.034484643053369915,278,0.7822821001584599
 11,Diag: Autism Spectrum Disorder,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
                 ('standardscaler', StandardScaler()),
                 ('logisticregression',
-                 LogisticRegression(C=0.023359548690688122,
-                                    class_weight='balanced',
-                                    l1_ratio=0.7326901686553631,
-                                    solver='saga'))])",0.8890082072785043,0.003458102679842001,524,0.8855501045986622
+                 LogisticRegression(C=0.0027612433374192224,
+                                    l1_ratio=0.5345523315697649,
+                                    solver='saga'))])",0.8395386978010592,0.011311553496583955,524,0.8282271443044752
