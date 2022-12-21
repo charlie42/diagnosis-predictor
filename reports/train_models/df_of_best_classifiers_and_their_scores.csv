@@ -1,0 +1,13 @@
+,Diag,Model type,Best classifier,Best score,SD of best score,Number of positive examples,Score - SD
+0,Diag: Generalized Anxiety Disorder,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
+                ('standardscaler', StandardScaler()),
+                ('logisticregression',
+                 LogisticRegression(C=0.01128182106506844,
+                                    l1_ratio=0.22039491318678983,
+                                    penalty='elasticnet', solver='saga'))])",0.8837395769430167,0.01244307717035489,512,0.8712964997726619
+1,Diag: Specific Learning Disorder with Impairment in Reading,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
+                ('standardscaler', StandardScaler()),
+                ('logisticregression',
+                 LogisticRegression(C=0.007592247224464037,
+                                    l1_ratio=0.1196622500250244,
+                                    penalty='elasticnet', solver='saga'))])",0.7470082906653768,0.010993914260329878,619,0.7360143764050469
