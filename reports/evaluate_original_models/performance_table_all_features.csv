@@ -1,0 +1,2 @@
+Diag,TP,TN,FP,FN,Prevalence,Accuracy,Precision,NPV,FDR,FOR,check_Pos,check_Neg,Recall (Sensitivity),FPR,FNR,TNR (Specificity),check_Pos2,check_Neg2,LR+,LR-,DOR,F1,MCC,BM,MK,Predicted Positive Ratio,ROC AUC,# of Positive Examples
+Diag: Oppositional Defiant Disorder,124.01,599.01,235.01,17.01,0.14,0.7415,0.3454,0.9724,0.6546,0.0276,1.0,1.0,0.8794,0.2818,0.1206,0.7182,1.0,1.0,3.1207,0.1679,1,0.496,0.4358,0.5975999999999999,0.3178000000000001,0.37,0.8710988655883805,469.0
