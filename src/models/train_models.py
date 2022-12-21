@@ -238,11 +238,7 @@ def dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_cla
     dump(scores_of_best_classifiers, dirs["reports_dir"]+'scores-of-best-classifiers.joblib', compress=1)
     dump(sds_of_scores_of_best_classifiers, dirs["reports_dir"]+'sds-of-scores-of-best-classifiers.joblib', compress=1)
 
-def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_file = 1):
-    #input_questionnaires = ["ASSQ", "SRS", "SCQ"]
-    input_questionnaires = ["ASSQ"]
-    diag = "Diag: Autism Spectrum Disorder"
-
+def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_file = 1, input_questionnaire = None):
     models_from_file = int(models_from_file)
     use_other_diags_as_input = int(use_other_diags_as_input)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
@@ -279,9 +275,9 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_fi
         dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers)
     else: 
         # Create datasets for each diagnosis (different input and output columns)
-        datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input, input_questionnaires)
+        datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input, [input_questionnaire])
         print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
-
+        
         dump(datasets, dirs["output_data_dir"]+'datasets.joblib', compress=1)
 
         # Find best models for each diagnosis
@@ -295,4 +291,4 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_fi
     print(df_of_best_classifiers_and_their_score_sds)
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
