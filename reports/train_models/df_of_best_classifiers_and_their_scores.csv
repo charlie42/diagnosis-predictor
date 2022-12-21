@@ -1,0 +1,15 @@
+,Diag,Model type,Best classifier,Best score,SD of best score,Number of positive examples,Score - SD
+0,Diag: Oppositional Defiant Disorder,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
+                ('standardscaler', StandardScaler()),
+                ('logisticregression',
+                 LogisticRegression(C=0.01028686931472347,
+                                    class_weight='balanced',
+                                    l1_ratio=0.22761304315257225,
+                                    penalty='elasticnet', solver='saga'))])",0.8836457282035557,0.0283773766263535,469,0.8552683515772022
+1,Diag: Specific Phobia,logisticregression,"Pipeline(steps=[('simpleimputer', SimpleImputer(strategy='median')),
+                ('standardscaler', StandardScaler()),
+                ('logisticregression',
+                 LogisticRegression(C=0.012279562637327724,
+                                    class_weight='balanced',
+                                    l1_ratio=0.03688459540611111, penalty='l1',
+                                    solver='saga'))])",0.7436384636744077,0.016730279195072795,306,0.7269081844793349
