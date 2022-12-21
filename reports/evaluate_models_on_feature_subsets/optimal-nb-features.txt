@@ -1,0 +1,4 @@
+{
+  "Diag: Generalized Anxiety Disorder": 13,
+  "Diag: Specific Learning Disorder with Impairment in Reading": 35
+}
