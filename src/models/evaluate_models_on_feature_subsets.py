@@ -65,9 +65,7 @@ def get_diags_in_order_of_auc_on_max_features(performance_table):
     return roc_table.columns[roc_table.loc[roc_table.first_valid_index()].argsort()[::-1]]
 
 def make_auc_table(auc_on_subsets, output_reports_dir):
-    print(auc_on_subsets)
     auc_on_subsets = pd.DataFrame.from_dict(auc_on_subsets)
-    print(auc_on_subsets)
     auc_on_subsets.index = range(1, len(auc_on_subsets)+1)
     auc_on_subsets = auc_on_subsets.rename(columns={"index": "Diagnosis"})
     print(auc_on_subsets)
