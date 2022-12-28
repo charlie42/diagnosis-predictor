@@ -47,8 +47,6 @@ def transform_data_for_rfe(diag, datasets):
 def get_rfe_objects(best_classifiers, datasets):
     rfe_objects = {}
     for diag in best_classifiers.keys():
-        if diag not in ["Diag: Autism Spectrum Disorder", "Diag: ADHD-Combined Type", "Diag: ADHD-Inattentive Type"]:
-            continue
         print(diag)
         
         # Impute values outside the pipeline, this can cause a bit of data leakage but we have no choice
