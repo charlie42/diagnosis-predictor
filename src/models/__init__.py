@@ -1,4 +1,3 @@
 from models.train_models import find_best_classifiers_and_scores, get_base_models_and_param_grids, get_best_classifier, build_df_of_best_classifiers_and_their_score_sds
 from models.evaluate_original_models import check_performance, find_well_performing_diags, find_best_thresholds, get_metrics, calculate_threshold
-from models.get_feature_subsets_from_lr import get_feature_subsets_from_lr
-from models.get_feature_subsets_from_sfs import get_feature_subsets_from_sfs
+from models.re_implement_classifiers import LogisticRegression, RandomForestClassifier, SVC

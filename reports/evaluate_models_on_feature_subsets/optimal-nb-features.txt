@@ -1,14 +1,5 @@
 {
-  "Diag: Oppositional Defiant Disorder": 10,
-  "Diag: Specific Phobia": 22,
-  "Diag: No Diagnosis Given": 22,
-  "Diag: ADHD-Inattentive Type": 17,
-  "Diag: Language Disorder": 29,
-  "Diag: Specific Learning Disorder with Impairment in Reading": 11,
-  "Diag: ADHD-Combined Type": 14,
-  "Diag: Generalized Anxiety Disorder": 8,
-  "Diag: Social Anxiety (Social Phobia)": 42,
-  "Diag: Specific Learning Disorder with Impairment in Mathematics": 3,
-  "Diag: Enuresis": 4,
-  "Diag: Autism Spectrum Disorder": 32
+  "Diag: Autism Spectrum Disorder": 27,
+  "Diag: ADHD-Combined Type": 11,
+  "Diag: ADHD-Inattentive Type": 18
 }
