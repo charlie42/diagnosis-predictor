@@ -105,7 +105,7 @@ def get_best_classifier(base_model, grid, X_train, y_train):
     rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
     
     print("Fitting", base_model, "...")
-    rs.fit(X_train, y_train) # On train_set, not train_train_set because do cross-validation
+    rs.fit(X_train, y_train) 
     
     best_estimator = rs.best_estimator_
     best_score = rs.best_score_
@@ -164,8 +164,8 @@ def find_best_classifiers_and_scores(datasets, diag_cols, performance_margin):
     for diag in diag_cols:
         print(diag)
 
-        X_train = datasets[diag]["X_train"]
-        y_train = datasets[diag]["y_train"]
+        X_train = datasets[diag]["X_train_train"]
+        y_train = datasets[diag]["y_train_train"]
         
         best_classifier_for_diag, best_score_for_diag, sd_of_score_of_best_classifier_for_diag = find_best_classifier_for_diag_and_its_score(X_train, y_train, performance_margin)
         best_classifiers[diag] = best_classifier_for_diag
