@@ -96,7 +96,8 @@ def get_base_models_and_param_grids():
         (lr_pipe, lr_param_grid),
     ]
     if DEBUG_MODE:
-        base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
+        #base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
+        base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[0]] # Only do LR in debug mode
     
     return base_models_and_param_grids
 
@@ -208,7 +209,8 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_fi
     all_diags = [x for x in full_dataset.columns if x.startswith("Diag: ")]
     diag_cols = find_diags_w_enough_positive_examples_in_test_set(full_dataset, all_diags, split_percentage, min_pos_examples_test_set)
     if DEBUG_MODE: # Only use first two diagnoses for debugging
-        diag_cols = diag_cols[:2]
+        #diag_cols = diag_cols[:2]
+        diag_cols = diag_cols 
     print(diag_cols)
 
     if models_from_file == 1:
