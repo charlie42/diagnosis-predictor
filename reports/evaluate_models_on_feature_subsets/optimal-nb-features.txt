@@ -1,4 +1,0 @@
-{
-  "Diag: Specific Learning Disorder with Impairment in Mathematics": 7,
-  "Diag: Specific Learning Disorder with Impairment in Reading": 29
-}

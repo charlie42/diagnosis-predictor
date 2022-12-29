@@ -1,17 +1,20 @@
 from sklearn.model_selection import StratifiedKFold
 
+DEBUG_MODE = True
+
 def get_sfs_object(diag, best_classifiers, number_of_features_to_check, X_train, y_train):
     from mlxtend.feature_selection import SequentialFeatureSelector
     print(diag)
+    print("Fitting SFS...")
     diag_classifier = best_classifiers[diag]
 
-    cv = StratifiedKFold(n_splits=2)
+    cv = StratifiedKFold(n_splits=2 if DEBUG_MODE else 10)
     sfs = SequentialFeatureSelector(diag_classifier, 
         k_features=number_of_features_to_check,
         forward=True, 
         scoring='roc_auc',
         cv=cv,
-        floating=False, 
+        floating=True, 
         verbose=1,
         n_jobs=-1)
 

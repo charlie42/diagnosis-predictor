@@ -1,16 +1,16 @@
-
-import pandas as pd
-import numpy as np
 from sklearn.feature_selection import RFE
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
+
+import numpy as np
+import pandas as pd
 
 # To import from parent directory
 import os, sys, inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-import util
+import models, util
 
 def transform_data_for_rfe(diag, datasets):
     imputer = SimpleImputer(missing_values=np.nan, strategy='median')
@@ -38,17 +38,17 @@ def get_feature_ranking_from_rfe(diag, best_classifiers, datasets):
     X_train = datasets[diag]["X_train_train"]
     return pd.DataFrame(rfe_object.ranking_, index=X_train.columns, columns=["Rank"]).sort_values(by="Rank", ascending=True)
 
-def get_feature_subsets_from_rfe(feature_ranking, number_of_features_to_check):
-    # Get dictionary with number of features as keys and list of features as values
-    feature_subsets = {}
+def get_first_n_features_from_rfe(diag, best_classifiers, datasets, number_of_features_to_check):
+    feature_ranking = get_feature_ranking_from_rfe(diag, best_classifiers, datasets)
+    best_n_features_from_rfe = feature_ranking[feature_ranking["Rank"] <= number_of_features_to_check].index.tolist()
+    return best_n_features_from_rfe
 
-    # Get a dictionnary with the number of features as keys and the list of features as values
-    for n_features in range(1, number_of_features_to_check+1):
-        feature_subsets[n_features] = feature_ranking[feature_ranking["Rank"] <= n_features].index.tolist()
+def get_feature_subsets_from_rfe_then_sfs(diag, best_classifiers, datasets, number_of_features_to_check):
+    # Get first n features from RFE
+    best_n_features_from_rfe = get_first_n_features_from_rfe(diag, best_classifiers, datasets, number_of_features_to_check)
 
-    return feature_subsets
+    X_train_top_n_features, y_train = datasets[diag]["X_train_train"][best_n_features_from_rfe], datasets[diag]["y_train_train"]
 
-def get_feature_subsets_for_linear_models(diag, best_classifiers, datasets, number_of_features_to_check):
-    feature_ranking = get_feature_ranking_from_rfe(diag, best_classifiers, datasets) # Get ranking of features from RFE
-    feature_subsets = get_feature_subsets_from_rfe(feature_ranking, number_of_features_to_check) # Create subsets of features from RFE ranking
+    # Use SFS to sort first n features
+    feature_subsets = models.get_feature_subsets_from_sfs(diag, best_classifiers, number_of_features_to_check, X_train_top_n_features, y_train)
     return feature_subsets
