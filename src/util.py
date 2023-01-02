@@ -1,5 +1,6 @@
 import os, shutil, json, numpy
 
+# File Utilities
 def clean_dir(folder):
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
@@ -36,3 +37,11 @@ def write_two_lvl_dict_to_file(dict, path):
     for key in dict.keys():
         print(key)
         write_dict_to_file(dict[key], path, key+".txt")
+
+
+# Model Utilities
+def get_base_model_name_from_pipeline(pipeline):
+    return list(pipeline.named_steps.keys())[-1]
+
+def get_estimator_from_pipeline(pipeline):
+    return pipeline.steps[-1][1]
