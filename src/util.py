@@ -38,6 +38,10 @@ def write_two_lvl_dict_to_file(dict, path):
         print(key)
         write_dict_to_file(dict[key], path, key+".txt")
 
+def get_newest_dir_in_dir(path):
+    dirs = [path+d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+    return max(dirs, key=os.path.getmtime)
+
 
 # Model Utilities
 def get_base_model_name_from_pipeline(pipeline):
@@ -45,3 +49,16 @@ def get_base_model_name_from_pipeline(pipeline):
 
 def get_estimator_from_pipeline(pipeline):
     return pipeline.steps[-1][1]
+
+
+# Datetime utils
+def get_string_with_current_datetime():
+    import datetime
+
+    # Get the current date and time
+    now = datetime.datetime.now()
+
+    # Format the date and time as a string with the format 'YYYY-MM-DD HH:MM:SS'
+    date_time_str = now.strftime('%Y-%m-%d %H:%M:%S')
+
+    return date_time_str

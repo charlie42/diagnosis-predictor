@@ -25,27 +25,67 @@ from joblib import load, dump
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-import data, util
+import util, data
 
 DEBUG_MODE = True
 
-def set_up_directories(keep_old_models=0):
+def get_last_non_diag_feature(data):
+    features = data.columns
+    non_diag_features = [feature for feature in features if "Diag: " not in feature]
+    return non_diag_features[-1]
 
-    input_data_dir = "data/make_dataset/"
+def build_params_dict_for_dir_name(data, other_diags_as_input):
+    nb_of_features = len(data.columns)
+    last_feature_non_diag_feature = get_last_non_diag_feature(data)
 
-    output_data_dir = "data/train_models/"
+    params_dict = {}
+    params_dict["other_diag_as_input"] = other_diags_as_input
+    params_dict["number_of_features"] = nb_of_features
+    params_dict["last_feature"] = last_feature_non_diag_feature
+    params_dict["debug_mode"] = DEBUG_MODE
+    return params_dict
+
+def build_param_string_for_dir_name(params):
+    param_string = ""
+    for param_name, param_value in params.items():
+        param_string += param_name + "_" + str(param_value) + "__"
+    # Drop last "__"
+    param_string = param_string[:-2]
+    return param_string
+
+def build_output_dir_name(data, other_diags_as_input):
+    # Part with the datetime
+    datetime_part = util.get_string_with_current_datetime()
+
+    # Part with the params
+    params = build_params_dict_for_dir_name(data, other_diags_as_input)
+    params_part = build_param_string_for_dir_name(params)
+    
+    return datetime_part + "__" + params_part
+
+def set_up_directories(data, other_diags_as_input):
+
+    # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
+    data_dir = "../diagnosis_predictor_data/"
+    util.create_dir_if_not_exists(data_dir)
+
+    # Create directory inside the output directory with the run timestamp and params:
+    #    - use other diags as input
+    #    - number of features used
+    #    - name of last feature
+    #    - debug mode
+    current_output_dir_name = build_output_dir_name(data, other_diags_as_input)
+
+    output_data_dir = data_dir + "data/train_models/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(output_data_dir)
 
-    models_dir = "models/" + "train_models/"
+    models_dir = data_dir + "models/" + "train_models/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(models_dir)
 
-    reports_dir = "reports/" + "train_models/"
-    util.create_dir_if_not_exists(reports_dir)
+    reports_dir = data_dir + "reports/" + "train_models/" + current_output_dir_name + "/"
+    util.create_dir_if_not_exists(reports_dir) 
 
-    if keep_old_models == 0:
-        util.clean_dirs([models_dir, reports_dir]) # Remove old models and reports
-
-    return {"input_data_dir": input_data_dir, "output_data_dir": output_data_dir, "models_dir": models_dir, "reports_dir": reports_dir}
+    return {"output_data_dir": output_data_dir, "models_dir": models_dir, "reports_dir": reports_dir}
     
 def get_base_models_and_param_grids():
     
@@ -193,14 +233,16 @@ def dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_cla
     dump(scores_of_best_classifiers, dirs["reports_dir"]+'scores-of-best-classifiers.joblib', compress=1)
     dump(sds_of_scores_of_best_classifiers, dirs["reports_dir"]+'sds-of-scores-of-best-classifiers.joblib', compress=1)
 
-def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_file = 1):
+def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_file = 1):
     models_from_file = int(models_from_file)
     use_other_diags_as_input = int(use_other_diags_as_input)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
 
-    dirs = set_up_directories(keep_old_models = models_from_file)
+    input_data_dir = "data/make_dataset/"
 
-    full_dataset = pd.read_csv(dirs["input_data_dir"] + "item_lvl_w_impairment.csv")
+    full_dataset = pd.read_csv(input_data_dir + "item_lvl_w_impairment.csv")
+
+    dirs = set_up_directories(full_dataset, use_other_diags_as_input)
 
     # Get list of column names with "Diag: " prefix, where number of 
     # positive examples is > threshold
