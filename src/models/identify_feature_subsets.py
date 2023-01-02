@@ -40,10 +40,10 @@ def get_feature_subsets(best_classifiers, datasets, number_of_features_to_check,
             continue
         # If base model is exposes feature importances, use RFE to get first 50 feature, then use SFS to get the rest.
         if not (base_model_type == "svc" and base_model.kernel != "linear"):
-            feature_subsets[diag] = models.get_feature_subsets_from_rfe_then_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
+            feature_subsets[diag] = models.helpers.get_feature_subsets_from_rfe_then_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
         # If base model doesn't expose feature importances, use SFS to get feature subsets directly (will take very long)
         else:
-            feature_subsets[diag] = models.get_feature_subsets_from_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
+            feature_subsets[diag] = models.helpers.get_feature_subsets_from_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
     return feature_subsets
 
@@ -51,7 +51,7 @@ def write_feature_subsets_to_text_file(feature_subsets, output_reports_dir):
     path = output_reports_dir+"feature-subsets/"
     util.write_two_lvl_dict_to_file(feature_subsets, path)
     
-def main(number_of_features_to_check = 100, importances_from_file = 0):
+def main(number_of_features_to_check = 126, importances_from_file = 0):
     number_of_features_to_check = int(number_of_features_to_check)
     importances_from_file = int(importances_from_file)
 

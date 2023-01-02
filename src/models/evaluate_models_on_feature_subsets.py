@@ -7,13 +7,14 @@ sys.excepthook = ultratb.FormattedTB(color_scheme='Neutral', call_pdb=False)
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import math
 
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.base import clone
 from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.metrics import confusion_matrix
 
 from joblib import dump, load
 
@@ -41,11 +42,59 @@ def set_up_directories(keep_old_re_trained_models=0):
     return {"input_data_dir": input_data_dir,  "input_models_dir": input_models_dir, "output_models_dir": output_models_dir, "input_reports_dir": input_reports_dir, "output_reports_dir": output_reports_dir}
 
 def get_best_thresholds(best_classifiers, datasets):
-    best_thresholds = models.find_best_thresholds(
+    best_thresholds = models.helpers.find_best_thresholds(
         best_classifiers=best_classifiers, 
         datasets=datasets
         )
     return best_thresholds
+
+def get_matrix_metrics(real_values,pred_values):
+    CM = confusion_matrix(real_values,pred_values)
+    TN = CM[0][0]+0.01 # +0.01 To avoid division by 0 errors
+    FN = CM[1][0]+0.01
+    TP = CM[1][1]+0.01
+    FP = CM[0][1]+0.01
+    Population = TN+FN+TP+FP
+    Prevalence = round( (TP+FN) / Population,2)
+    Accuracy   = round( (TP+TN) / Population,4)
+    Precision  = round( TP / (TP+FP),4 )
+    NPV        = round( TN / (TN+FN),4 )
+    FDR        = round( FP / (TP+FP),4 )
+    FOR        = round( FN / (TN+FN),4 ) 
+    check_Pos  = Precision + FDR
+    check_Neg  = NPV + FOR
+    Recall     = round( TP / (TP+FN),4 )
+    FPR        = round( FP / (TN+FP),4 )
+    FNR        = round( FN / (TP+FN),4 )
+    TNR        = round( TN / (TN+FP),4 ) 
+    check_Pos2 = Recall + FNR
+    check_Neg2 = FPR + TNR
+    LRPos      = round( Recall/FPR,4 ) 
+    LRNeg      = round( FNR / TNR ,4 )
+    #DOR        = round( LRPos/LRNeg)
+    DOR        = 1 # FIX, LINE ABOVE
+    F1         = round ( 2 * ((Precision*Recall)/(Precision+Recall)),4)
+    MCC        = round ( ((TP*TN)-(FP*FN))/math.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))  ,4)
+    BM         = Recall+TNR-1
+    MK         = Precision+NPV-1   
+    Predicted_Positive_Ratio = round( (TP+FP) / Population,2)
+    
+    mat_met = [TP,TN,FP,FN,Prevalence,Accuracy,Precision,NPV,FDR,FOR,check_Pos,check_Neg,Recall,FPR,FNR,TNR,check_Pos2,check_Neg2,LRPos,LRNeg,DOR,F1,MCC,BM,MK,Predicted_Positive_Ratio]
+    metric_names = ['TP','TN','FP','FN','Prevalence','Accuracy','Precision','NPV','FDR','FOR','check_Pos','check_Neg','Recall (Sensitivity)','FPR','FNR','TNR (Specificity)','check_Pos2','check_Neg2','LR+','LR-','DOR','F1','MCC','BM','MK','Predicted Positive Ratio','ROC AUC']   
+
+    return (mat_met, metric_names)
+
+def get_metrics(classifier, threshold, X, y):
+       
+    y_pred_prob = classifier.predict_proba(X)
+    y_pred = (y_pred_prob[:,1] >= threshold).astype(bool) 
+
+    metrics, metric_names = get_matrix_metrics(y, y_pred)
+
+    roc_auc = models.helpers.get_roc_auc(X, y, classifier)
+    metrics.append(roc_auc)
+    
+    return metrics, metric_names
 
 def fit_classifier_on_subset_of_features(best_classifiers, diag, X, y):
     new_classifier_base = clone(best_classifiers[diag][2])
@@ -130,7 +179,7 @@ def calculate_thresholds_for_feature_subsets_per_output(diag, feature_subsets, c
     for nb_features in feature_subsets[diag].keys():
         top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
 
-        thresholds_on_feature_subsets[nb_features] = models.calculate_threshold(
+        thresholds_on_feature_subsets[nb_features] = models.helpers.calculate_threshold(
             classifiers_on_feature_subsets[diag][nb_features], 
             X_train[top_n_features], 
             y_train,
@@ -160,7 +209,7 @@ def get_performances_on_feature_subsets_per_output(diag, feature_subsets, classi
         top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
         new_classifier = classifiers_on_feature_subsets[diag][nb_features]
         new_threshold = thresholds_on_feature_subsets[diag][nb_features]
-        metrics, metric_names = models.get_metrics(new_classifier, new_threshold, X_test[top_n_features], y_test)
+        metrics, metric_names = models.helpers.get_metrics(new_classifier, new_threshold, X_test[top_n_features], y_test)
         relevant_metrics = [
             metrics[-1], # AUC ROC
             metrics[metric_names.index("Recall (Sensitivity)")],
