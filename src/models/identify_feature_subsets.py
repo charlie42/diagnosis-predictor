@@ -16,17 +16,26 @@ import models, util
 
 DEBUG_MODE = False
 
-def set_up_directories(keep_old_importances=0):
+def build_output_dir_name(params_from_previous_script):
+    # Part with the datetime
+    datetime_part = util.get_string_with_current_datetime()
 
-    input_data_dir = "data/train_models/"
-    models_dir = "models/" + "train_models/"
-    input_reports_dir = "reports/" + "train_models/"
+    return datetime_part + "__" + models.build_param_string_for_dir_name(params_from_previous_script)
 
-    output_reports_dir = "reports/" + "identify_feature_subsets/"
+def set_up_directories():
+
+    data_dir = "../diagnosis_predictor_data/"
+
+    # Input dirs
+    input_data_dir = util.get_newest_dir_in_dir(data_dir + "data/train_models/")
+    models_dir = util.get_newest_dir_in_dir(data_dir + "models/train_models/")
+    input_reports_dir = util.get_newest_dir_in_dir(data_dir+ "reports/train_models/")
+
+    # Output dirs
+    params_from_previous_script = util.get_params_from_current_data_dir_name(input_data_dir)
+    current_output_dir_name = build_output_dir_name(params_from_previous_script)
+    output_reports_dir = data_dir + "reports/" + "identify_feature_subsets/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(output_reports_dir)
-
-    if keep_old_importances == 0:
-        util.clean_dirs([output_reports_dir]) # Remove old reports
 
     return {"input_data_dir": input_data_dir,  "models_dir": models_dir, "input_reports_dir": input_reports_dir, "output_reports_dir": output_reports_dir}
 
@@ -40,10 +49,10 @@ def get_feature_subsets(best_classifiers, datasets, number_of_features_to_check,
             continue
         # If base model is exposes feature importances, use RFE to get first 50 feature, then use SFS to get the rest.
         if not (base_model_type == "svc" and base_model.kernel != "linear"):
-            feature_subsets[diag] = models.helpers.get_feature_subsets_from_rfe_then_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
+            feature_subsets[diag] = models.get_feature_subsets_from_rfe_then_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
         # If base model doesn't expose feature importances, use SFS to get feature subsets directly (will take very long)
         else:
-            feature_subsets[diag] = models.helpers.get_feature_subsets_from_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
+            feature_subsets[diag] = models.get_feature_subsets_from_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
     return feature_subsets
 
@@ -55,7 +64,7 @@ def main(number_of_features_to_check = 126, importances_from_file = 0):
     number_of_features_to_check = int(number_of_features_to_check)
     importances_from_file = int(importances_from_file)
 
-    dirs = set_up_directories(importances_from_file)
+    dirs = set_up_directories()
 
     best_classifiers = load(dirs["models_dir"]+'best-classifiers.joblib')
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')

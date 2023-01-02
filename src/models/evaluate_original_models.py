@@ -11,17 +11,61 @@ from sklearn.metrics import roc_auc_score
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-import util
+import util, models
 
-def set_up_directories():
-    input_data_dir = "data/train_models/"
-    models_dir = "models/train_models/"
-    input_reports_dir = "reports/train_models/"
+def get_params_from_current_data_dir_name(current_data_dir_name):
 
-    output_reports_dir = "reports/evaluate_original_models/"
+    # Get paramers from the dir name created by train_models.py. Format: "[DATETIME]__first_param_1__second_param_TRUE"
+    
+    # Split the string on the double underscores
+    parts = current_data_dir_name.split("__")
+    
+    # The first element is the datetime, so we can ignore it
+    # The remaining elements are the parameters, so we can assign them to a list
+    params = parts[1:]
+    
+    # Initialize an empty dictionary to store the param names and values
+    param_dict = {}
+    
+    # Iterate through the list of params
+    for param in params:
+        # Split the param on the underscore to separate the name from the value
+        print(param)
+        print(param.rsplit("_", 1))
+        name, value = param.rsplit("_", 1)
+        
+        # Add the name and value to the dictionary
+        param_dict[name] = value
+    
+    # Return the dictionary
+    return param_dict
+
+def build_output_dir_name(params_from_train_models, params_from_evaluate_original_models):
+    # Part with the datetime
+    datetime_part = util.get_string_with_current_datetime()
+
+    return datetime_part + "__" + models.build_param_string_for_dir_name(params_from_train_models) + "__" + models.build_param_string_for_dir_name(params_from_evaluate_original_models)
+
+def set_up_directories(use_test_set):
+
+    data_dir = "../diagnosis_predictor_data/"
+
+    # Input dirs
+    input_data_dir = util.get_newest_dir_in_dir(data_dir + "data/train_models/")
+    models_dir = util.get_newest_dir_in_dir(data_dir + "models/train_models/")
+    input_reports_dir = util.get_newest_dir_in_dir(data_dir+ "reports/train_models/")
+
+    # Output dirs
+
+    # Create directory inside the output directory with the run timestamp and params:
+    #    - [params from train_models.py]
+    #    - use test set
+    params_from_train_models = get_params_from_current_data_dir_name(input_data_dir)
+    params_from_current_file = {"use_test_set": use_test_set}
+    current_output_dir_name = build_output_dir_name(params_from_train_models, params_from_current_file)
+
+    output_reports_dir = data_dir + "reports/evaluate_original_models/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(output_reports_dir)
-
-    util.clean_dirs([output_reports_dir]) # Remove old reports
 
     return {"input_data_dir": input_data_dir, "models_dir": models_dir, "input_reports_dir": input_reports_dir, "output_reports_dir": output_reports_dir}
 
@@ -71,7 +115,7 @@ def get_roc_aucs(best_classifiers, datasets, use_test_set, diag_cols, input_repo
 def main(use_test_set=1):
     use_test_set = int(use_test_set)
 
-    dirs = set_up_directories()
+    dirs = set_up_directories(use_test_set)
 
     from joblib import load
     best_classifiers = load(dirs["models_dir"]+'best-classifiers.joblib')
@@ -87,4 +131,4 @@ def main(use_test_set=1):
         roc_aucs.to_csv(dirs["output_reports_dir"]+"performance_table_all_features.csv", index=False)    
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1])

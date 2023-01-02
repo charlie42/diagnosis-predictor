@@ -24,25 +24,35 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import models, util
 
-def set_up_directories(keep_old_re_trained_models=0):
+def build_output_dir_name(params_from_previous_script):
+    # Part with the datetime
+    datetime_part = util.get_string_with_current_datetime()
 
-    input_data_dir = "data/train_models/"
-    input_models_dir = "models/" + "train_models/"
-    input_reports_dir = "reports/" + "identify_feature_subsets/"
+    return datetime_part + "__" + models.build_param_string_for_dir_name(params_from_previous_script)
 
-    output_models_dir = "models/" + "evaluate_models_on_feature_subsets/"
+def set_up_directories():
+
+    data_dir = "../diagnosis_predictor_data/"
+
+    # Input dirs
+    input_data_dir = util.get_newest_dir_in_dir(data_dir + "data/train_models/")
+    input_models_dir = util.get_newest_dir_in_dir(data_dir + "models/train_models/")
+    input_reports_dir = util.get_newest_dir_in_dir(data_dir+ "reports/identify_feature_subsets/")
+    
+    # Output dirs
+    params_from_previous_script = util.get_params_from_current_data_dir_name(input_data_dir)
+    current_output_dir_name = build_output_dir_name(params_from_previous_script)
+    
+    output_models_dir = data_dir + "models/" + "evaluate_models_on_feature_subsets/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(output_models_dir)
 
-    output_reports_dir = "reports/" + "evaluate_models_on_feature_subsets/"
+    output_reports_dir = data_dir + "reports/" + "evaluate_models_on_feature_subsets/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(output_reports_dir)
-
-    if keep_old_re_trained_models == 0:
-        util.clean_dirs([output_models_dir, output_reports_dir]) # Remove old models and reports
 
     return {"input_data_dir": input_data_dir,  "input_models_dir": input_models_dir, "output_models_dir": output_models_dir, "input_reports_dir": input_reports_dir, "output_reports_dir": output_reports_dir}
 
 def get_best_thresholds(best_classifiers, datasets):
-    best_thresholds = models.helpers.find_best_thresholds(
+    best_thresholds = models.find_best_thresholds(
         best_classifiers=best_classifiers, 
         datasets=datasets
         )
@@ -179,7 +189,7 @@ def calculate_thresholds_for_feature_subsets_per_output(diag, feature_subsets, c
     for nb_features in feature_subsets[diag].keys():
         top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
 
-        thresholds_on_feature_subsets[nb_features] = models.helpers.calculate_threshold(
+        thresholds_on_feature_subsets[nb_features] = models.calculate_threshold(
             classifiers_on_feature_subsets[diag][nb_features], 
             X_train[top_n_features], 
             y_train,
@@ -244,7 +254,7 @@ def get_optimal_nb_features(auc_table, dir):
 def main(models_from_file = 1):
     models_from_file = int(models_from_file)
 
-    dirs = set_up_directories(models_from_file)
+    dirs = set_up_directories()
 
     feature_subsets = load(dirs["input_reports_dir"]+'feature-subsets.joblib')
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
