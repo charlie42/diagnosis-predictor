@@ -16,15 +16,15 @@ Arguments: performance_margin = 0.02, use_other_diags_as_input = 1, models_from_
 
 ## 3 step:
 
-`python -W ignore src/models/evaluate_original_models.py 0.8 1`
+`python -W ignore src/models/evaluate_original_models.py 1`
 
-Arguments: auc_threshold = 0.8, use_test_set=1
+Arguments: use_test_set=1
 
 ## 4 step:
 
-`python -W ignore src/models/identify_feature_subsets.py 100 0`
+`python -W ignore src/models/identify_feature_subsets.py 126 0`
 
-Arguments: number_of_features_to_check = 100, importances_from_file = 0
+Arguments: number_of_features_to_check = 126, importances_from_file = 0
 
 ## 5 step
 
