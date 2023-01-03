@@ -28,7 +28,7 @@ def build_output_dir_name(params_from_previous_script):
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
-    return datetime_part + "__" + models.build_param_string_for_dir_name(params_from_previous_script)
+    return datetime_part + "___" + models.build_param_string_for_dir_name(params_from_previous_script)
 
 def set_up_directories():
 
@@ -40,7 +40,7 @@ def set_up_directories():
     input_reports_dir = util.get_newest_dir_in_dir(data_dir+ "reports/identify_feature_subsets/")
     
     # Output dirs
-    params_from_previous_script = util.get_params_from_current_data_dir_name(input_data_dir)
+    params_from_previous_script = models.get_params_from_current_data_dir_name(input_data_dir)
     current_output_dir_name = build_output_dir_name(params_from_previous_script)
     
     output_models_dir = data_dir + "models/" + "evaluate_models_on_feature_subsets/" + current_output_dir_name + "/"
@@ -50,6 +50,11 @@ def set_up_directories():
     util.create_dir_if_not_exists(output_reports_dir)
 
     return {"input_data_dir": input_data_dir,  "input_models_dir": input_models_dir, "output_models_dir": output_models_dir, "input_reports_dir": input_reports_dir, "output_reports_dir": output_reports_dir}
+
+def set_up_load_directories():
+    data_dir = "../diagnosis_predictor_data/"
+    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/evaluate_models_on_feature_subsets/")
+    return {"load_reports_dir": load_reports_dir}
 
 def get_best_thresholds(best_classifiers, datasets):
     best_thresholds = models.find_best_thresholds(
@@ -101,7 +106,7 @@ def get_metrics(classifier, threshold, X, y):
 
     metrics, metric_names = get_matrix_metrics(y, y_pred)
 
-    roc_auc = models.helpers.get_roc_auc(X, y, classifier)
+    roc_auc = models.get_roc_auc(X, y, classifier)
     metrics.append(roc_auc)
     
     return metrics, metric_names
@@ -219,7 +224,7 @@ def get_performances_on_feature_subsets_per_output(diag, feature_subsets, classi
         top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
         new_classifier = classifiers_on_feature_subsets[diag][nb_features]
         new_threshold = thresholds_on_feature_subsets[diag][nb_features]
-        metrics, metric_names = models.helpers.get_metrics(new_classifier, new_threshold, X_test[top_n_features], y_test)
+        metrics, metric_names = get_metrics(new_classifier, new_threshold, X_test[top_n_features], y_test)
         relevant_metrics = [
             metrics[-1], # AUC ROC
             metrics[metric_names.index("Recall (Sensitivity)")],
@@ -261,8 +266,14 @@ def main(models_from_file = 1):
     best_classifiers = load(dirs["input_models_dir"]+'best-classifiers.joblib')
 
     if models_from_file == 1:
-        performances_on_feature_subsets = load(dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')    
-        cv_scores_on_feature_subsets = load(dirs["output_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
+        load_dirs = set_up_load_directories()
+
+        performances_on_feature_subsets = load(load_dirs["load_reports_dir"]+'performances-on-feature-subsets.joblib')    
+        cv_scores_on_feature_subsets = load(load_dirs["load_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
+
+        # Save reports to newly created directories
+        dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
+        dump(cv_scores_on_feature_subsets, dirs["output_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
     else:
         performances_on_feature_subsets, cv_scores_on_feature_subsets = get_performances_on_feature_subsets(feature_subsets, datasets, best_classifiers, use_test_set = 1)
         dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')

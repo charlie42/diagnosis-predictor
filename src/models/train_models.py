@@ -48,9 +48,9 @@ def build_params_dict_for_dir_name(data, other_diags_as_input):
 def build_param_string_for_dir_name(params):
     param_string = ""
     for param_name, param_value in params.items():
-        param_string += param_name + "_" + str(param_value) + "__"
-    # Drop last "__"
-    param_string = param_string[:-2]
+        param_string += param_name + "__" + str(param_value) + "___"
+    # Drop last "___"
+    param_string = param_string[:-3]
     return param_string
 
 def build_output_dir_name(data, other_diags_as_input):
@@ -86,6 +86,18 @@ def set_up_directories(data, other_diags_as_input):
     util.create_dir_if_not_exists(reports_dir) 
 
     return {"output_data_dir": output_data_dir, "models_dir": models_dir, "reports_dir": reports_dir}
+
+def set_up_load_directories():
+    # When loading existing models, can't take the newest directory, we just created it, it will be empty. 
+    #   Need to take the newest non-empty directory.
+
+    data_dir = "../diagnosis_predictor_data/"
+    
+    load_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/train_models/")
+    load_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
+    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "reports/train_models/")
+    
+    return {"load_data_dir": load_data_dir, "load_models_dir": load_models_dir, "load_reports_dir": load_reports_dir}
     
 def get_base_models_and_param_grids():
     
@@ -251,15 +263,21 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
     all_diags = [x for x in full_dataset.columns if x.startswith("Diag: ")]
     diag_cols = find_diags_w_enough_positive_examples_in_test_set(full_dataset, all_diags, split_percentage, min_pos_examples_test_set)
     if DEBUG_MODE: # Only use first two diagnoses for debugging
-        diag_cols = diag_cols[:2]
+        print(diag_cols)
+        diag_cols = diag_cols[-2:]
     print(diag_cols)
 
     if models_from_file == 1:
-        datasets = load(dirs["output_data_dir"]+'datasets.joblib')
+        load_dirs = set_up_load_directories()
+        datasets = load(load_dirs["load_data_dir"]+'datasets.joblib')
 
-        best_classifiers = load(dirs["models_dir"]+'best-classifiers.joblib')
-        scores_of_best_classifiers = load(dirs["reports_dir"]+'scores-of-best-classifiers.joblib')
-        sds_of_scores_of_best_classifiers = load(dirs["reports_dir"]+'sds-of-scores-of-best-classifiers.joblib')
+        best_classifiers = load(load_dirs["load_models_dir"]+'best-classifiers.joblib')
+        scores_of_best_classifiers = load(load_dirs["load_reports_dir"]+'scores-of-best-classifiers.joblib')
+        sds_of_scores_of_best_classifiers = load(load_dirs["load_reports_dir"]+'sds-of-scores-of-best-classifiers.joblib')
+
+        # Save data, models, and reports to newly created directories
+        dump(datasets, dirs["output_data_dir"]+'datasets.joblib', compress=1)
+        dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers)
     else: 
         # Create datasets for each diagnosis (different input and output columns)
         datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)

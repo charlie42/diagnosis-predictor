@@ -16,9 +16,12 @@ import util, models
 def get_params_from_current_data_dir_name(current_data_dir_name):
 
     # Get paramers from the dir name created by train_models.py. Format: "[DATETIME]__first_param_1__second_param_TRUE"
+
+    # Remove the last underscore
+    current_data_dir_name = current_data_dir_name[:-1]
     
-    # Split the string on the double underscores
-    parts = current_data_dir_name.split("__")
+    # Split the string on the triple underscores
+    parts = current_data_dir_name.split("___")
     
     # The first element is the datetime, so we can ignore it
     # The remaining elements are the parameters, so we can assign them to a list
@@ -31,8 +34,8 @@ def get_params_from_current_data_dir_name(current_data_dir_name):
     for param in params:
         # Split the param on the underscore to separate the name from the value
         print(param)
-        print(param.rsplit("_", 1))
-        name, value = param.rsplit("_", 1)
+        print(param.rsplit("__", 1))
+        name, value = param.rsplit("__", 1)
         
         # Add the name and value to the dictionary
         param_dict[name] = value
@@ -44,7 +47,7 @@ def build_output_dir_name(params_from_train_models, params_from_evaluate_origina
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
-    return datetime_part + "__" + models.build_param_string_for_dir_name(params_from_train_models) + "__" + models.build_param_string_for_dir_name(params_from_evaluate_original_models)
+    return datetime_part + "___" + models.build_param_string_for_dir_name(params_from_train_models) + "___" + models.build_param_string_for_dir_name(params_from_evaluate_original_models)
 
 def set_up_directories(use_test_set):
 
@@ -95,7 +98,10 @@ def get_aucs_on_test_set(best_classifiers, datasets, use_test_set, diag_cols):
         roc_auc = get_roc_auc(X, y, classifier)
         aucs[diag] = roc_auc
 
-    results = pd.DataFrame.from_dict(aucs, columns=["Diag", "ROC AUC"], orient="index").sort_values("ROC AUC", ascending=False).reset_index()
+    # Example of aucs: {'Diag1': 0.5, 'Diag2': 0.6, 'Diag3': 0.7}
+    # Convert to a dataframe
+    results = pd.DataFrame.from_dict(aucs, columns=["ROC AUC"], orient="index").sort_values("ROC AUC", ascending=False).reset_index().rename(columns={'index': 'Diag'})
+    print(results)
     results = add_number_of_positive_examples(results, datasets)
 
     return results.sort_values(by="ROC AUC", ascending=False)

@@ -20,7 +20,7 @@ def build_output_dir_name(params_from_previous_script):
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
-    return datetime_part + "__" + models.build_param_string_for_dir_name(params_from_previous_script)
+    return datetime_part + "___" + models.build_param_string_for_dir_name(params_from_previous_script)
 
 def set_up_directories():
 
@@ -32,12 +32,17 @@ def set_up_directories():
     input_reports_dir = util.get_newest_dir_in_dir(data_dir+ "reports/train_models/")
 
     # Output dirs
-    params_from_previous_script = util.get_params_from_current_data_dir_name(input_data_dir)
+    params_from_previous_script = models.get_params_from_current_data_dir_name(input_data_dir)
     current_output_dir_name = build_output_dir_name(params_from_previous_script)
     output_reports_dir = data_dir + "reports/" + "identify_feature_subsets/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(output_reports_dir)
 
     return {"input_data_dir": input_data_dir,  "models_dir": models_dir, "input_reports_dir": input_reports_dir, "output_reports_dir": output_reports_dir}
+
+def set_up_load_directories():
+    data_dir = "../diagnosis_predictor_data/"
+    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/identify_feature_subsets/")
+    return {"load_reports_dir": load_reports_dir}
 
 def get_feature_subsets(best_classifiers, datasets, number_of_features_to_check, dirs):
     feature_subsets = {}
@@ -70,7 +75,11 @@ def main(number_of_features_to_check = 126, importances_from_file = 0):
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
 
     if importances_from_file == 1:
-        feature_subsets = load(dirs["output_reports_dir"]+'feature-subsets.joblib')
+        load_dirs = set_up_load_directories()
+        feature_subsets = load(load_dirs["load_reports_dir"]+'feature-subsets.joblib')
+
+        # Save reports to newly created directories
+        dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
     else:
         feature_subsets = get_feature_subsets(best_classifiers, datasets, number_of_features_to_check, dirs)
         
