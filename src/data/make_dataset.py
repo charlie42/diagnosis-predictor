@@ -16,16 +16,30 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util
 
-def set_up_directories():
-    data_statistics_dir = "reports/make_dataset/"
+def build_output_dir_name(first_assessment_to_drop):
+    # Part with the datetime
+    datetime_part = util.get_string_with_current_datetime()
+
+    # Part with the params
+    params_part = "first_dropped_assessment__" + first_assessment_to_drop
+    
+    return datetime_part + "___" + params_part
+
+def set_up_directories(first_assessment_to_drop):
+
+    # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
+    data_dir = "../diagnosis_predictor_data/"
+    util.create_dir_if_not_exists(data_dir)
+
+    # Create directory inside the output directory with the run timestamp and first_assessment_to_drop param
+    current_output_dir_name = build_output_dir_name(first_assessment_to_drop)
+
+    data_statistics_dir = data_dir + "reports/make_dataset/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(data_statistics_dir)
-
-    data_output_dir = "data/make_dataset/"
-    util.create_dir_if_not_exists(data_output_dir)
-
-    util.clean_dirs([data_statistics_dir, data_output_dir]) # Remove old models and reports
-
     util.create_dir_if_not_exists(data_statistics_dir+"figures/")
+
+    data_output_dir = data_dir + "data/make_dataset/" + current_output_dir_name + "/"
+    util.create_dir_if_not_exists(data_output_dir)
 
     return data_statistics_dir, data_output_dir
 
@@ -295,7 +309,7 @@ def export_datasets(data_up_to_dropped, data_up_to_dropped_item_lvl, data_up_to_
 
 def main(first_assessment_to_drop):
 
-    data_statistics_dir, data_output_dir = set_up_directories()
+    data_statistics_dir, data_output_dir = set_up_directories(first_assessment_to_drop)
 
     # LORIS saved query (all data)
     full = pd.read_csv("data/raw/LORIS-release-10.csv", dtype=object)
