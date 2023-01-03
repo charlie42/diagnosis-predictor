@@ -13,36 +13,6 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util, models
 
-def get_params_from_current_data_dir_name(current_data_dir_name):
-
-    # Get paramers from the dir name created by train_models.py. Format: "[DATETIME]__first_param_1__second_param_TRUE"
-
-    # Remove the last underscore
-    current_data_dir_name = current_data_dir_name[:-1]
-    
-    # Split the string on the triple underscores
-    parts = current_data_dir_name.split("___")
-    
-    # The first element is the datetime, so we can ignore it
-    # The remaining elements are the parameters, so we can assign them to a list
-    params = parts[1:]
-    
-    # Initialize an empty dictionary to store the param names and values
-    param_dict = {}
-    
-    # Iterate through the list of params
-    for param in params:
-        # Split the param on the underscore to separate the name from the value
-        print(param)
-        print(param.rsplit("__", 1))
-        name, value = param.rsplit("__", 1)
-        
-        # Add the name and value to the dictionary
-        param_dict[name] = value
-    
-    # Return the dictionary
-    return param_dict
-
 def build_output_dir_name(params_from_train_models, params_from_evaluate_original_models):
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
@@ -63,7 +33,7 @@ def set_up_directories(use_test_set):
     # Create directory inside the output directory with the run timestamp and params:
     #    - [params from train_models.py]
     #    - use test set
-    params_from_train_models = get_params_from_current_data_dir_name(input_data_dir)
+    params_from_train_models = models.get_params_from_current_data_dir_name(input_data_dir)
     params_from_current_file = {"use_test_set": use_test_set}
     current_output_dir_name = build_output_dir_name(params_from_train_models, params_from_current_file)
 

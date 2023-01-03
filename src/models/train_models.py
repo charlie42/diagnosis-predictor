@@ -34,14 +34,10 @@ def get_last_non_diag_feature(data):
     non_diag_features = [feature for feature in features if "Diag: " not in feature]
     return non_diag_features[-1]
 
-def build_params_dict_for_dir_name(data, other_diags_as_input):
-    nb_of_features = len(data.columns)
-    last_feature_non_diag_feature = get_last_non_diag_feature(data)
+def build_params_dict_for_dir_name(other_diags_as_input):
 
     params_dict = {}
     params_dict["other_diag_as_input"] = other_diags_as_input
-    params_dict["number_of_features"] = nb_of_features
-    params_dict["last_feature"] = last_feature_non_diag_feature
     params_dict["debug_mode"] = DEBUG_MODE
     return params_dict
 
@@ -53,28 +49,60 @@ def build_param_string_for_dir_name(params):
     param_string = param_string[:-3]
     return param_string
 
-def build_output_dir_name(data, other_diags_as_input):
+def build_output_dir_name(other_diags_as_input, params_from_make_dataset):
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
     # Part with the params
-    params = build_params_dict_for_dir_name(data, other_diags_as_input)
-    params_part = build_param_string_for_dir_name(params)
+    params = build_params_dict_for_dir_name(other_diags_as_input)
+    params_part = build_param_string_for_dir_name(params_from_make_dataset) + "___" +  build_param_string_for_dir_name(params) 
     
-    return datetime_part + "__" + params_part
+    return datetime_part + "___" + params_part
 
-def set_up_directories(data, other_diags_as_input):
+def get_params_from_current_data_dir_name(current_data_dir_name):
+
+    # Get paramers from the dir name created by train_models.py. Format: "[DATETIME]__first_param_1__second_param_TRUE"
+
+    # Remove the last underscore
+    current_data_dir_name = current_data_dir_name[:-1]
+    
+    # Split the string on the triple underscores
+    parts = current_data_dir_name.split("___")
+    
+    # The first element is the datetime, so we can ignore it
+    # The remaining elements are the parameters, so we can assign them to a list
+    params = parts[1:]
+    
+    # Initialize an empty dictionary to store the param names and values
+    param_dict = {}
+    
+    # Iterate through the list of params
+    for param in params:
+        # Split the param on the underscore to separate the name from the value
+        print(param.rsplit("__", 1))
+        name, value = param.rsplit("__", 1)
+        
+        # Add the name and value to the dictionary
+        param_dict[name] = value
+    
+    # Return the dictionary
+    return param_dict
+
+def set_up_directories(other_diags_as_input):
 
     # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
     data_dir = "../diagnosis_predictor_data/"
     util.create_dir_if_not_exists(data_dir)
 
+    # Input dirs
+    input_data_dir = util.get_newest_dir_in_dir(data_dir + "data/make_dataset/")
+
     # Create directory inside the output directory with the run timestamp and params:
+    #    - [params from make_dataset.py]
     #    - use other diags as input
-    #    - number of features used
-    #    - name of last feature
     #    - debug mode
-    current_output_dir_name = build_output_dir_name(data, other_diags_as_input)
+    params_from_make_dataset = get_params_from_current_data_dir_name(input_data_dir)
+    current_output_dir_name = build_output_dir_name(other_diags_as_input, params_from_make_dataset)
 
     output_data_dir = data_dir + "data/train_models/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(output_data_dir)
@@ -85,7 +113,7 @@ def set_up_directories(data, other_diags_as_input):
     reports_dir = data_dir + "reports/" + "train_models/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(reports_dir) 
 
-    return {"output_data_dir": output_data_dir, "models_dir": models_dir, "reports_dir": reports_dir}
+    return {"input_data_dir": input_data_dir, "output_data_dir": output_data_dir, "models_dir": models_dir, "reports_dir": reports_dir}
 
 def set_up_load_directories():
     # When loading existing models, can't take the newest directory, we just created it, it will be empty. 
@@ -250,11 +278,9 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
     use_other_diags_as_input = int(use_other_diags_as_input)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
 
-    input_data_dir = "data/make_dataset/"
+    dirs = set_up_directories(use_other_diags_as_input)
 
-    full_dataset = pd.read_csv(input_data_dir + "item_lvl_w_impairment.csv")
-
-    dirs = set_up_directories(full_dataset, use_other_diags_as_input)
+    full_dataset = pd.read_csv(dirs["input_data_dir"] + "item_lvl_w_impairment.csv")
 
     # Get list of column names with "Diag: " prefix, where number of 
     # positive examples is > threshold
@@ -264,7 +290,7 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
     diag_cols = find_diags_w_enough_positive_examples_in_test_set(full_dataset, all_diags, split_percentage, min_pos_examples_test_set)
     if DEBUG_MODE: # Only use first two diagnoses for debugging
         print(diag_cols)
-        diag_cols = diag_cols[-2:]
+        diag_cols = diag_cols[-1:]
     print(diag_cols)
 
     if models_from_file == 1:
