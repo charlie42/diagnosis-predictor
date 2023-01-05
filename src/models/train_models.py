@@ -46,7 +46,12 @@ def build_output_dir_name(other_diags_as_input, params_from_make_dataset):
     
     return datetime_part + "___" + params_part
 
-def set_up_directories(other_diags_as_input):
+def replace_assessment_param(params_from_make_dataset, input_questionnaire):
+    del params_from_make_dataset['first_dropped_assessment']
+    params_from_make_dataset["single_assessment_used"] = input_questionnaire
+    return params_from_make_dataset
+
+def set_up_directories(other_diags_as_input, input_questionnaire):
 
     # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
     data_dir = "../diagnosis_predictor_data/"
@@ -60,6 +65,7 @@ def set_up_directories(other_diags_as_input):
     #    - use other diags as input
     #    - debug mode
     params_from_make_dataset = models.get_params_from_current_data_dir_name(input_data_dir)
+    new_params = replace_assessment_param(params_from_make_dataset, input_questionnaire)
     current_output_dir_name = build_output_dir_name(other_diags_as_input, params_from_make_dataset)
 
     output_data_dir = data_dir + "data/train_models/" + current_output_dir_name + "/"
@@ -243,7 +249,7 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_fi
     use_other_diags_as_input = int(use_other_diags_as_input)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
 
-    dirs = set_up_directories(use_other_diags_as_input)
+    dirs = set_up_directories(use_other_diags_as_input, input_questionnaire)
 
     full_dataset = pd.read_csv(dirs["input_data_dir"] + "item_lvl_w_impairment.csv")
 
@@ -258,7 +264,7 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_fi
     diag_cols = find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set)
     if DEBUG_MODE: # Only use first two diagnoses for debugging
         print(diag_cols)
-        #diag_cols = diag_cols[-2:]
+        diag_cols = diag_cols[-2:]
     print(diag_cols)
 
     if models_from_file == 1:
