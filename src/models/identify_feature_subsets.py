@@ -74,6 +74,9 @@ def main(number_of_features_to_check = 126, importances_from_file = 0):
     best_classifiers = load(dirs["models_dir"]+'best-classifiers.joblib')
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
 
+    # If number of features to check is higher than the number of items in the total feature set, set it to the number of items in the total feature set
+    number_of_features_to_check = min(number_of_features_to_check, len(list(datasets.values())[0]["X_train"].columns))
+
     if importances_from_file == 1:
         load_dirs = set_up_load_directories()
         feature_subsets = load(load_dirs["load_reports_dir"]+'feature-subsets.joblib')
