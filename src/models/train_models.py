@@ -66,7 +66,7 @@ def set_up_directories(other_diags_as_input, input_questionnaire):
     #    - debug mode
     params_from_make_dataset = models.get_params_from_current_data_dir_name(input_data_dir)
     new_params = replace_assessment_param(params_from_make_dataset, input_questionnaire)
-    current_output_dir_name = build_output_dir_name(other_diags_as_input, params_from_make_dataset)
+    current_output_dir_name = build_output_dir_name(other_diags_as_input, new_params)
 
     output_data_dir = data_dir + "data/train_models/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(output_data_dir)
@@ -264,7 +264,8 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_fi
     diag_cols = find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set)
     if DEBUG_MODE: # Only use first two diagnoses for debugging
         print(diag_cols)
-        diag_cols = diag_cols[-2:]
+        #diag_cols = diag_cols[-1:]
+        diag_cols = diag_cols
     print(diag_cols)
 
     if models_from_file == 1:
