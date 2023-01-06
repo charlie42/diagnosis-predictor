@@ -35,9 +35,9 @@ def set_up_directories():
     data_dir = "../diagnosis_predictor_data/"
 
     # Input dirs
-    input_data_dir = util.get_newest_dir_in_dir(data_dir + "data/train_models/")
-    input_models_dir = util.get_newest_dir_in_dir(data_dir + "models/train_models/")
-    input_reports_dir = util.get_newest_dir_in_dir(data_dir+ "reports/identify_feature_subsets/")
+    input_data_dir = models.get_newest_dir_in_dir(data_dir + "data/train_models/")
+    input_models_dir = models.get_newest_dir_in_dir(data_dir + "models/train_models/")
+    input_reports_dir = models.get_newest_dir_in_dir(data_dir+ "reports/identify_feature_subsets/")
     
     # Output dirs
     params_from_previous_script = models.get_params_from_current_data_dir_name(input_data_dir)
@@ -53,7 +53,7 @@ def set_up_directories():
 
 def set_up_load_directories():
     data_dir = "../diagnosis_predictor_data/"
-    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/evaluate_models_on_feature_subsets/")
+    load_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir+ "reports/evaluate_models_on_feature_subsets/")
     return {"load_reports_dir": load_reports_dir}
 
 def get_best_thresholds(best_classifiers, datasets):
