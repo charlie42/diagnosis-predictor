@@ -37,15 +37,6 @@ def write_two_lvl_dict_to_file(dict, path):
     for key in dict.keys():
         write_dict_to_file(dict[key], path, key+".txt")
 
-def get_newest_dir_in_dir(path):
-    dirs = [path+d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
-    return max(dirs, key=os.path.getmtime) + "/"
-
-def get_newest_non_empty_dir_in_dir(path):
-    dirs = [path+d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
-    dirs = [d for d in dirs if len(os.listdir(d)) > 0]
-    return max(dirs, key=os.path.getmtime) + "/"
-
 
 # Model Utilities
 def get_base_model_name_from_pipeline(pipeline):

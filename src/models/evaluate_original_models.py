@@ -24,9 +24,9 @@ def set_up_directories(use_test_set):
     data_dir = "../diagnosis_predictor_data/"
 
     # Input dirs
-    input_data_dir = util.get_newest_dir_in_dir(data_dir + "data/train_models/")
-    models_dir = util.get_newest_dir_in_dir(data_dir + "models/train_models/")
-    input_reports_dir = util.get_newest_dir_in_dir(data_dir+ "reports/train_models/")
+    input_data_dir = models.get_newest_dir_in_dir(data_dir + "data/train_models/")
+    models_dir = models.get_newest_dir_in_dir(data_dir + "models/train_models/")
+    input_reports_dir = models.get_newest_dir_in_dir(data_dir+ "reports/train_models/")
 
     # Output dirs
 

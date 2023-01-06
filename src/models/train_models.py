@@ -25,14 +25,9 @@ from joblib import load, dump
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-import util, data
+import util, data, models
 
 DEBUG_MODE = True
-
-def get_last_non_diag_feature(data):
-    features = data.columns
-    non_diag_features = [feature for feature in features if "Diag: " not in feature]
-    return non_diag_features[-1]
 
 def build_params_dict_for_dir_name(other_diags_as_input):
 
@@ -41,52 +36,15 @@ def build_params_dict_for_dir_name(other_diags_as_input):
     params_dict["debug_mode"] = DEBUG_MODE
     return params_dict
 
-def build_param_string_for_dir_name(params):
-    param_string = ""
-    for param_name, param_value in params.items():
-        param_string += param_name + "__" + str(param_value) + "___"
-    # Drop last "___"
-    param_string = param_string[:-3]
-    return param_string
-
 def build_output_dir_name(other_diags_as_input, params_from_make_dataset):
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
     # Part with the params
     params = build_params_dict_for_dir_name(other_diags_as_input)
-    params_part = build_param_string_for_dir_name(params_from_make_dataset) + "___" +  build_param_string_for_dir_name(params) 
+    params_part = models.build_param_string_for_dir_name(params_from_make_dataset) + "___" +  models.build_param_string_for_dir_name(params) 
     
     return datetime_part + "___" + params_part
-
-def get_params_from_current_data_dir_name(current_data_dir_name):
-
-    # Get paramers from the dir name created by train_models.py. Format: "[DATETIME]__first_param_1__second_param_TRUE"
-
-    # Remove the last underscore
-    current_data_dir_name = current_data_dir_name[:-1]
-    
-    # Split the string on the triple underscores
-    parts = current_data_dir_name.split("___")
-    
-    # The first element is the datetime, so we can ignore it
-    # The remaining elements are the parameters, so we can assign them to a list
-    params = parts[1:]
-    
-    # Initialize an empty dictionary to store the param names and values
-    param_dict = {}
-    
-    # Iterate through the list of params
-    for param in params:
-        # Split the param on the underscore to separate the name from the value
-        print(param.rsplit("__", 1))
-        name, value = param.rsplit("__", 1)
-        
-        # Add the name and value to the dictionary
-        param_dict[name] = value
-    
-    # Return the dictionary
-    return param_dict
 
 def set_up_directories(other_diags_as_input):
 
@@ -95,13 +53,13 @@ def set_up_directories(other_diags_as_input):
     util.create_dir_if_not_exists(data_dir)
 
     # Input dirs
-    input_data_dir = util.get_newest_dir_in_dir(data_dir + "data/make_dataset/")
+    input_data_dir = models.get_newest_dir_in_dir(data_dir + "data/make_dataset/")
 
     # Create directory inside the output directory with the run timestamp and params:
     #    - [params from make_dataset.py]
     #    - use other diags as input
     #    - debug mode
-    params_from_make_dataset = get_params_from_current_data_dir_name(input_data_dir)
+    params_from_make_dataset = models.get_params_from_current_data_dir_name(input_data_dir)
     current_output_dir_name = build_output_dir_name(other_diags_as_input, params_from_make_dataset)
 
     output_data_dir = data_dir + "data/train_models/" + current_output_dir_name + "/"
@@ -121,9 +79,9 @@ def set_up_load_directories():
 
     data_dir = "../diagnosis_predictor_data/"
     
-    load_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/train_models/")
-    load_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
-    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "reports/train_models/")
+    load_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/train_models/")
+    load_models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
+    load_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "reports/train_models/")
     
     return {"load_data_dir": load_data_dir, "load_models_dir": load_models_dir, "load_reports_dir": load_reports_dir}
     
@@ -177,7 +135,7 @@ def get_base_models_and_param_grids():
     ]
     if DEBUG_MODE:
         #base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
-        base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[0]] # Only do LR in debug mode
+        base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[0]] # Only do LR and RF in debug mode
     
     return base_models_and_param_grids
 
@@ -290,7 +248,8 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
     diag_cols = find_diags_w_enough_positive_examples_in_test_set(full_dataset, all_diags, split_percentage, min_pos_examples_test_set)
     if DEBUG_MODE: # Only use first two diagnoses for debugging
         print(diag_cols)
-        diag_cols = diag_cols[-1:]
+        #diag_cols = diag_cols[-1:]
+        diag_cols = diag_cols
     print(diag_cols)
 
     if models_from_file == 1:
