@@ -3,4 +3,3 @@ from helpers.get_feature_subsets_from_sfs import *
 from helpers.idenitfy_thresholds import *
 from helpers.file_helpers import *
 from helpers.print_top_features_from_lr import *
-from helpers.get_performance_on_feature_subsets import get_performances_on_feature_subsets
