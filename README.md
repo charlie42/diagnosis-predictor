@@ -10,7 +10,7 @@ Arguments: only_assessment_distribution, first_assessment_to_drop
 
 ## 2 step:
 
-`python -W ignore src/models/train_models.py 0.02 0 0 ASSQ`
+`python -W ignore src/models/train_models.py 0.02 0 0 SWAN`
 
 Arguments: performance_margin = 0.02, use_other_diags_as_input = 0, models_from_file = 1, input_questionnaire = None
 
