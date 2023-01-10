@@ -2,6 +2,6 @@ from models.train_models import find_best_classifiers_and_scores, get_base_model
 from models.evaluate_original_models import get_roc_auc
 from models.helpers.get_feature_subsets_from_rfe_then_sfs import get_feature_subsets_from_rfe_then_sfs
 from models.helpers.get_feature_subsets_from_sfs import get_feature_subsets_from_sfs
-from models.helpers.idenitfy_thresholds import calculate_thresholds
+from models.helpers.idenitfy_thresholds import calculate_threshold
 from models.helpers.file_helpers import *
 from models.helpers.print_top_features_from_lr import *
