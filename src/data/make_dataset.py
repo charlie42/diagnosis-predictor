@@ -109,7 +109,7 @@ def get_relevant_id_cols_by_popularity(assessment_answer_counts):
     # Get relevant assessments: 
     #   relevant cognitive tests, Questionnaire Measures of Emotional and Cognitive Status, and 
     #   Questionnaire Measures of Family Structure, Stress, and Trauma (from Assessment_List_Jan2019.xlsx)
-    relevant_EID_list = [x+",EID" for x in ["Basic_Demos", "SympChck", "SCQ", "Barratt", 
+    relevant_EID_list = [x+",EID" for x in ["Basic_Demos", "PreInt_EduHx", "PreInt_DevHx", "SympChck", "SCQ", "Barratt", 
         "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "APQ_P", "PCIAT", "DTS", "ESWAN", "MFQ_P", "APQ_SR", 
         "WHODAS_P", "CIS_P", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_SR", 
         "C3SR", "CCSC", "CPIC", "YSR", "PhenX_SchoolRisk", "CBCL_Pre", "SRS_Pre", "ASR"]]
@@ -156,7 +156,7 @@ def get_data_up_to_dropped(full_wo_underscore, EID_columns_until_dropped, column
 
 def convert_numeric_col_to_numeric_type(col):
     if col.name != "ID" and "Diagnosis_ClinicianConsensus" not in col.name:
-        return pd.to_numeric(col)
+        return pd.to_numeric(col, errors='coerce') # Non-numeric values are converted to NaN and removed later in remove_cols_w_missing_over_n function
     else:
         return col
 
@@ -194,6 +194,20 @@ def transform_dx_cols(data_up_to_dropped):
         
     # Drop original diag columns
     data_up_to_dropped = data_up_to_dropped.drop(og_diag_cols, axis=1)
+
+    return data_up_to_dropped
+
+def transform_devhx_eduhx_cols(data_up_to_dropped):
+
+    list_of_preg_symp_cols = [x for x in data_up_to_dropped.columns if "preg_symp" in x]
+    
+    # If any of the preg_symp columns are 1, then the preg_symp column is 1
+    data_up_to_dropped["preg_symp"] = (data_up_to_dropped[list_of_preg_symp_cols] == 1).any(axis=1)
+
+    # Drop original preg_symp columns
+    data_up_to_dropped = data_up_to_dropped.drop(list_of_preg_symp_cols, axis=1) 
+
+    data_up_to_dropped = data_up_to_dropped.drop(["PreInt_EduHx,NeuroPsych", "PreInt_EduHx,IEP", "PreInt_EduHx,learning_disability", "PreInt_EduHx,EI", "PreInt_EduHx,CPSE"], axis=1)
 
     return data_up_to_dropped
 
@@ -360,6 +374,9 @@ def main(first_assessment_to_drop):
 
     # Aggregare demographics input columns: remove per parent data from Barratt
     data_up_to_dropped = data_up_to_dropped.drop(["Barratt,Barratt_P1_Edu", "Barratt,Barratt_P1_Occ", "Barratt,Barratt_P2_Edu", "Barratt,Barratt_P2_Occ"], axis=1)
+
+    # Transform PreInt_DevHx columns
+    data_up_to_dropped = transform_devhx_eduhx_cols(data_up_to_dropped)
 
     # Convert numeric columns to numeric type (all except ID and DX)
     data_up_to_dropped = data_up_to_dropped.apply(lambda col: convert_numeric_col_to_numeric_type(col))

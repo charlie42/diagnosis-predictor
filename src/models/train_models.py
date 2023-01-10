@@ -25,7 +25,7 @@ from joblib import load, dump
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-import util, data, models
+import util, data, models, util
 
 DEBUG_MODE = True
 
@@ -212,6 +212,11 @@ def find_best_classifiers_and_scores(datasets, diag_cols, performance_margin):
         best_classifiers[diag] = best_classifier_for_diag
         sds_of_scores_of_best_classifiers[diag] = sd_of_score_of_best_classifier_for_diag
         scores_of_best_classifiers[diag] = best_score_for_diag
+
+        if DEBUG_MODE and util.get_base_model_name_from_pipeline(best_classifiers[diag]) == "logisticregression":
+            # In debug mode print top features from LR
+            models.print_top_features_from_lr(best_classifiers[diag], X_train, 10)
+            
     return best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers
 
 def build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers, full_dataset):
@@ -220,7 +225,7 @@ def build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of
         best_classifier = best_classifiers[diag]
         score_of_best_classifier = scores_of_best_classifiers[diag]
         sd_of_score_of_best_classifier = sds_of_scores_of_best_classifiers[diag]
-        model_type = list(best_classifier.named_steps.keys())[-1]
+        model_type = util.get_base_model_name_from_pipeline(best_classifier)
         number_of_positive_examples = full_dataset[diag].sum()
         best_classifiers_and_score_sds.append([diag, model_type, best_classifier, score_of_best_classifier, sd_of_score_of_best_classifier, number_of_positive_examples])
     best_classifiers_and_score_sds = pd.DataFrame(best_classifiers_and_score_sds, columns = ["Diag", "Model type", "Best classifier", "Best score", "SD of best score", "Number of positive examples"])
@@ -251,7 +256,6 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
     if DEBUG_MODE: # Only use first two diagnoses for debugging
         print(diag_cols)
         diag_cols = diag_cols[-1:]
-        diag_cols = ["Diag.Other Specified Attention-Deficit.Hyperactivity Disorder"]
     print(diag_cols)
 
     if models_from_file == 1:

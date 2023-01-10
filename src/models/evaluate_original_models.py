@@ -57,7 +57,7 @@ def get_aucs_on_test_set(best_classifiers, datasets, use_test_set, diag_cols):
     aucs = {}
     for diag in diag_cols:
         print(diag)
-        print(list(best_classifiers[diag].named_steps.keys())[-1])
+        print(util.get_base_model_name_from_pipeline(best_classifiers[diag]))
         classifier = best_classifiers[diag]
         
         if use_test_set == 1:
