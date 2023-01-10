@@ -42,19 +42,6 @@ def set_up_directories(first_assessment_to_drop):
     util.create_dir_if_not_exists(data_output_dir)
 
     return data_statistics_dir, data_output_dir
-
-def remove_irrelevant_nih_cols(full):
-    NIH_cols = [x for x in full.columns if "NIH" in x]
-    NIH_scores_cols = [x for x in NIH_cols if x.startswith("NIH_Scores,")]
-
-    # Drop percentile scores, only keep actual score
-    NIH_cols_to_drop = [x for x in NIH_scores_cols if x.endswith("_P")]
-    full = full.drop(NIH_cols_to_drop, axis = 1)
-
-    # Drop non-numeric columns
-    full = full.drop(["NIH_Scores,NIH7_Incomplete_Reason"], axis = 1)
-
-    return full
     
 def remove_admin_cols(full):
     # Remove uninteresting columns
@@ -122,7 +109,7 @@ def get_relevant_id_cols_by_popularity(assessment_answer_counts):
     # Get relevant assessments: 
     #   relevant cognitive tests, Questionnaire Measures of Emotional and Cognitive Status, and 
     #   Questionnaire Measures of Family Structure, Stress, and Trauma (from Assessment_List_Jan2019.xlsx)
-    relevant_EID_list = [x+",EID" for x in ["Basic_Demos", "NIH_Scores", "SympChck", "SCQ", "Barratt", 
+    relevant_EID_list = [x+",EID" for x in ["Basic_Demos", "SympChck", "SCQ", "Barratt", 
         "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "APQ_P", "PCIAT", "DTS", "ESWAN", "MFQ_P", "APQ_SR", 
         "WHODAS_P", "CIS_P", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_SR", 
         "C3SR", "CCSC", "CPIC", "YSR", "PhenX_SchoolRisk", "CBCL_Pre", "SRS_Pre", "ASR"]]
@@ -322,9 +309,6 @@ def main(first_assessment_to_drop):
 
     # Drop empty columns
     full = full.dropna(how='all', axis=1)
-
-    # Remove irrelevant NIH toolbox columns
-    full = remove_irrelevant_nih_cols(full)
 
     full = remove_admin_cols(full)
 
