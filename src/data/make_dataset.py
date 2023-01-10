@@ -203,7 +203,7 @@ def transform_dx_cols(data_up_to_dropped):
 
     # Make new columns
     for diag in diags:
-        data_up_to_dropped["Diag: "+diag] = (data_up_to_dropped[og_diag_cols] == diag).any(axis=1)
+        data_up_to_dropped["Diag." + util.remove_chars_forbidden_in_file_names(diag)] = (data_up_to_dropped[og_diag_cols] == diag).any(axis=1)
         
     # Drop original diag columns
     data_up_to_dropped = data_up_to_dropped.drop(og_diag_cols, axis=1)

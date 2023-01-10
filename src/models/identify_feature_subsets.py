@@ -27,9 +27,9 @@ def set_up_directories():
     data_dir = "../diagnosis_predictor_data/"
 
     # Input dirs
-    input_data_dir = models.get_newest_dir_in_dir(data_dir + "data/train_models/")
-    models_dir = models.get_newest_dir_in_dir(data_dir + "models/train_models/")
-    input_reports_dir = models.get_newest_dir_in_dir(data_dir+ "reports/train_models/")
+    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/train_models/")
+    models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
+    input_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir+ "reports/train_models/")
 
     # Output dirs
     params_from_previous_script = models.get_params_from_current_data_dir_name(input_data_dir)

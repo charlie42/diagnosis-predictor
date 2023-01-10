@@ -37,6 +37,12 @@ def write_two_lvl_dict_to_file(dict, path):
     for key in dict.keys():
         write_dict_to_file(dict[key], path, key+".txt")
 
+def remove_chars_forbidden_in_file_names(string):
+    forbidden_chars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|']
+    for char in forbidden_chars:
+        string = string.replace(char, '.')
+    return string
+
 
 # Model Utilities
 def get_base_model_name_from_pipeline(pipeline):
