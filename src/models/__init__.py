@@ -3,9 +3,5 @@ from models.evaluate_original_models import get_roc_auc
 from models.helpers.get_feature_subsets_from_rfe_then_sfs import get_feature_subsets_from_rfe_then_sfs
 from models.helpers.get_feature_subsets_from_sfs import get_feature_subsets_from_sfs
 from models.helpers.idenitfy_thresholds import calculate_threshold
-<<<<<<< HEAD
 from models.helpers.file_helpers import *
 from models.helpers.print_top_features_from_lr import *
-=======
-from models.helpers.file_helpers import *
->>>>>>> 33664b8 (dir with latest timestamp instead of latest dir (to take into account git pulls))
