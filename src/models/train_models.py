@@ -53,7 +53,7 @@ def set_up_directories(other_diags_as_input):
     util.create_dir_if_not_exists(data_dir)
 
     # Input dirs
-    input_data_dir = models.get_newest_dir_in_dir(data_dir + "data/make_dataset/")
+    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/make_dataset/")
 
     # Create directory inside the output directory with the run timestamp and params:
     #    - [params from make_dataset.py]
@@ -134,8 +134,8 @@ def get_base_models_and_param_grids():
         (lr_pipe, lr_param_grid),
     ]
     if DEBUG_MODE:
-        #base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
-        base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[0]] # Only do LR and RF in debug mode
+        base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
+        #base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[0]] # Only do LR and RF in debug mode
     
     return base_models_and_param_grids
 
@@ -186,14 +186,16 @@ def find_best_classifier_for_diag_and_its_score(X_train, y_train, performance_ma
     
     return best_classifier, best_score, sd_of_score_of_best_classifier
 
-def find_diags_w_enough_positive_examples_in_test_set(full_dataset, all_diags, split_percentage, min_pos_examples_test_set):
-    diags_w_enough_positive_examples_in_test_set = []
+def find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set):
+    diags_w_enough_positive_examples_in_val_set = []
     for diag in all_diags:
         positive_examples_full_ds = full_dataset[full_dataset[diag] == 1].shape[0]
-        positive_examples_test_set = positive_examples_full_ds * split_percentage * split_percentage
-        if positive_examples_test_set >= min_pos_examples_test_set:
-            diags_w_enough_positive_examples_in_test_set.append(diag)
-    return diags_w_enough_positive_examples_in_test_set
+        # First get # of positive examples in the train set, then from those, get # of positive examples in the validation set 
+        # (first we split the dataset into train and test set, then we split the train set into train and validation set)
+        positive_examples_val_set = positive_examples_full_ds * (1-split_percentage) * split_percentage 
+        if positive_examples_val_set >= min_pos_examples_val_set:
+            diags_w_enough_positive_examples_in_val_set.append(diag)
+    return diags_w_enough_positive_examples_in_val_set
 
 # Find best classifier
 def find_best_classifiers_and_scores(datasets, diag_cols, performance_margin):
@@ -240,16 +242,16 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
 
     full_dataset = pd.read_csv(dirs["input_data_dir"] + "item_lvl_w_impairment.csv")
 
-    # Get list of column names with "Diag: " prefix, where number of 
+    # Get list of column names with "Diag." prefix, where number of 
     # positive examples is > threshold
-    min_pos_examples_test_set = 20
-    split_percentage = 0.3
-    all_diags = [x for x in full_dataset.columns if x.startswith("Diag: ")]
-    diag_cols = find_diags_w_enough_positive_examples_in_test_set(full_dataset, all_diags, split_percentage, min_pos_examples_test_set)
+    min_pos_examples_val_set = 20
+    split_percentage = 0.2
+    all_diags = [x for x in full_dataset.columns if x.startswith("Diag.")]
+    diag_cols = find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set)
     if DEBUG_MODE: # Only use first two diagnoses for debugging
         print(diag_cols)
-        #diag_cols = diag_cols[-1:]
-        diag_cols = diag_cols
+        diag_cols = diag_cols[-1:]
+        diag_cols = ["Diag.Other Specified Attention-Deficit.Hyperactivity Disorder"]
     print(diag_cols)
 
     if models_from_file == 1:
@@ -266,6 +268,7 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
     else: 
         # Create datasets for each diagnosis (different input and output columns)
         datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
+
         dump(datasets, dirs["output_data_dir"]+'datasets.joblib', compress=1)
 
         # Find best models for each diagnosis

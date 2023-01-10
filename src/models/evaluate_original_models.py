@@ -24,9 +24,9 @@ def set_up_directories(use_test_set):
     data_dir = "../diagnosis_predictor_data/"
 
     # Input dirs
-    input_data_dir = models.get_newest_dir_in_dir(data_dir + "data/train_models/")
-    models_dir = models.get_newest_dir_in_dir(data_dir + "models/train_models/")
-    input_reports_dir = models.get_newest_dir_in_dir(data_dir+ "reports/train_models/")
+    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/train_models/")
+    models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
+    input_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir+ "reports/train_models/")
 
     # Output dirs
 
@@ -85,7 +85,7 @@ def get_aucs_cv_from_grid_search(reports_dir, diag_cols):
 def get_roc_aucs(best_classifiers, datasets, use_test_set, diag_cols, input_reports_dir):
     roc_aucs_cv_from_grid_search = get_aucs_cv_from_grid_search(input_reports_dir, diag_cols)
     roc_aucs_on_test_set = get_aucs_on_test_set(best_classifiers, datasets, use_test_set=use_test_set, diag_cols=diag_cols)
-    roc_aucs = roc_aucs_cv_from_grid_search.merge(roc_aucs_on_test_set, on="Diag")
+    roc_aucs = roc_aucs_cv_from_grid_search.merge(roc_aucs_on_test_set, on="Diag").sort_values(by="ROC AUC Mean CV - SD", ascending=False)
     return roc_aucs
 
 def main(use_test_set=1):
