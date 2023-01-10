@@ -265,8 +265,8 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 1, models_from_fi
     diag_cols = find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set)
     if DEBUG_MODE: # Only use first two diagnoses for debugging
         print(diag_cols)
-        #diag_cols = diag_cols[-1:]
-        diag_cols = diag_cols
+        diag_cols = diag_cols[-1:]
+        diag_cols = ["Diag.Other Specified Attention-Deficit.Hyperactivity Disorder"]
     print(diag_cols)
 
     if models_from_file == 1:
