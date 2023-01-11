@@ -4,9 +4,9 @@ File structure: http://drivendata.github.io/cookiecutter-data-science/#directory
 
 ## 1 step:
 
-`python -W ignore src/data/make_dataset.py ICU_P`
+`python -W ignore src/data/make_dataset.py 1 ICU_P`
 
-Arguments: first_assessment_to_drop
+Arguments: only_assessment_distribution, first_assessment_to_drop
 
 ## 2 step:
 
