@@ -308,7 +308,8 @@ def export_datasets(data_up_to_dropped, data_up_to_dropped_item_lvl, data_up_to_
     data_up_to_SCARED_subscale_scores_w_impairment.to_csv(data_output_dir + "subscale_scores_w_impairment.csv", index=False)
     data_up_to_SCARED_total_scores_w_impairment.to_csv(data_output_dir + "total_scores_w_impairment.csv", index=False)
 
-def main(first_assessment_to_drop):
+def main(only_assessment_distribution, first_assessment_to_drop):
+    only_assessment_distribution = int(only_assessment_distribution)
 
     data_statistics_dir, data_output_dir = set_up_directories(first_assessment_to_drop)
 
@@ -360,61 +361,63 @@ def main(first_assessment_to_drop):
 
     ### => The first drop-off in number of respondents is at ICU_P, 
     # then SCARED_SR (the biggest drop off, and it's the first assessment with an age restriction). Last drop off is at CPIC.
+
+    if only_assessment_distribution != 1:
     
-    # List of most popular assessments until the first one from the drop list 
-    EID_columns_until_dropped = [x for x in EID_columns_by_popularity[:EID_columns_by_popularity.index(first_assessment_to_drop+",EID")]]
+        # List of most popular assessments until the first one from the drop list 
+        EID_columns_until_dropped = [x for x in EID_columns_by_popularity[:EID_columns_by_popularity.index(first_assessment_to_drop+",EID")]]
 
-    # Get data up to the dropped assessment
-    # Get only people who took the most popular assessments until the first one from the drop list 
-    columns_until_dropped = get_columns_until_dropped(full_wo_underscore, EID_columns_until_dropped)
-    data_up_to_dropped = get_data_up_to_dropped(full_wo_underscore, EID_columns_until_dropped, columns_until_dropped)
+        # Get data up to the dropped assessment
+        # Get only people who took the most popular assessments until the first one from the drop list 
+        columns_until_dropped = get_columns_until_dropped(full_wo_underscore, EID_columns_until_dropped)
+        data_up_to_dropped = get_data_up_to_dropped(full_wo_underscore, EID_columns_until_dropped, columns_until_dropped)
 
-    # Remove EID columns: not needed anymore
-    data_up_to_dropped = data_up_to_dropped.drop(EID_columns_until_dropped, axis=1)
+        # Remove EID columns: not needed anymore
+        data_up_to_dropped = data_up_to_dropped.drop(EID_columns_until_dropped, axis=1)
 
-    # Aggregare demographics input columns: remove per parent data from Barratt
-    data_up_to_dropped = data_up_to_dropped.drop(["Barratt,Barratt_P1_Edu", "Barratt,Barratt_P1_Occ", "Barratt,Barratt_P2_Edu", "Barratt,Barratt_P2_Occ"], axis=1)
+        # Aggregare demographics input columns: remove per parent data from Barratt
+        data_up_to_dropped = data_up_to_dropped.drop(["Barratt,Barratt_P1_Edu", "Barratt,Barratt_P1_Occ", "Barratt,Barratt_P2_Edu", "Barratt,Barratt_P2_Occ"], axis=1)
 
-    # Transform PreInt_DevHx columns
-    data_up_to_dropped = transform_devhx_eduhx_cols(data_up_to_dropped)
+        # Transform PreInt_DevHx columns
+        data_up_to_dropped = transform_devhx_eduhx_cols(data_up_to_dropped)
 
-    # Convert numeric columns to numeric type (all except ID and DX)
-    data_up_to_dropped = data_up_to_dropped.apply(lambda col: convert_numeric_col_to_numeric_type(col))
+        # Convert numeric columns to numeric type (all except ID and DX)
+        data_up_to_dropped = data_up_to_dropped.apply(lambda col: convert_numeric_col_to_numeric_type(col))
 
-    # Save report of missing values
-    missing_values_df = get_missing_values_df(data_up_to_dropped)
-    missing_values_df.to_csv(data_statistics_dir + "missing-values-report.csv")
+        # Save report of missing values
+        missing_values_df = get_missing_values_df(data_up_to_dropped)
+        missing_values_df.to_csv(data_statistics_dir + "missing-values-report.csv")
 
-    # Remove columns with more than 40% missing data
-    data_up_to_dropped = remove_cols_w_missing_over_n(data_up_to_dropped, 40, missing_values_df)
+        # Remove columns with more than 40% missing data
+        data_up_to_dropped = remove_cols_w_missing_over_n(data_up_to_dropped, 40, missing_values_df)
 
-    # Special case: replace missing "CBCL,CBCL_56H" with 0 ("Other")
-    data_up_to_dropped[["CBCL,CBCL_56H"]] = data_up_to_dropped[["CBCL,CBCL_56H"]].fillna(value=0)
+        # Special case: replace missing "CBCL,CBCL_56H" with 0 ("Other")
+        data_up_to_dropped[["CBCL,CBCL_56H"]] = data_up_to_dropped[["CBCL,CBCL_56H"]].fillna(value=0)
 
-    # Add missingness marker for columns with more than 5% missing data 
-    data_up_to_dropped = add_missingness_markers(data_up_to_dropped, 5, missing_values_df)
+        # Add missingness marker for columns with more than 5% missing data 
+        data_up_to_dropped = add_missingness_markers(data_up_to_dropped, 5, missing_values_df)
 
-    # Transform diagnosis columns
-    data_up_to_dropped = transform_dx_cols(data_up_to_dropped)
+        # Transform diagnosis columns
+        data_up_to_dropped = transform_dx_cols(data_up_to_dropped)
 
-    # Remove ID column - not needed anymore
-    data_up_to_dropped = data_up_to_dropped.drop("ID", axis=1)
+        # Remove ID column - not needed anymore
+        data_up_to_dropped = data_up_to_dropped.drop("ID", axis=1)
 
-    # Convert new boolean columns to numeric
-    data_up_to_dropped = data_up_to_dropped.replace({True: 1, False: 0})
+        # Convert new boolean columns to numeric
+        data_up_to_dropped = data_up_to_dropped.replace({True: 1, False: 0})
 
-    # Separate subscale and total scores
-    data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores = separate_item_lvl_from_scale_scores(data_up_to_dropped, columns_until_dropped)
+        # Separate subscale and total scores
+        data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores = separate_item_lvl_from_scale_scores(data_up_to_dropped, columns_until_dropped)
 
-    # Remove _WAS_MISSING columns that are not linked to any columns from each dataset
-    data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores = remove_irrelavent_missing_markers(data_up_to_dropped, 
-        data_up_to_dropped_item_lvl, 
-        data_up_to_dropped_total_scores, 
-        data_up_to_dropped_subscale_scores)
+        # Remove _WAS_MISSING columns that are not linked to any columns from each dataset
+        data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores = remove_irrelavent_missing_markers(data_up_to_dropped, 
+            data_up_to_dropped_item_lvl, 
+            data_up_to_dropped_total_scores, 
+            data_up_to_dropped_subscale_scores)
 
-    # Export final datasets
-    export_datasets(data_up_to_dropped, data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_output_dir)
+        # Export final datasets
+        export_datasets(data_up_to_dropped, data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_output_dir)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])
