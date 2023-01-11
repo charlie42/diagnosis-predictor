@@ -117,34 +117,39 @@ def fit_classifier_on_subset_of_features(best_classifiers, diag, X, y):
     new_classifier.fit(X, y)
     return new_classifier
 
-def make_performance_table(performances_on_subsets, dir):
+def make_performance_table(performances_on_subsets):
     performances_on_subsets = pd.DataFrame.from_dict(performances_on_subsets)
     performances_on_subsets.index = range(1, len(performances_on_subsets)+1)
     performances_on_subsets = performances_on_subsets.rename(columns={"index": "Diagnosis"})
-    performances_on_subsets.to_csv(dir+'performances-on-feature-subsets.csv')
     return performances_on_subsets
 
 def get_diags_in_order_of_auc_on_max_features(performance_table):
     roc_table =  performance_table.applymap(lambda x: x[0]).iloc[::-1]
     return roc_table.columns[roc_table.loc[roc_table.first_valid_index()].argsort()[::-1]]
 
-def make_auc_table(auc_on_subsets, output_reports_dir):
+def make_auc_table(auc_on_subsets):
     print(auc_on_subsets)
     auc_on_subsets = pd.DataFrame.from_dict(auc_on_subsets)
     print(auc_on_subsets)
     auc_on_subsets.index = range(1, len(auc_on_subsets)+1)
     auc_on_subsets = auc_on_subsets.rename(columns={"index": "Diagnosis"})
     print(auc_on_subsets)
-    auc_on_subsets.to_csv(output_reports_dir+'cv_auc_on_subsets.csv')
     return auc_on_subsets
 
-def make_sens_spec_table(performance_table, output_reports_dir):
-    sens_spec_table = performance_table.applymap(lambda x: str(x[1]) + "," + str(x[2]))
+def make_sens_spec_tables(performance_table):
+    auc_table = performance_table.applymap(lambda x: x[0])
+    sens_table = performance_table.applymap(lambda x: x[1])
+    spec_table = performance_table.applymap(lambda x: x[2])
+
     # Inverse order of rows
-    sens_spec_table = sens_spec_table.iloc[::-1]
-    # Sort columns by score on 100 features (first row)
+    auc_table = auc_table.iloc[::-1]
+    sens_table = sens_table.iloc[::-1]
+    spec_table = spec_table.iloc[::-1]
+
+    # Sort columns by test set auc score on first row (max # of features)
     new_columns = get_diags_in_order_of_auc_on_max_features(performance_table)
-    sens_spec_table[new_columns].to_csv(output_reports_dir+'sens_spec_on_subsets.csv')
+
+    return auc_table[new_columns], sens_table[new_columns], spec_table[new_columns]
 
 def get_top_n_features(feature_subsets, diag, n):
     features_up_top_n = feature_subsets[diag][n]
@@ -256,6 +261,21 @@ def get_optimal_nb_features(auc_table, dir):
     util.write_dict_to_file(optimal_nb_features, dir, "optimal-nb-features.txt")
     return optimal_nb_features
 
+def make_and_write_performance_tables(performances_on_feature_subsets, cv_scores_on_feature_subsets, dir):
+    performance_table = make_performance_table(performances_on_feature_subsets)
+    performance_table.to_csv(dir+'performances-on-feature-subsets-test-set.csv')
+
+    cv_auc_table = make_auc_table(cv_scores_on_feature_subsets)
+    cv_auc_table.to_csv(dir+'cv-auc-on-subsets.csv')
+
+    [auc_test_set_table, sens_test_set_table, spec_test_set_table] = make_sens_spec_tables(performance_table)
+    auc_test_set_table.to_csv(dir+'auc-on-subsets-test-set.csv')
+    sens_test_set_table.to_csv(dir+'sens-on-subsets-test-set.csv')
+    spec_test_set_table.to_csv(dir+'spec-on-subsets-test-set.csv')
+
+    return performance_table, cv_auc_table, auc_test_set_table, sens_test_set_table, spec_test_set_table
+
+
 def main(models_from_file = 1):
     models_from_file = int(models_from_file)
 
@@ -279,9 +299,7 @@ def main(models_from_file = 1):
         dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
         dump(cv_scores_on_feature_subsets, dirs["output_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
 
-    performance_table = make_performance_table(performances_on_feature_subsets, dirs["output_reports_dir"])
-    auc_table = make_auc_table(cv_scores_on_feature_subsets, dirs["output_reports_dir"])
-    sens_spec_table = make_sens_spec_table(performance_table, dirs["output_reports_dir"])
+    _, auc_table, _, _, _ = make_and_write_performance_tables(performances_on_feature_subsets, cv_scores_on_feature_subsets, dirs["output_reports_dir"])
 
     get_optimal_nb_features(auc_table, dirs["output_reports_dir"])
 
