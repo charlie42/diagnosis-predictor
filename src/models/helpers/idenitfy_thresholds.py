@@ -2,7 +2,7 @@ from sklearn.metrics import roc_curve
 import numpy as np
 
 # Calculate probability threshold
-def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val):
+def calculate_thresholds(classifier, X_train_train, y_train_train, X_val, y_val):
     from numpy import nanargmax
 
     # Fit model on train set
@@ -22,7 +22,7 @@ def calculate_threshold(classifier, X_train_train, y_train_train, X_val, y_val):
     
     threshold = thresholds[ix]
     
-    return threshold
+    return [thresholds, threshold]
 
 # Find best thresholds
 def find_best_thresholds(best_classifiers, datasets):
@@ -34,10 +34,10 @@ def find_best_thresholds(best_classifiers, datasets):
             datasets[diag]["y_train_train"], \
             datasets[diag]["X_val"], \
             datasets[diag]["y_val"]
-        threshold = calculate_threshold(
+        thresholds = calculate_thresholds(
             best_classifier_for_diag, 
             X_train_train, y_train_train, X_val, y_val, 
         )
-        best_thresholds[diag] = threshold
+        best_thresholds[diag] = thresholds
     print("Thesholds: ", best_thresholds)
     return best_thresholds

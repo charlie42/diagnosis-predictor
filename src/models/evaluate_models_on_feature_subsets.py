@@ -6,15 +6,6 @@ from IPython.core import ultratb
 sys.excepthook = ultratb.FormattedTB(color_scheme='Neutral', call_pdb=False)
 
 import pandas as pd
-import numpy as np
-import math
-
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline
-from sklearn.base import clone
-from sklearn.model_selection import StratifiedKFold, cross_val_score
-from sklearn.metrics import confusion_matrix
 
 from joblib import dump, load
 
@@ -23,6 +14,8 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import models, util
+
+DEBUG_MODE = True
 
 def build_output_dir_name(params_from_previous_script):
     # Part with the datetime
@@ -56,225 +49,152 @@ def set_up_load_directories():
     load_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir+ "reports/evaluate_models_on_feature_subsets/")
     return {"load_reports_dir": load_reports_dir}
 
-def get_best_thresholds(best_classifiers, datasets):
-    best_thresholds = models.find_best_thresholds(
-        best_classifiers=best_classifiers, 
-        datasets=datasets
-        )
-    return best_thresholds
-
-def get_matrix_metrics(real_values,pred_values):
-    CM = confusion_matrix(real_values,pred_values)
-    TN = CM[0][0]+0.01 # +0.01 To avoid division by 0 errors
-    FN = CM[1][0]+0.01
-    TP = CM[1][1]+0.01
-    FP = CM[0][1]+0.01
-    Population = TN+FN+TP+FP
-    Prevalence = round( (TP+FN) / Population,2)
-    Accuracy   = round( (TP+TN) / Population,4)
-    Precision  = round( TP / (TP+FP),4 )
-    NPV        = round( TN / (TN+FN),4 )
-    FDR        = round( FP / (TP+FP),4 )
-    FOR        = round( FN / (TN+FN),4 ) 
-    check_Pos  = Precision + FDR
-    check_Neg  = NPV + FOR
-    Recall     = round( TP / (TP+FN),4 )
-    FPR        = round( FP / (TN+FP),4 )
-    FNR        = round( FN / (TP+FN),4 )
-    TNR        = round( TN / (TN+FP),4 ) 
-    check_Pos2 = Recall + FNR
-    check_Neg2 = FPR + TNR
-    LRPos      = round( Recall/FPR,4 ) 
-    LRNeg      = round( FNR / TNR ,4 )
-    #DOR        = round( LRPos/LRNeg)
-    DOR        = 1 # FIX, LINE ABOVE
-    F1         = round ( 2 * ((Precision*Recall)/(Precision+Recall)),4)
-    MCC        = round ( ((TP*TN)-(FP*FN))/math.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))  ,4)
-    BM         = Recall+TNR-1
-    MK         = Precision+NPV-1   
-    Predicted_Positive_Ratio = round( (TP+FP) / Population,2)
-    
-    mat_met = [TP,TN,FP,FN,Prevalence,Accuracy,Precision,NPV,FDR,FOR,check_Pos,check_Neg,Recall,FPR,FNR,TNR,check_Pos2,check_Neg2,LRPos,LRNeg,DOR,F1,MCC,BM,MK,Predicted_Positive_Ratio]
-    metric_names = ['TP','TN','FP','FN','Prevalence','Accuracy','Precision','NPV','FDR','FOR','check_Pos','check_Neg','Recall (Sensitivity)','FPR','FNR','TNR (Specificity)','check_Pos2','check_Neg2','LR+','LR-','DOR','F1','MCC','BM','MK','Predicted Positive Ratio','ROC AUC']   
-
-    return (mat_met, metric_names)
-
-def get_metrics(classifier, threshold, X, y):
-       
-    y_pred_prob = classifier.predict_proba(X)
-    y_pred = (y_pred_prob[:,1] >= threshold).astype(bool) 
-
-    metrics, metric_names = get_matrix_metrics(y, y_pred)
-
-    roc_auc = models.get_roc_auc(X, y, classifier)
-    metrics.append(roc_auc)
-    
-    return metrics, metric_names
-
-def fit_classifier_on_subset_of_features(best_classifiers, diag, X, y):
-    new_classifier_base = clone(best_classifiers[diag][2])
-    new_classifier = make_pipeline(SimpleImputer(missing_values=np.nan, strategy='median'), StandardScaler(), new_classifier_base)
-    new_classifier.fit(X, y)
-    return new_classifier
-
-def make_performance_table(performances_on_subsets):
-    performances_on_subsets = pd.DataFrame.from_dict(performances_on_subsets)
-    performances_on_subsets.index = range(1, len(performances_on_subsets)+1)
-    performances_on_subsets = performances_on_subsets.rename(columns={"index": "Diagnosis"})
-    return performances_on_subsets
-
-def get_diags_in_order_of_auc_on_max_features(performance_table):
-    roc_table =  performance_table.applymap(lambda x: x[0]).iloc[::-1]
-    return roc_table.columns[roc_table.loc[roc_table.first_valid_index()].argsort()[::-1]]
-
-def make_auc_table(auc_on_subsets):
-    print(auc_on_subsets)
+def make_and_write_cv_auc_table(auc_on_subsets, dir):
     auc_on_subsets = pd.DataFrame.from_dict(auc_on_subsets)
-    print(auc_on_subsets)
     auc_on_subsets.index = range(1, len(auc_on_subsets)+1)
     auc_on_subsets = auc_on_subsets.rename(columns={"index": "Diagnosis"})
-    print(auc_on_subsets)
+
+    auc_on_subsets.to_csv(dir+'cv-auc-on-subsets.csv')
+
     return auc_on_subsets
 
-def make_sens_spec_tables(performance_table):
-    auc_table = performance_table.applymap(lambda x: x[0])
-    sens_table = performance_table.applymap(lambda x: x[1])
-    spec_table = performance_table.applymap(lambda x: x[2])
+def make_performance_tables_opt_threshold(performances_on_feature_subsets, optimal_thresholds):
+    # Create a table for each performance metric (AUC, Sensitivity, Specificity) for each number of features, using the optimal threshold
+    # Build list of lists where each list is a row in the table
+    auc_table = []
+    sens_table = []
+    spec_table = []
 
-    # Inverse order of rows
-    auc_table = auc_table.iloc[::-1]
-    sens_table = sens_table.iloc[::-1]
-    spec_table = spec_table.iloc[::-1]
-
-    # Sort columns by test set auc score on first row (max # of features)
-    new_columns = get_diags_in_order_of_auc_on_max_features(performance_table)
-
-    return auc_table[new_columns], sens_table[new_columns], spec_table[new_columns]
-
-def get_top_n_features(feature_subsets, diag, n):
-    features_up_top_n = feature_subsets[diag][n]
-    return features_up_top_n
-
-def get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_classifiers):
-    cv_scores_on_feature_subsets = {}
-    
-    for diag in feature_subsets.keys():
-        print("Getting CV scores on feature subsets for " + diag)
-        cv_scores_on_feature_subsets[diag] = []
-        for nb_features in feature_subsets[diag].keys():
-            X_train, y_train = datasets[diag]["X_train"], datasets[diag]["y_train"]
-            top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
-            new_classifier = make_pipeline(SimpleImputer(missing_values=np.nan, strategy='median'), StandardScaler(), clone(best_classifiers[diag][2]))
-            cv_scores = cross_val_score(new_classifier, X_train[top_n_features], y_train, cv = StratifiedKFold(n_splits=10), scoring='roc_auc')
-            cv_scores_on_feature_subsets[diag].append(cv_scores.mean())
-    return cv_scores_on_feature_subsets
-
-def re_train_models_on_feature_subsets_per_output(diag, feature_subsets, datasets, best_classifiers):
-    classifiers_on_feature_subsets = {}
-
-    for nb_features in feature_subsets[diag].keys():
-        X_train, y_train = datasets[diag]["X_train_train"], datasets[diag]["y_train_train"]
-
-        # Create new pipeline with the params of the best classifier (need to re-train the imputer on less features)
-        top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
-        new_classifier = fit_classifier_on_subset_of_features(best_classifiers, diag, X_train[top_n_features], y_train)
-        classifiers_on_feature_subsets[nb_features] = new_classifier
-    
-    return classifiers_on_feature_subsets
-
-def re_train_models_on_feature_subsets(feature_subsets, datasets, best_classifiers):
-    classifiers_on_feature_subsets = {}
-    for diag in feature_subsets.keys():
-        print("Re-training models on feature subsets for output: " + diag)
-        classifiers_on_feature_subsets[diag] = re_train_models_on_feature_subsets_per_output(diag, feature_subsets, datasets, best_classifiers)
+    for diag in performances_on_feature_subsets:
         
-    return classifiers_on_feature_subsets
+        diag_row_auc = [diag] # Each row in the table will have the diagnosis and then each columns will be the performance for each number of features
+        diag_row_sens = [diag]
+        diag_row_spec = [diag]
+        
+        for nb_features in performances_on_feature_subsets[diag]:
 
-def calculate_thresholds_for_feature_subsets_per_output(diag, feature_subsets, classifiers_on_feature_subsets, datasets):
-    X_train, y_train = datasets[diag]["X_train_train"], datasets[diag]["y_train_train"]
-    X_val, y_val = datasets[diag]["X_val"], datasets[diag]["y_val"]
+            optimal_threshold = optimal_thresholds[diag][nb_features]
+            print("DEBUG", performances_on_feature_subsets[diag][nb_features])
+            diag_row_auc = diag_row_auc + [performances_on_feature_subsets[diag][nb_features][optimal_threshold][0]] 
+            diag_row_sens = diag_row_sens + [performances_on_feature_subsets[diag][nb_features][optimal_threshold][1]]
+            diag_row_spec = diag_row_spec + [performances_on_feature_subsets[diag][nb_features][optimal_threshold][2]]
+            
+        auc_table = auc_table + [diag_row_auc]
+        sens_table = sens_table + [diag_row_sens]
+        spec_table = spec_table + [diag_row_spec]
 
-    thresholds_on_feature_subsets = {}
+    auc_df = pd.DataFrame(auc_table, columns=["Diagnosis"] + list(performances_on_feature_subsets[diag].keys()))
+    sens_df = pd.DataFrame(sens_table, columns=["Diagnosis"] + list(performances_on_feature_subsets[diag].keys()))
+    spec_df = pd.DataFrame(spec_table, columns=["Diagnosis"] + list(performances_on_feature_subsets[diag].keys()))
 
-    for nb_features in feature_subsets[diag].keys():
-        top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
+    # Sort diagnoses by performance on max number of features (sort values by last column)
+    auc_df = auc_df.sort_values(by=auc_df.columns[-1])
+    sens_df = sens_df.sort_values(by=sens_df.columns[-1])
+    spec_df = spec_df.sort_values(by=spec_df.columns[-1])
 
-        thresholds_on_feature_subsets[nb_features] = models.calculate_threshold(
-            classifiers_on_feature_subsets[diag][nb_features], 
-            X_train[top_n_features], 
-            y_train,
-            X_val[top_n_features], 
-            y_val
-            )
+    # Transpose so that each column is a diagnosis and each row is a number of features
+    auc_df = auc_df.transpose()
+    sens_df = sens_df.transpose()
+    spec_df = spec_df.transpose()
 
-    return thresholds_on_feature_subsets
+    # Rename columns and index
+    auc_df.columns = auc_df.iloc[0]
+    auc_df = auc_df.drop(auc_df.index[0])
+    auc_df.index.name = "Number of features"
 
-def calculate_thresholds_for_feature_subsets(feature_subsets, classifiers_on_feature_subsets, datasets):
-    thresholds_on_feature_subsets = {}
-    for diag in feature_subsets.keys():
-        thresholds_on_feature_subsets[diag] = calculate_thresholds_for_feature_subsets_per_output(diag, feature_subsets, classifiers_on_feature_subsets, datasets)
-    return thresholds_on_feature_subsets
+    sens_df.columns = sens_df.iloc[0]
+    sens_df = sens_df.drop(sens_df.index[0])
+    sens_df.index.name = "Number of features"
 
-def get_performances_on_feature_subsets_per_output(diag, feature_subsets, classifiers_on_feature_subsets, thresholds_on_feature_subsets, datasets, use_test_set):
-
-    if use_test_set == 1:
-        X_test, y_test = datasets[diag]["X_test"], datasets[diag]["y_test"]
-    else:
-        X_test, y_test = datasets[diag]["X_val"], datasets[diag]["y_val"]
-
-    metrics_on_subsets = []
+    spec_df.columns = spec_df.iloc[0]
+    spec_df = spec_df.drop(spec_df.index[0])
+    spec_df.index.name = "Number of features"
     
-    for nb_features in feature_subsets[diag].keys():
-        # Create new pipeline with the params of the best classifier (need to re-train the imputer on less features)
-        top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
-        new_classifier = classifiers_on_feature_subsets[diag][nb_features]
-        new_threshold = thresholds_on_feature_subsets[diag][nb_features]
-        metrics, metric_names = get_metrics(new_classifier, new_threshold, X_test[top_n_features], y_test)
-        relevant_metrics = [
-            metrics[-1], # AUC ROC
-            metrics[metric_names.index("Recall (Sensitivity)")],
-            metrics[metric_names.index("TNR (Specificity)")]]
-        metrics_on_subsets.append(relevant_metrics)
+    return auc_df, sens_df, spec_df
 
-    return metrics_on_subsets
+def make_performance_tables_opt_nb_features(performances_on_feature_subsets, optimal_nbs_features):
+    # Create a table for each performance metric (AUC, Sensitivity, Specificity) for each threshold, using the optimal number of features
+    # Build list of lists where each list is a row in the table
+    auc_table = []
+    sens_table = []
+    spec_table = []
 
-def get_performances_on_feature_subsets(feature_subsets, datasets, best_classifiers, use_test_set):
-    cv_scores_on_feature_subsets = get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_classifiers)
-    classifiers_on_feature_subsets = re_train_models_on_feature_subsets(feature_subsets, datasets, best_classifiers)
-    thresholds_on_feature_subsets = calculate_thresholds_for_feature_subsets(feature_subsets, classifiers_on_feature_subsets, datasets)
+    for diag in performances_on_feature_subsets:
+        
+        optimal_nb_features = optimal_nbs_features[diag]
 
-    performances_on_subsets = {}
-    
-    for diag in feature_subsets.keys():
-        performances_on_subsets[diag] = get_performances_on_feature_subsets_per_output(diag, feature_subsets, classifiers_on_feature_subsets, thresholds_on_feature_subsets, datasets, use_test_set)
+        diag_row_auc = [diag] # Each row in the table will have the diagnosis and then each columns will be the performance for each threshold
+        diag_row_sens = [diag]
+        diag_row_spec = [diag]
+        
+        for threshold in performances_on_feature_subsets[diag][optimal_nb_features]:
+            diag_row_auc = diag_row_auc + [performances_on_feature_subsets[diag][optimal_nb_features][threshold][0]] 
+            diag_row_sens = diag_row_sens + [performances_on_feature_subsets[diag][optimal_nb_features][threshold][1]]
+            diag_row_spec = diag_row_spec + [performances_on_feature_subsets[diag][optimal_nb_features][threshold][2]]
+            
+        auc_table = auc_table + [diag_row_auc]
+        sens_table = sens_table + [diag_row_sens]
+        spec_table = spec_table + [diag_row_spec]
 
-    return performances_on_subsets, cv_scores_on_feature_subsets
+    auc_df = pd.DataFrame(auc_table, columns=["Diagnosis"] + list(performances_on_feature_subsets[diag][optimal_nb_features].keys()))
+    sens_df = pd.DataFrame(sens_table, columns=["Diagnosis"] + list(performances_on_feature_subsets[diag][optimal_nb_features].keys()))
+    spec_df = pd.DataFrame(spec_table, columns=["Diagnosis"] + list(performances_on_feature_subsets[diag][optimal_nb_features].keys()))
 
-def get_optimal_nb_features(auc_table, dir):
-    optimal_nb_features = {}
+    # Sort diagnoses by performance on max number of features (sort values by last column)
+    auc_df = auc_df.sort_values(by=auc_df.columns[-1])
+    sens_df = sens_df.sort_values(by=sens_df.columns[-1])
+    spec_df = spec_df.sort_values(by=spec_df.columns[-1])
+
+    # Transpose so that each column is a diagnosis and each row is a number of features
+    auc_df = auc_df.transpose()
+    sens_df = sens_df.transpose()
+    spec_df = spec_df.transpose()
+
+    # Rename columns and index
+    auc_df.columns = auc_df.iloc[0]
+    auc_df = auc_df.drop(auc_df.index[0])
+    auc_df.index.name = "Threshold"
+
+    sens_df.columns = sens_df.iloc[0]
+    sens_df = sens_df.drop(sens_df.index[0])
+    sens_df.index.name = "Threshold"
+
+    spec_df.columns = spec_df.iloc[0]
+    spec_df = spec_df.drop(spec_df.index[0])
+    spec_df.index.name = "Threshold"
+
+    # Replace index with integers starting from 1 (to obscure actual threshold values)
+    auc_df.index = range(1, len(auc_df.index) + 1)
+
+    return auc_df, sens_df, spec_df
+
+def get_and_write_optimal_nbs_features(auc_table, dir):
+    optimal_nbs_features = {}
+
     for diag in auc_table.columns:
         max_score = auc_table[diag].max()
         optimal_score = max_score - 0.01
         # Get index of the first row with a score >= optimal_score
-        optimal_nb_features[diag] = auc_table[diag][auc_table[diag] >= optimal_score].index[0]
-    print(optimal_nb_features)
-    util.write_dict_to_file(optimal_nb_features, dir, "optimal-nb-features.txt")
-    return optimal_nb_features
+        optimal_nbs_features[diag] = auc_table[diag][auc_table[diag] >= optimal_score].index[0]
 
-def make_and_write_performance_tables(performances_on_feature_subsets, cv_scores_on_feature_subsets, dir):
-    performance_table = make_performance_table(performances_on_feature_subsets)
-    performance_table.to_csv(dir+'performances-on-feature-subsets-test-set.csv')
+    print(optimal_nbs_features)
+    util.write_dict_to_file(optimal_nbs_features, dir, "optimal-nb-features.txt")
 
-    cv_auc_table = make_auc_table(cv_scores_on_feature_subsets)
-    cv_auc_table.to_csv(dir+'cv-auc-on-subsets.csv')
+    return optimal_nbs_features
 
-    [auc_test_set_table, sens_test_set_table, spec_test_set_table] = make_sens_spec_tables(performance_table)
-    auc_test_set_table.to_csv(dir+'auc-on-subsets-test-set.csv')
-    sens_test_set_table.to_csv(dir+'sens-on-subsets-test-set.csv')
-    spec_test_set_table.to_csv(dir+'spec-on-subsets-test-set.csv')
+def make_and_write_test_set_performance_tables(performances_on_feature_subsets, dir, optimal_thresholds, optimal_nbs_features):
 
-    return performance_table, cv_auc_table, auc_test_set_table, sens_test_set_table, spec_test_set_table
+    # Make AUC, Sens, Spec tables for optimal thresholds
+    [auc_test_set_table_optimal_threshold, sens_test_set_table_optimal_threshold, spec_test_set_table_optimal_threshold] = make_performance_tables_opt_threshold(performances_on_feature_subsets, optimal_thresholds)
+    auc_test_set_table_optimal_threshold.to_csv(dir+'auc-on-subsets-test-set-optimal-threshold.csv')
+    sens_test_set_table_optimal_threshold.to_csv(dir+'sens-on-subsets-test-set-optimal-threshold.csv')
+    spec_test_set_table_optimal_threshold.to_csv(dir+'spec-on-subsets-test-set-optimal-threshold.csv')
 
+    # Make AUC, Sens, Spec tables for all thresholds on optimal number of features
+    [auc_test_set_table_optimal_nb_features, sens_test_set_table_optimal_nb_features, spec_test_set_table_optimal_nb_features] = make_performance_tables_opt_nb_features(performances_on_feature_subsets, optimal_nbs_features)
+    auc_test_set_table_optimal_nb_features.to_csv(dir+'auc-on-subsets-test-set-optimal-nb-features.csv')
+    sens_test_set_table_optimal_nb_features.to_csv(dir+'sens-on-subsets-test-set-optimal-nb-features.csv')
+    spec_test_set_table_optimal_nb_features.to_csv(dir+'spec-on-subsets-test-set-optimal-nb-features.csv')
 
 def main(models_from_file = 1):
     models_from_file = int(models_from_file)
@@ -285,23 +205,32 @@ def main(models_from_file = 1):
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
     best_classifiers = load(dirs["input_models_dir"]+'best-classifiers.joblib')
 
+    if DEBUG_MODE == 1:
+        # In debug mode, only use first diagnosis
+        datasets = {list(datasets.keys())[0]: datasets[list(datasets.keys())[0]]}
+        feature_subsets = {list(feature_subsets.keys())[0]: feature_subsets[list(feature_subsets.keys())[0]]}
+        best_classifiers = {list(best_classifiers.keys())[0]: best_classifiers[list(best_classifiers.keys())[0]]}
+
     if models_from_file == 1:
         load_dirs = set_up_load_directories()
 
         performances_on_feature_subsets = load(load_dirs["load_reports_dir"]+'performances-on-feature-subsets.joblib')    
         cv_scores_on_feature_subsets = load(load_dirs["load_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
+        optimal_thresholds = load(load_dirs["load_reports_dir"]+'optimal-thresholds.joblib')
 
         # Save reports to newly created directories
         dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
         dump(cv_scores_on_feature_subsets, dirs["output_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
+        dump(optimal_thresholds, dirs["output_reports_dir"]+'optimal-thresholds.joblib')
     else:
-        performances_on_feature_subsets, cv_scores_on_feature_subsets = get_performances_on_feature_subsets(feature_subsets, datasets, best_classifiers, use_test_set = 1)
+        performances_on_feature_subsets, cv_scores_on_feature_subsets, optimal_thresholds = models.get_performances_on_feature_subsets(feature_subsets, datasets, best_classifiers, use_test_set = 1)
         dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
         dump(cv_scores_on_feature_subsets, dirs["output_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
-
-    _, auc_table, _, _, _ = make_and_write_performance_tables(performances_on_feature_subsets, cv_scores_on_feature_subsets, dirs["output_reports_dir"])
-
-    get_optimal_nb_features(auc_table, dirs["output_reports_dir"])
+        dump(optimal_thresholds, dirs["output_reports_dir"]+'optimal-thresholds.joblib')
+    
+    cv_auc_table = make_and_write_cv_auc_table(cv_scores_on_feature_subsets, dirs["output_reports_dir"])
+    optimal_nbs_features = get_and_write_optimal_nbs_features(cv_auc_table, dirs["output_reports_dir"])
+    make_and_write_test_set_performance_tables(performances_on_feature_subsets, dirs["output_reports_dir"], optimal_thresholds, optimal_nbs_features)
 
 if __name__ == "__main__":
     main(sys.argv[1])
