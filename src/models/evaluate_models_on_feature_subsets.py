@@ -15,7 +15,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import models, util
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 def build_output_dir_name(params_from_previous_script):
     # Part with the datetime
@@ -74,7 +74,6 @@ def make_performance_tables_opt_threshold(performances_on_feature_subsets, optim
         for nb_features in performances_on_feature_subsets[diag]:
 
             optimal_threshold = optimal_thresholds[diag][nb_features]
-            print("DEBUG", performances_on_feature_subsets[diag][nb_features])
             diag_row_auc = diag_row_auc + [performances_on_feature_subsets[diag][nb_features][optimal_threshold][0]] 
             diag_row_sens = diag_row_sens + [performances_on_feature_subsets[diag][nb_features][optimal_threshold][1]]
             diag_row_spec = diag_row_spec + [performances_on_feature_subsets[diag][nb_features][optimal_threshold][2]]
@@ -88,9 +87,9 @@ def make_performance_tables_opt_threshold(performances_on_feature_subsets, optim
     spec_df = pd.DataFrame(spec_table, columns=["Diagnosis"] + list(performances_on_feature_subsets[diag].keys()))
 
     # Sort diagnoses by performance on max number of features (sort values by last column)
-    auc_df = auc_df.sort_values(by=auc_df.columns[-1])
-    sens_df = sens_df.sort_values(by=sens_df.columns[-1])
-    spec_df = spec_df.sort_values(by=spec_df.columns[-1])
+    auc_df = auc_df.sort_values(by=auc_df.columns[-1], ascending=False)
+    sens_df = sens_df.sort_values(by=sens_df.columns[-1], ascending=False)
+    spec_df = spec_df.sort_values(by=spec_df.columns[-1], ascending=False)
 
     # Transpose so that each column is a diagnosis and each row is a number of features
     auc_df = auc_df.transpose()
@@ -109,64 +108,35 @@ def make_performance_tables_opt_threshold(performances_on_feature_subsets, optim
     spec_df.columns = spec_df.iloc[0]
     spec_df = spec_df.drop(spec_df.index[0])
     spec_df.index.name = "Number of features"
+
+    # Reverse order order of rows so max number of features is at the top
+    auc_df = auc_df.iloc[::-1]
+    sens_df = sens_df.iloc[::-1]
+    spec_df = spec_df.iloc[::-1]
     
     return auc_df, sens_df, spec_df
 
 def make_performance_tables_opt_nb_features(performances_on_feature_subsets, optimal_nbs_features):
     # Create a table for each performance metric (AUC, Sensitivity, Specificity) for each threshold, using the optimal number of features
     # Build list of lists where each list is a row in the table
-    auc_table = []
-    sens_table = []
-    spec_table = []
+    sens_spec_tables = {}
 
     for diag in performances_on_feature_subsets:
+
+        sens_spec_table_diag = []
         
         optimal_nb_features = optimal_nbs_features[diag]
-
-        diag_row_auc = [diag] # Each row in the table will have the diagnosis and then each columns will be the performance for each threshold
-        diag_row_sens = [diag]
-        diag_row_spec = [diag]
         
-        for threshold in performances_on_feature_subsets[diag][optimal_nb_features]:
-            diag_row_auc = diag_row_auc + [performances_on_feature_subsets[diag][optimal_nb_features][threshold][0]] 
-            diag_row_sens = diag_row_sens + [performances_on_feature_subsets[diag][optimal_nb_features][threshold][1]]
-            diag_row_spec = diag_row_spec + [performances_on_feature_subsets[diag][optimal_nb_features][threshold][2]]
-            
-        auc_table = auc_table + [diag_row_auc]
-        sens_table = sens_table + [diag_row_sens]
-        spec_table = spec_table + [diag_row_spec]
+        for threshold in performances_on_feature_subsets[diag][optimal_nb_features]: # Each row in the table will have the threshold, specificity, and sensitivity for that threshold
+            row = [threshold, performances_on_feature_subsets[diag][optimal_nb_features][threshold][1], performances_on_feature_subsets[diag][optimal_nb_features][threshold][2]]
+            sens_spec_table_diag = sens_spec_table_diag + [row]
 
-    auc_df = pd.DataFrame(auc_table, columns=["Diagnosis"] + list(performances_on_feature_subsets[diag][optimal_nb_features].keys()))
-    sens_df = pd.DataFrame(sens_table, columns=["Diagnosis"] + list(performances_on_feature_subsets[diag][optimal_nb_features].keys()))
-    spec_df = pd.DataFrame(spec_table, columns=["Diagnosis"] + list(performances_on_feature_subsets[diag][optimal_nb_features].keys()))
+        sens_spec_tables[diag] = pd.DataFrame(sens_spec_table_diag, columns=["Threshold", "Sensitivity", "Specificity"])
 
-    # Sort diagnoses by performance on max number of features (sort values by last column)
-    auc_df = auc_df.sort_values(by=auc_df.columns[-1])
-    sens_df = sens_df.sort_values(by=sens_df.columns[-1])
-    spec_df = spec_df.sort_values(by=spec_df.columns[-1])
+        # Replace Thresholds with numbers 1, 2, 3, etc. to obscure the actual thresholds
+        sens_spec_tables[diag]["Threshold"] = range(1, len(sens_spec_tables[diag]) + 1)
 
-    # Transpose so that each column is a diagnosis and each row is a number of features
-    auc_df = auc_df.transpose()
-    sens_df = sens_df.transpose()
-    spec_df = spec_df.transpose()
-
-    # Rename columns and index
-    auc_df.columns = auc_df.iloc[0]
-    auc_df = auc_df.drop(auc_df.index[0])
-    auc_df.index.name = "Threshold"
-
-    sens_df.columns = sens_df.iloc[0]
-    sens_df = sens_df.drop(sens_df.index[0])
-    sens_df.index.name = "Threshold"
-
-    spec_df.columns = spec_df.iloc[0]
-    spec_df = spec_df.drop(spec_df.index[0])
-    spec_df.index.name = "Threshold"
-
-    # Replace index with integers starting from 1 (to obscure actual threshold values)
-    auc_df.index = range(1, len(auc_df.index) + 1)
-
-    return auc_df, sens_df, spec_df
+    return sens_spec_tables
 
 def get_and_write_optimal_nbs_features(auc_table, dir):
     optimal_nbs_features = {}
@@ -191,10 +161,11 @@ def make_and_write_test_set_performance_tables(performances_on_feature_subsets, 
     spec_test_set_table_optimal_threshold.to_csv(dir+'spec-on-subsets-test-set-optimal-threshold.csv')
 
     # Make AUC, Sens, Spec tables for all thresholds on optimal number of features
-    [auc_test_set_table_optimal_nb_features, sens_test_set_table_optimal_nb_features, spec_test_set_table_optimal_nb_features] = make_performance_tables_opt_nb_features(performances_on_feature_subsets, optimal_nbs_features)
-    auc_test_set_table_optimal_nb_features.to_csv(dir+'auc-on-subsets-test-set-optimal-nb-features.csv')
-    sens_test_set_table_optimal_nb_features.to_csv(dir+'sens-on-subsets-test-set-optimal-nb-features.csv')
-    spec_test_set_table_optimal_nb_features.to_csv(dir+'spec-on-subsets-test-set-optimal-nb-features.csv')
+    sens_spec_test_set_tables_optimal_nb_features = make_performance_tables_opt_nb_features(performances_on_feature_subsets, optimal_nbs_features)
+    path = dir + "sens-spec-on-subsets-test-set-optimal-nb-features/"
+    util.create_dir_if_not_exists(path)
+    for diag in sens_spec_test_set_tables_optimal_nb_features:
+        sens_spec_test_set_tables_optimal_nb_features[diag].to_csv(path+diag+'.csv')
 
 def main(models_from_file = 1):
     models_from_file = int(models_from_file)
@@ -205,7 +176,7 @@ def main(models_from_file = 1):
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
     best_classifiers = load(dirs["input_models_dir"]+'best-classifiers.joblib')
 
-    if DEBUG_MODE == 1:
+    if DEBUG_MODE == True:
         # In debug mode, only use first diagnosis
         datasets = {list(datasets.keys())[0]: datasets[list(datasets.keys())[0]]}
         feature_subsets = {list(feature_subsets.keys())[0]: feature_subsets[list(feature_subsets.keys())[0]]}
