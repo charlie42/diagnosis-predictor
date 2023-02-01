@@ -153,12 +153,14 @@ def get_performances_on_feature_subsets_per_output(diag, feature_subsets, classi
         X_test, y_test = datasets[diag]["X_val"], datasets[diag]["y_val"]
 
     metrics_on_subsets = {}
+    optimal_thresholds = {}
     
     for nb_features in feature_subsets[diag].keys():
         # Create new pipeline with the params of the best classifier (need to re-train the imputer on less features)
         top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
         new_classifier = classifiers_on_feature_subsets[diag][nb_features]
         thresholds = thresholds_on_feature_subsets[diag][nb_features][0]
+        optimal_thresholds[nb_features] = thresholds_on_feature_subsets[diag][nb_features][1]
         metrics_on_subsets[nb_features] = {}
         for threshold in thresholds:
             metrics, metric_names = get_metrics(new_classifier, threshold, X_test[top_n_features], y_test)
@@ -167,9 +169,8 @@ def get_performances_on_feature_subsets_per_output(diag, feature_subsets, classi
                 metrics[metric_names.index("Recall (Sensitivity)")],
                 metrics[metric_names.index("TNR (Specificity)")]]
             metrics_on_subsets[nb_features][threshold] = relevant_metrics
-        optimal_threshold = thresholds_on_feature_subsets[diag][nb_features][1]
-
-    return metrics_on_subsets, optimal_threshold
+        
+    return metrics_on_subsets, optimal_thresholds
 
 def get_performances_on_feature_subsets(feature_subsets, datasets, best_classifiers, use_test_set):
     cv_scores_on_feature_subsets = get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_classifiers)
