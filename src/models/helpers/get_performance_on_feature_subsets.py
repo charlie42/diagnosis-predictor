@@ -95,7 +95,7 @@ def get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_classifiers
             X_train, y_train = datasets[diag]["X_train"], datasets[diag]["y_train"]
             top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
             new_classifier = make_pipeline(SimpleImputer(missing_values=np.nan, strategy='median'), StandardScaler(), clone(best_classifiers[diag][2]))
-            cv_scores = cross_val_score(new_classifier, X_train[top_n_features], y_train, cv = StratifiedKFold(n_splits=10), scoring='roc_auc')
+            cv_scores = cross_val_score(new_classifier, X_train[top_n_features], y_train, cv = StratifiedKFold(n_splits=8), scoring='roc_auc')
             cv_scores_on_feature_subsets[diag].append(cv_scores.mean())
     return cv_scores_on_feature_subsets
 

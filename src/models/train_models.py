@@ -140,7 +140,7 @@ def get_base_models_and_param_grids():
     return base_models_and_param_grids
 
 def get_best_classifier(base_model, grid, X_train, y_train):
-    cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 10)
+    cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 8)
     rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
     
     print("Fitting", base_model, "...")
