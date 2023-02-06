@@ -135,6 +135,10 @@ def make_performance_tables_opt_nb_features(performances_on_feature_subsets, opt
 
         # Replace Thresholds with numbers 1, 2, 3, etc. to obscure the actual thresholds
         sens_spec_tables[diag]["Threshold"] = range(1, len(sens_spec_tables[diag]) + 1)
+        sens_spec_tables[diag].set_index("Threshold", inplace=True)
+
+        # Only keep every 10th row
+        sens_spec_tables[diag] = sens_spec_tables[diag][::10]
 
     return sens_spec_tables
 
