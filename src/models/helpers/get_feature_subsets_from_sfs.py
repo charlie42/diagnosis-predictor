@@ -8,7 +8,7 @@ def get_sfs_object(diag, best_classifiers, number_of_features_to_check, X_train,
     print("Fitting SFS...")
     diag_classifier = best_classifiers[diag]
 
-    cv = StratifiedKFold(n_splits=2 if DEBUG_MODE else 10)
+    cv = StratifiedKFold(n_splits=2 if DEBUG_MODE else 8)
     sfs = SequentialFeatureSelector(diag_classifier, 
         k_features=number_of_features_to_check,
         forward=True, 
