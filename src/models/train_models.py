@@ -238,7 +238,7 @@ def dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_cla
     dump(scores_of_best_classifiers, dirs["reports_dir"]+'scores-of-best-classifiers.joblib', compress=1)
     dump(sds_of_scores_of_best_classifiers, dirs["reports_dir"]+'sds-of-scores-of-best-classifiers.joblib', compress=1)
 
-def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_file = 1, use_optimal_threshold = 1):
+def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_file = 1):
     models_from_file = int(models_from_file)
     use_other_diags_as_input = int(use_other_diags_as_input)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
@@ -281,7 +281,7 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
         dump(datasets, dirs["output_data_dir"]+'datasets.joblib', compress=1)
 
         # Find best models for each diagnosis
-        best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers = find_best_classifiers_and_scores(datasets, diag_cols, performance_margin, use_optimal_threshold)
+        best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers = find_best_classifiers_and_scores(datasets, diag_cols, performance_margin)
         
         # Save best classifiers and thresholds 
         dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers)
