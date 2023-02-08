@@ -157,6 +157,7 @@ def get_performances_on_feature_subsets_per_output(diag, feature_subsets, classi
     
     for nb_features in feature_subsets[diag].keys():
         # Create new pipeline with the params of the best classifier (need to re-train the imputer on less features)
+        print("Getting metrics on feature subsets for " + diag + " with " + str(nb_features) + " features")
         top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
         new_classifier = classifiers_on_feature_subsets[diag][nb_features]
         thresholds = thresholds_on_feature_subsets[diag][nb_features][0]

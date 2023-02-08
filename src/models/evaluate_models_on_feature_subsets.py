@@ -113,6 +113,11 @@ def make_performance_tables_opt_threshold(performances_on_feature_subsets, optim
     auc_df = auc_df.iloc[::-1]
     sens_df = sens_df.iloc[::-1]
     spec_df = spec_df.iloc[::-1]
+
+    # Remove Diag. from diagnosis names
+    auc_df.columns = [col.replace("Diag. ", "") for col in auc_df.columns]
+    sens_df.columns = [col.replace("Diag. ", "") for col in sens_df.columns]
+    spec_df.columns = [col.replace("Diag. ", "") for col in spec_df.columns]
     
     return auc_df, sens_df, spec_df
 
@@ -137,8 +142,10 @@ def make_performance_tables_opt_nb_features(performances_on_feature_subsets, opt
         sens_spec_tables[diag]["Threshold"] = range(1, len(sens_spec_tables[diag]) + 1)
         sens_spec_tables[diag].set_index("Threshold", inplace=True)
 
-        # Only keep every 10th row
-        sens_spec_tables[diag] = sens_spec_tables[diag][::10]
+        # If more than 25 thresholds, evenly take ~25 thresholds
+        if len(sens_spec_tables[diag]) > 25:
+            step = int(len(sens_spec_tables[diag])/25) 
+            sens_spec_tables[diag] = sens_spec_tables[diag][::step]
 
     return sens_spec_tables
 
@@ -170,6 +177,18 @@ def make_and_write_test_set_performance_tables(performances_on_feature_subsets, 
     util.create_dir_if_not_exists(path)
     for diag in sens_spec_test_set_tables_optimal_nb_features:
         sens_spec_test_set_tables_optimal_nb_features[diag].to_csv(path+diag+'.csv')
+
+    # Make a table with AUC, Sens, Spec for optimal threhsolds on optimal number of features for each diagnosis
+    auc_sens_spec_test_set_opt_thres_opt_nb_features = []
+    for diag in auc_test_set_table_optimal_threshold.columns:
+        auc_test_set_table_optimal_threshold = auc_test_set_table_optimal_threshold[auc_test_set_table_optimal_threshold["Number of features"] == optimal_nbs_features[diag]].iloc[0][diag]
+        sens_test_set_table_optimal_threshold = sens_test_set_table_optimal_threshold[sens_test_set_table_optimal_threshold["Number of features"] == optimal_nbs_features[diag]].iloc[0][diag]
+        spec_test_set_table_optimal_threshold = spec_test_set_table_optimal_threshold[spec_test_set_table_optimal_threshold["Number of features"] == optimal_nbs_features[diag]].iloc[0][diag]
+        auc_sens_spec_test_set_opt_thres_opt_nb_features.append([diag, optimal_nbs_features[diag], auc_test_set_table_optimal_threshold, sens_test_set_table_optimal_threshold, spec_test_set_table_optimal_threshold])
+    
+    auc_sens_spec_test_set_opt_thres_opt_nb_features = pd.DataFrame(auc_sens_spec_test_set_opt_thres_opt_nb_features, columns=["Diagnosis", "Number of features", "AUC", "Sensitivity", "Specificity"])
+    auc_sens_spec_test_set_opt_thres_opt_nb_features.to_csv(dir+'auc-sens-spec-on-subsets-test-set-optimal-threshold-optimal-nb-features.csv')
+    
 
 def main(models_from_file = 1):
     models_from_file = int(models_from_file)

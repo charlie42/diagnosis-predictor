@@ -12,7 +12,7 @@ def calculate_thresholds(classifier, X_train_train, y_train_train, X_val, y_val)
     y_val_pred_prob = classifier.predict_proba(X_val)
 
     # calculate roc curve
-    fpr, tpr, thresholds = roc_curve(y_val, y_val_pred_prob[:,1])
+    fpr, tpr, thresholds = roc_curve(y_val, y_val_pred_prob[:,1], drop_intermediate=False)
 
     # calculate the g-mean for each threshold
     gmeans = np.sqrt(tpr * (1-fpr))
