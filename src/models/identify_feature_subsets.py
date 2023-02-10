@@ -6,7 +6,7 @@ from IPython.core import ultratb
 sys.excepthook = ultratb.FormattedTB(color_scheme='Neutral', call_pdb=False)
 
 from joblib import load, dump
-import json
+import pandas as pd
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -61,9 +61,20 @@ def get_feature_subsets(best_classifiers, datasets, number_of_features_to_check,
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
     return feature_subsets
 
+def append_feature_names_to_feature_subsets(feature_subsets):
+    names_df = pd.read_csv("references/item-names.csv", index_col=1, encoding = "ISO-8859-1", names=["Name", "ID"])
+    feature_subsets_with_names = {}
+    for diag in feature_subsets.keys():
+        feature_subsets_with_names[diag] = {}
+        for subset in feature_subsets[diag].keys():
+            # Append item name to each item ID
+            feature_subsets_with_names[diag][subset] = [x + f': {names_df.loc[x]["Name"]}' for x in feature_subsets[diag][subset]]
+    return feature_subsets_with_names
+
 def write_feature_subsets_to_text_file(feature_subsets, output_reports_dir):
     path = output_reports_dir+"feature-subsets/"
-    util.write_two_lvl_dict_to_file(feature_subsets, path)
+    feature_subsets_with_names = append_feature_names_to_feature_subsets(feature_subsets)
+    util.write_two_lvl_dict_to_file(feature_subsets_with_names, path)
     
 def main(number_of_features_to_check = 126, importances_from_file = 0):
     number_of_features_to_check = int(number_of_features_to_check)

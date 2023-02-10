@@ -180,11 +180,12 @@ def make_and_write_test_set_performance_tables(performances_on_feature_subsets, 
 
     # Make a table with AUC, Sens, Spec for optimal threhsolds on optimal number of features for each diagnosis
     auc_sens_spec_test_set_opt_thres_opt_nb_features = []
-    for diag in auc_test_set_table_optimal_threshold.columns:
-        auc_test_set_table_optimal_threshold = auc_test_set_table_optimal_threshold[auc_test_set_table_optimal_threshold["Number of features"] == optimal_nbs_features[diag]].iloc[0][diag]
-        sens_test_set_table_optimal_threshold = sens_test_set_table_optimal_threshold[sens_test_set_table_optimal_threshold["Number of features"] == optimal_nbs_features[diag]].iloc[0][diag]
-        spec_test_set_table_optimal_threshold = spec_test_set_table_optimal_threshold[spec_test_set_table_optimal_threshold["Number of features"] == optimal_nbs_features[diag]].iloc[0][diag]
-        auc_sens_spec_test_set_opt_thres_opt_nb_features.append([diag, optimal_nbs_features[diag], auc_test_set_table_optimal_threshold, sens_test_set_table_optimal_threshold, spec_test_set_table_optimal_threshold])
+    diags = auc_test_set_table_optimal_threshold.columns
+    for diag in diags:
+        auc_test_set_optimal_threshold = auc_test_set_table_optimal_threshold[diag].iloc[optimal_nbs_features[diag]]
+        sens_test_set_optimal_threshold = sens_test_set_table_optimal_threshold[diag].iloc[optimal_nbs_features[diag]]
+        spec_test_set_optimal_threshold = spec_test_set_table_optimal_threshold[diag].iloc[optimal_nbs_features[diag]]
+        auc_sens_spec_test_set_opt_thres_opt_nb_features.append([diag, optimal_nbs_features[diag], auc_test_set_optimal_threshold, sens_test_set_optimal_threshold, spec_test_set_optimal_threshold])
     
     auc_sens_spec_test_set_opt_thres_opt_nb_features = pd.DataFrame(auc_sens_spec_test_set_opt_thres_opt_nb_features, columns=["Diagnosis", "Number of features", "AUC", "Sensitivity", "Specificity"])
     auc_sens_spec_test_set_opt_thres_opt_nb_features.to_csv(dir+'auc-sens-spec-on-subsets-test-set-optimal-threshold-optimal-nb-features.csv')
