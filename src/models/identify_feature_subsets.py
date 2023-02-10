@@ -62,13 +62,18 @@ def get_feature_subsets(best_classifiers, datasets, number_of_features_to_check,
     return feature_subsets
 
 def append_feature_names_to_feature_subsets(feature_subsets):
-    names_df = pd.read_csv("references/item-names.csv", index_col=1, encoding = "ISO-8859-1", names=["Name", "ID"])
+    names_df = pd.read_csv("references/item-names.csv", index_col=1, encoding = "ISO-8859-1", names=["Name", "ID"], sep=";")
+    print(names_df)
     feature_subsets_with_names = {}
     for diag in feature_subsets.keys():
         feature_subsets_with_names[diag] = {}
         for subset in feature_subsets[diag].keys():
-            # Append item name to each item ID
-            feature_subsets_with_names[diag][subset] = [x + f': {names_df.loc[x]["Name"]}' for x in feature_subsets[diag][subset]]
+            # Append item name to each item ID 
+            #   Remove name from assessment from feauture name, only keep item name (already contains assessment name)
+            #   Don't append name to basic demographics, self explanatory item IDs
+            feature_subsets_with_names[diag][subset] = [x + f': {names_df.loc[x.split(",")[1]]["Name"]}' 
+                for x in feature_subsets[diag][subset] 
+                if not x.startswith("Basic_Demos")]
     return feature_subsets_with_names
 
 def write_feature_subsets_to_text_file(feature_subsets, output_reports_dir):
