@@ -73,7 +73,9 @@ def append_feature_names_to_feature_subsets(feature_subsets):
             #   Don't append name to basic demographics, self explanatory item IDs
             feature_subsets_with_names[diag][subset] = [x + f': {names_df.loc[x.split(",")[1]]["Name"]}' 
                 for x in feature_subsets[diag][subset] 
-                if not x.startswith("Basic_Demos")]
+                if not x.startswith("Basic_Demos")
+                and not x.endswith("WAS_MISSING")
+                and not x.endswith("financialsupport")]
     return feature_subsets_with_names
 
 def write_feature_subsets_to_text_file(feature_subsets, output_reports_dir):

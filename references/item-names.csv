@@ -1,20 +1,20 @@
-Did a parent or other adult in the household often or very often… Swear at you, insult you, put you down, or humiliate you? or Act in a way that made you afraid that you might be physically hur;ACE_01
-Did a parent or other adult in the household often or very often… Push, grab, slap, or throw something at you? or Ever hit you so hard that you had marks or were injure;ACE_02
-Did an adult or person at least 5 years older than you ever… Touch or fondle you or have you touch their body in a sexual way? or Attempt or actually have oral, anal, or vaginal intercourse with yo;ACE_03
-Did you often or very often feel that … No one in your family loved you or thought you were important or special? or Your family didn’t look out for each other, feel close to each other, or support each ot;ACE_04
-Did you often or very often feel that … You didn’t have enough to eat, had to wear dirty clothes, and had no one to protect you? or Your parents were too drunk or high to take care of you or take you to the doctor if you needed;ACE_05
+Did a parent or other adult in the household often or very often��� Swear at you, insult you, put you down, or humiliate you? or Act in a way that made you afraid that you might be physical;ACE_01
+Did a parent or other adult in the household often or very often��� Push, grab, slap, or throw something at you? or Ever hit you so hard that you had marks or were ;ACE_02
+Did an adult or person at least 5 years older than you ever��� Touch or fondle you or have you touch their body in a sexual way? or Attempt or actually have oral, anal, or vaginal intercourse w;ACE_03
+Did you often or very often feel that ��� No one in your family loved you or thought you were important or special? or Your family didn���t look out for each other, feel close to each other, or sup;ACE_04
+Did you often or very often feel that ��� You didn���t have enough to eat, had to wear dirty clothes, and had no one to protect you? or Your parents were too drunk or high to take care of you or take you to the doctor i;ACE_05
 Were your parents ever separated or divorced?;ACE_06
 Was your mother or stepmother: Often or very often pushed, grabbed, slapped, or had something thrown at her? or Sometimes, often, or very often kicked, bitten, hit with a fist, or hit with something hard? or Ever repeatedly hit over at least a few minutes or threatened with a gun or knife?;ACE_07
 Did you live with anyone who was a problem drinker or alcoholic, or who used street drugs?;ACE_08
 Was a household member depressed or mentally ill, or did a household member attempt suicide?;ACE_09
 Did a household member go to prison?;ACE_10
 Total ACE Score;ACE_Score
-Your child’s parents or guardians were separated or divorc;ACE_01
+Your child���s parents or guardians were separated or ;ACE_01
 Your child lived with a household member who served time in jail or prison;ACE_02
 Your child lived with a household member who was depressed, mentally ill or attempted suicide;ACE_03
 Your child saw or heard household members hurt or threaten to hurt each other;ACE_04
 A household member swore at, insulted, humiliated, or put down your child in a way that scared your child OR a household member acted in a way that made your child afraid that s/he might be physically hurt?;ACE_05
-Someone touched your child’s private parts or asked your child to touch their private parts in a sexual w;ACE_06
+Someone touched your child���s private parts or asked your child to touch their private parts in a se;ACE_06
 More than once, your child went without food, clothing, a place to live, or had no one to protect her/him;ACE_07
 Someone pushed, grabbed, slapped or threw something at your child OR your child was hit so hard that your child was injured or had marks;ACE_08
 Your child lived with someone who had a problem with drinking or using drugs;ACE_09
@@ -27,6 +27,7 @@ Your child had a serious medical procedure or life threatening illness;ACE_15
 Your child often saw or heard violence in the neighborhood or in her/his school neighborhood;ACE_16
 Your child was often treated badly because of race, sexual orientation, place of birth, disability or religion;ACE_17
 Total ACE Score;ACE_Score
+1. You have a friendly talk with your child;APQ_P_01
 2. Your ket your child know when he/she is doing a good job with something;APQ_P_02
 3. You threaten to punish your child and then do not actuallypunish him/her;APQ_P_03
 4. You volunteer to help with special activities that your child is involved with (such as sports, boy/girl scouts, church youth groups);APQ_P_04
@@ -75,6 +76,7 @@ Inconsistent Discipline Score;APQ_P_ID
 Corporal Punishment Score;APQ_P_CP
 APQ Total Score;APQ_P_Total
 Other Discipline Practices Score (Not factored into total score but provides item level information);APQ_P_OPD
+1. You have a friendly talk with your mom;APQ_SR_01
 1A. How about your dad?;APQ_SR_01A
 2. Your parents tell you that you are doing a good job;APQ_SR_02
 3. Your parents threaten to punish you and then not do it;APQ_SR_03
@@ -133,6 +135,7 @@ Inconsistent Discipline Score;APQ_SR_ID
 Corporal Punishment Score;APQ_SR_CP
 APQ Total Score;APQ_SR_OPD
 Other Discipline Practices Score (Not factored into total score but provides item level information);APQ_SR_Total
+Is easily annoyed by others;ARI_P_01
 Often loses his/her temper;ARI_P_02
 Stays angry for a long time;ARI_P_03
 Is angry most of the time;ARI_P_04
@@ -140,6 +143,7 @@ Gets angry frequently;ARI_P_05
 Loses temper easily;ARI_P_06
 Overall, irritability causes him/her problems;ARI_P_07
 Total Score;ARI_P_Total_Score
+I am easily annoyed by others;ARI_S_01
 I often lose my temper;ARI_S_02
 I stay angry for a long time;ARI_S_03
 I am angry most of the time;ARI_S_04
@@ -147,6 +151,7 @@ I get angry frequently;ARI_S_05
 I lose my temper easily;ARI_S_06
 Overall, irritability causes me problems;ARI_S_07
 Total Score;ARI_S_Total_Score
+1. I am too forgetful;ASR_01
 2. I make good  use of my opportunities;ASR_02
 3. I argue a lot;ASR_03
 4. I work up to my ability;ASR_04
@@ -299,24 +304,25 @@ ASR Intrusive T-Score;ASR_Intrusive_T
 ASR C Score;ASR_C
 ASR Total Score;ASR_Total
 ASR Total Score T-Score;ASR_Total_T
-is regarded as an ‘eccentric professor’ by the other chil;ASSQ_02
+is old-fashioned or precocious;ASSQ_01
+is regarded as an ���eccentric professor��� by th;ASSQ_02
 lives somewhat in a world of his/her own with restricted idiosyncratic intellectual interests;ASSQ_03
 accumulates facts on certain subjects (good rote memory) but does not really understand the meaning;ASSQ_04
 "has a literal understanding of ambiguous and metaphoric language (i.e. takes things literally; troubles understanding expressions or metaphors)";ASSQ_05
-has a deviant style of communication with a formal, fussy, ‘old-fashioned’ or ‘robotlike’ language (i.e. talks differently than other children, in a formal or stil;ASSQ_06
+has a deviant style of communication with a formal, fussy, ���old-fashioned��� or ���robotlike��� language (i.e. talks differently than other child;ASSQ_06
 invents idiosyncratic words and expressions (i.e. makes up his or her own words, expressions or names for things);ASSQ_07
 has a different voice or speech;ASSQ_08
 "expresses sounds involuntarily; clears throat, grunts, smacks, cries or screams";ASSQ_09
 is surprisingly good at some things and surprisingly poor at others;ASSQ_10
 uses language freely but fails to make adjustments to fit social contexts or the needs of different listeners;ASSQ_11
 lacks empathy (i.e. tends to see things only from his/her own perspective, and has troubles seeing things from other's perspective);ASSQ_12
-makes naïve and embarrassing remark;ASSQ_13
+makes na��ve and embarrassing re;ASSQ_13
 has a deviant style of gaze (e.g. may range from not looking people in the eye, to the other extreme of staring directly at people to the point it makes them uncomfortable);ASSQ_14
 wishes to be sociable but fails to make relationships with peers;ASSQ_15
 can be with other children but only on his/her terms;ASSQ_16
 lacks best friend;ASSQ_17
 lacks common sense;ASSQ_18
-"is poor at games; no idea of cooperating in a team, scores ‘own goal";ASSQ_19
+"is poor at games; no idea of cooperating in a team, scores ���ow";ASSQ_19
 has clumsy, ill coordinated, ungainly, awkward movements or gestures;ASSQ_20
 has involuntary face or body movements (i.e. any tics?);ASSQ_21
 has difficulties in completing simple daily activities because of compulsory repetition of certain actions or thoughts (i.e. any habits that s/he just has to do?);ASSQ_22
@@ -326,6 +332,7 @@ is bullied by other children;ASSQ_25
 has markedly unusual facial expression;ASSQ_26
 has markedly unusual posture;ASSQ_27
 ASSQ Score;ASSQ_Total
+1. How often do you have a drink containing alcohol?;AUDIT_01
 2. How many drinks containing alcohol do you have on a typical day when you are drinking?;AUDIT_02
 2a. Have you ever had at least three drinks on one occasion?;AUDIT_02_a
 2b. Have you ever had at least two drinks on one occasion?;AUDIT_02_b
@@ -339,16 +346,19 @@ IF NEVER: 4a. Have you ever found that you were not able to stop drinking once y
 9. Have you or someone else been injured as a result of your drinking?;AUDIT_09
 10. Has a relative or friend, or a doctor or other health worker been concerned about your drinking or suggested you cut down?;AUDIT_10
 Total Score;AUDIT_Total_Score
+Father's level of education;Father_Edu
 Mother's level of education;Mother_Edu
 Father's level of occupation;Father_Occupation
 Mother's level of occupation;Mother_Occupation
 Education total score;Total_Edu
 Occupation total score;Occupation_Total
 Barratt Total Score;Barratt_Total
+Participant ID;EID
 Start Date;START_DATE
 Participant ID;Patient_ID
 Sex;Sex
 Age;Age
+Sex;Sex
 Age;Age
 Body Frame;Frame
 Activity Level;Activity_Level
@@ -368,10 +378,11 @@ Bone Mineral Content;BMC
 Lean Soft Tissue;LST
 Basal Metabolic Rate;BMR
 Daily Energy Expenditure;DEE
+1. I blurt out the first thing that I think of.;C3SR_01
 2. I struggle to complete hard tasks;C3SR_02
 3. It is hard for me to pay attention to details.;C3SR_03
 4. It is hard for me to sit still;C3SR_04
-5. I can’t pay attention for lon;C3SR_05
+5. I can���t pay attention f;C3SR_05
 6. I am good at some things;C3SR_06
 7. I make mistakes.;C3SR_07
 8. I do things to hurt people;C3SR_08
@@ -401,7 +412,7 @@ Daily Energy Expenditure;DEE
 32. I destroy stuff that belongs to other people;C3SR_32
 33. I have trouble with reading.;C3SR_33
 34. My parents are too critical of me.;C3SR_34
-35. I can’t do things righ;C3SR_35
+35. I can���t do thing;C3SR_35
 36. I learn more slowly than other kids my age.;C3SR_36
 37. My parents are too strict with me.;C3SR_37
 38. I have trouble with math.;C3SR_38
@@ -418,29 +429,30 @@ Learning Problems Raw Score;C3SR_LP
 Learning Problems T-Score;C3SR_LP_T
 Negative Impression Raw Score;C3SR_NI
 Positive Impression Raw Score;C3SR_PI
+1. I interrupt others when talking.;CAARS_01
 2. I am always on the go as if driven by a motor.;CAARS_02
-3. I’m disorganize;CAARS_03
-4. It’s hard for me to stay in one place very lon;CAARS_04
-5. It’s hard for me to keep track of several things at onc;CAARS_05
-6. I’m bored easil;CAARS_06
+3. I���m disor;CAARS_03
+4. It���s hard for me to stay in one place ve;CAARS_04
+5. It���s hard for me to keep track of several things ;CAARS_05
+6. I���m bored;CAARS_06
 7. I have a short fuse/hot temper.;CAARS_07
 8. I still throw tantrums.;CAARS_08
 9. I avoid new challenges because I lack faith in my abilities.;CAARS_09
 10. I seek out fast paced, exciting activities.;CAARS_10
 11. I feel restless inside even if I am sitting still.;CAARS_11
-12. Things I hear or see distract me from what I’m doin;CAARS_12
+12. Things I hear or see distract me from what I���;CAARS_12
 13. Many things set me off easily.;CAARS_13
 14. I am an underachiever.;CAARS_14
 15. I get down on myself.;CAARS_15
-16. I act okay on the outside, but inside I’m unsure of mysel;CAARS_16
-17. I can’t get things done unless there’s an absolute deadl;CAARS_17
+16. I act okay on the outside, but inside I���m unsure of;CAARS_16
+17. I can���t get things done unless there���s an ab;CAARS_17
 18. I have trouble getting started on a task.;CAARS_18
-19. I intrude on others’ activitie;CAARS_19
+19. I intrude on others��� act;CAARS_19
 20. My moods are unpredictable.;CAARS_20
-21. I’m absent-minded in daily activitie;CAARS_21
-"22. Sometimes my attention narrows so much that I’m oblivious to everything else; other times it’s so broad that everything distracts";CAARS_22
+21. I���m absent-minded in daily act;CAARS_21
+"22. Sometimes my attention narrows so much that I���m oblivious to everything else; other times it���s so broad that everythi";CAARS_22
 23. I tend to squirm or fidget.;CAARS_23
-24. I can’t keep my mind on something unless it’s really interest;CAARS_24
+24. I can���t keep my mind on something unless it���s rea;CAARS_24
 25. I wish I had greater confidence in my abilities.;CAARS_25
 26. My past failures make it hard for me to believe in myself.;CAARS_26
 Inattention/Memory Problems Raw Score;CAARS_IM_Raw
@@ -453,6 +465,7 @@ Problems with Self-Concept Raw Score;CAARS_SC_Raw
 Problems with Self-Concept T-Score;CAARS_SC_T
 ADHD Index Raw Score;CAARS_ADHD_Raw
 ADHD Index T-Score;CAARS_ADHD_T
+1. Acts too young for his/her age;CBCL_01
 2. Drinks alcohol without parents' approval;CBCL_02
 3. Argues a lot;CBCL_03
 4. Fails to finish things he/she starts;CBCL_04
@@ -598,6 +611,7 @@ Externalizing T Score;CBCL_Ext_T
 C Score Raw Score;CBCL_C
 Total Raw Score;CBCL_Total
 Total T Score;CBCL_Total_T
+"1. Aches or pains (without medical cause; do not include stomach or headaches)";CBCL_Pre_01
 2. Acts too young for age;CBCL_Pre_02
 3. Afraid to try new things;CBCL_Pre_03
 4. Avoids looking others in the eye;CBCL_Pre_04
@@ -728,6 +742,7 @@ Pervasive Development Problems T-Scre;CBCL_Pre_DSM_PDP_T
 Other Problems Raw Score;CBCL_Pre_OP
 Total Raw Score;CBCL_Pre_Total
 Total T-Score;CBCL_Pre_Total_T
+1. When you had problems, you thought about what you could do before you did something. ;CCSC_01
 2. You told yourself that you could handle this problem. ;CCSC_02
 3. You daydreamed that everything was okay. ;CCSC_03
 4. You asked your parent for help in figuring out what to do. ;CCSC_04
@@ -804,6 +819,7 @@ Support Sought from Siblings Score;CCSC_SUPSIB
 CELF-5 Total Score;CELF_Total
 CELF-5 Criterion Score;CELF_CriterionScore
 Meets criterion score?;CELF_ExceedCutoff
+Was CELF completed?;CELF_Complete
 If incomplete, reason:;CELF_Inc_Reason
 Was CELF administration valid?;CELF_Valid
 If invalid, reason:;CELF_Invalid_Reason
@@ -844,6 +860,7 @@ Language Content Index Standard Score;CELF_LCI_Stnd
 Language Content Index Percentile Rank;CELF_LCI_P
 Language Structure Index Standard Score;CELF_LSI_Stnd
 Language Structure Index Percentile Rank;CELF_LSI_P
+Was CELF completed?;CELF_Complete
 If incomplete, reason:;CELF_Inc_Reason
 Was CELF administration valid?;CELF_Valid
 If invalid, reason:;CELF_Invalid_Reason
@@ -884,6 +901,7 @@ Language Content Index Standard Score;CELF_LCI_Stnd
 Language Content Index Percentile Rank;CELF_LCI_P
 Language Memory Index Standard Score;CELF_LMI_Stnd
 Language Memory Index Percentile Rank;CELF_LMI_P
+Was CELF-5 Metalinguistics completed?;CELF5M_Complete
 If no, reason:;CELF5M_Incomplete_Reason
 Was CELF-5 Metalinguistics administration valid?;CELF5M_Valid
 If no, then possibly due to language background;CELF5M_Valid_Possible
@@ -908,11 +926,13 @@ Meta-Pragmatics index percentile rank;CLEF5M_MPI_Rank
 Meta-Semantics index sum of scaled scores;CLEF5M_MSI_Sum
 Meta-Semantics index standard score;CLEF5M_MSI_Stnd
 Meta-Semantics index percentile rank;CLEF5M_MSI_Rank
+child shows interest and curiosity in learning new things.;CFS_01
 Child stays calm and in control when faced with a chllenge ;CFS_02
 Child finishes task and follows through with plans ;CFS_03
 Child cares about doing well at school.;CFS_04
 Child completes all required homework ;CFS_05
 Children's Global Assessment Scale Score;CGAS_Score
+In general, how much of a problem do you think your child has with getting into trouble?;CIS_P_01
 In general, how much of a problem do you think your child has with getting along with his/her mother?;CIS_P_02
 In general, how much of a problem do you think your child has with getting along with his/her father?;CIS_P_03
 In general, how much of a problem do you think your child has with feeling unhappy or sad?;CIS_P_04
@@ -926,6 +946,7 @@ How much of a problem would you say your child has getting involved in activitie
 How much of a problem would you say your child has with his/her school work (or doing his/her job)?;CIS_P_12
 How much of a problem would you say your child has with his/her behavior at home?;CIS_P_13
 CIS_P Total Score;CIS_P_Total
+In general, how much of a problem do you think you have with getting into trouble?;CIS_SR_01
 In general, how much of a problem do you think you have with getting along with your mother figure?;CIS_SR_02
 In general, how much of a problem do you think you have with getting along with your father figure?;CIS_SR_03
 In general, how much of a problem do you think you have with feeling unhappy or sad?;CIS_SR_04
@@ -939,6 +960,7 @@ How much of a problem would you say you have getting involved in activities like
 How much of a problem would you say you have with your school work (or doing your job)?;CIS_SR_12
 How much of a problem would you say you have with your behavior at home?;CIS_SR_13
 CIS_SR Total Score;CIS_SR_Total
+Plate 01 Response;CV_Plate_01
 Plate 01 Result;CV_Plate_01_R
 Plate 02 Response;CV_Plate_02
 Plate 02 Result;CV_Plate_02_R
@@ -967,6 +989,7 @@ Plate 13 Result;CV_Plate_13_R
 Plate 14 Response;CV_Plate_14
 Plate 14 Result;CV_Plate_14_R
 Color Vision Score;CV_Score
+Was the participant given a diagnosis?;NoDX
 Category;DX_01_Cat
 Subcategory (If applicable);DX_01_Sub
 Diagnosis;DX_01
@@ -978,6 +1001,7 @@ Rule out (diagnosis needs to be confirmed or ruled out with further evaluation);
 In remission;DX_01_Rem
 In partial remission;DX_01_PRem
 Requires confirmation;DX_01_RC
+1. I never see my parents arguing or disagreeing;CPIC_01
 2. When my parents have an argument they usually work it out;CPIC_02
 3. My parents often get into arguments about things I do at school;CPIC_03
 4. When my parents argue it's because one of them just had a bad day;CPIC_04
@@ -1071,6 +1095,7 @@ Actual lethality/medical damage of initial/first attempt;CSSRS_actuallethality_i
 Potential lethality of most recent attempt;CSSRS_potentiallethal_recent
 Potential lethality of most lethal attempt;CSSRS_potentiallethal_lethal
 Potential lethality of initial/first attempt;CSSRS_potentiallethal_initial
+CTOPP Complete?;complete
 Reason Incomplete ;incomplete_reason
 Elision raw score;EL_raw
 Elision percentile score;EL_percentile
@@ -1100,6 +1125,7 @@ Rapid Symbolic Naming (RD+RL) sum score;RSN_sum
 Rapid Symbolic Naming (RD+RL) percentile score;RSN_percentile
 Rapid Symbolic Naming (RD+RL) composite score;RSN_composite
 Rapid Symbolic Naming (RD+RL) descriptive rating;RSN_desc
+Visit ID;Visit_Number
 Hours of sleep;hours_sleep
 Did the participant take any medications on day of visit?;medications
 Medication Type (1);med_type_01
@@ -1142,6 +1168,7 @@ Time (1);drugs_time_01
 What kind? (2);drugs_02
 Amount (2);drugs_amt_02
 Time (2);drugs_time_02
+PatientCode;EID
 UserType;KSADS_002
 Major Depressive Disorder Present;KSADS_003
 Major Depressive Disorder, Current, in Partial Remission (F32.4);KSADS_004
@@ -1197,15 +1224,15 @@ Bipolar I Disorder, current episode depressed, F31.3x;KSADS_053
 Bipolar I Disorder, currently hypomanic  F31.0;KSADS_054
 Bipolar I Disorder, most recent past episode manic (F31.1x);KSADS_055
 Bipolar I Disorder, most recent past episode depressed (F31.1.3x);KSADS_056
-Bipolar II Disorder, currently hypomanic  F31.8;KSADS_057
+Bipolar II Disorder, currently hypomanic ��F;KSADS_057
 Bipolar II Disorder, currently depressed F31.81;KSADS_058
-Bipolar II Disorder, most recent past hypomanic  F31.8;KSADS_059
-Unspecified Bipolar and Related Disorder, current  (F31.9;KSADS_060
+Bipolar II Disorder, most recent past hypomanic ��F;KSADS_059
+Unspecified Bipolar and Related Disorder, current ��(F;KSADS_060
 Unspecified Bipolar and Related Disorder, PAST (F31.9);KSADS_061
 Elevated Mood, Present;KSADS_062
 Elevated Mood, Past;KSADS_063
 Explosive Irritability, Present;KSADS_064
-ExplosiveIrritability, PresentNext �;KSADS_065
+ExplosiveIrritability, PresentNext �;KSADS_065
 Explosive Irritability, Past;KSADS_066
 Decreased Need for Sleep, Present;KSADS_067
 Decreased Need for Sleep, Past;KSADS_068
@@ -1226,7 +1253,7 @@ Racing Thoughts, Past;KSADS_082
 Flight of Ideas, Present;KSADS_083
 Flight of Ideas, Past;KSADS_084
 Increased Goal Directed Activity, Present;KSADS_085
-Increased Goal Directed Activity, Past �;KSADS_086
+Increased Goal Directed Activity, Past �;KSADS_086
 Increased Energy, Present;KSADS_087
 Increased Energy, Past;KSADS_088
 Psychomotor Agitation in Bipolar Disorder, Present;KSADS_089
@@ -1234,7 +1261,7 @@ Psychomotor Agitation in Bipolar Disorder, Past;KSADS_090
 Distractibility, Present;KSADS_091
 Increased Distractibility, Present;KSADS_092
 Distractibility, Past;KSADS_093
-Increased Distractibility,  Past ;KSADS_094
+Increased Distractibility, ��P;KSADS_094
 Excessive Involvement in high risk activities, Present;KSADS_095
 Excessive Involvement in high risk activities, Past;KSADS_096
 Impairment in functioning due to bipolar, Present;KSADS_097
@@ -1250,8 +1277,8 @@ Temper outbursts occur 3 or more times per week;KSADS_106
 Present at least 12 months;KSADS_107
 No 3 month period without symptoms;KSADS_108
 Temper/irritability present in at least 2 settings;KSADS_109
-Associated Psychotic Symptoms – Curre;KSADS_110
-Associated Psychotic Symptoms – Pa;KSADS_111
+Associated Psychotic Symptoms ���;KSADS_110
+Associated Psychotic Symptoms ��;KSADS_111
 Unspecified Schizophrenia Spectrum and Other Psychotic Disorder F29 (Current);KSADS_112
 Unspecified Schizophrenia Spectrum and Other Psychotic Disorder F29 (Past);KSADS_113
 Hallucinations (Present);KSADS_114
@@ -1262,7 +1289,7 @@ Hallucinations, Present;KSADS_118
 Hallucinations, Past;KSADS_119
 Persecutory Delusions, Past two weeks, Present;KSADS_120
 Persecutory Delusions, Past;KSADS_121
-Auditory Hallucinations, Present �;KSADS_122
+Auditory Hallucinations, Present �;KSADS_122
 Auditory Hallucinations, Past;KSADS_123
 Other Hallucinations, Present;KSADS_124
 Other Hallucinations, Past;KSADS_125
@@ -1319,7 +1346,7 @@ Excessive avoidance of agoraphobic situations, Past;KSADS_175
 Reason for agoraphobic avoidance, Present;KSADS_176
 Reason for agoraphobic avoidance, Past;KSADS_177
 Impairment in functioning due to Agoraphobia, Present;KSADS_178
-Impairment in functioning due to  Agoraphobia, Pas;KSADS_179
+Impairment in functioning due to ��Agoraphobia,;KSADS_179
 Clinically significant distress due to Agoraphobia, Present;KSADS_180
 Clinically significant distress due to Agoraphobia, Past;KSADS_181
 Separation Anxiety Disorder (F93.00) PRESENT;KSADS_182
@@ -1337,11 +1364,11 @@ Worry about harm befalling attachment figure, Past;KSADS_193
 Fear of being alone without attachment figure, Present;KSADS_194
 Fear of being alone without attachment figure, Past;KSADS_195
 Refusal to sleep without attachment figure near, Present;KSADS_196
-Refusal to sleep without attachment figure near,  Pas;KSADS_197
+Refusal to sleep without attachment figure near, ��;KSADS_197
 Nightmares about separation themes, Present;KSADS_198
 Nightmares about separation themes, Past;KSADS_199
 Physical symptoms when separated from attachment figure, Present;KSADS_200
-Physical symptoms when separated from attachment figure,  Pas;KSADS_201
+Physical symptoms when separated from attachment figure, ��;KSADS_201
 Impairment in functioning due to separation anxiety, Present;KSADS_202
 Impairment in functioning due to separation anxiety, Past;KSADS_203
 Clinically significant distress due to separation anxiety, Present;KSADS_204
@@ -1351,25 +1378,25 @@ Separation anxiety duration was at least 4 weeks, Past;KSADS_207
 Separation anxiety duration is at least 2 weeks;KSADS_208
 Separation anxiety (past) duration was at least 2 weeks;KSADS_209
 Other Specified Anxiety Disorder (Social Anxiety Disorder, impairment, does not meet minimum duration) F41.8;KSADS_210
-Other Specified Anxiety Disorder (Social Anxiety Disorder, impairment, does not meet minimum duration), PAST,  F41.;KSADS_211
+Other Specified Anxiety Disorder (Social Anxiety Disorder, impairment, does not meet minimum duration), PAST, ��;KSADS_211
 Social Anxiety Disorder (F40.10) PRESENT;KSADS_212
 Social Anxiety Disorder (F40.10) PAST;KSADS_213
 Fear of Social Situations, Present;KSADS_214
 Duration (at least 6 months), Present;KSADS_215
 Fear of Social Situations, Past;KSADS_216
 Social situations invariably provoke anxiety, Present;KSADS_217
-Social situations invariably provoke  anxiety, Pas;KSADS_218
+Social situations invariably provoke ��anxiety,;KSADS_218
 Social situations avoided or endured with distress, Present;KSADS_219
 Social situations avoided or endured with distress, Past;KSADS_220
 Social fear is excessive given threat or sociocultural context, Present;KSADS_221
-Social fear is excessive given threat or sociocultural context,  Pas;KSADS_222
+Social fear is excessive given threat or sociocultural context, ��;KSADS_222
 Impairment in functioning due to social anxiety, Present;KSADS_223
 Impairment in functioning due to social anxiety, Past;KSADS_224
 Clinically significant distress due to Social Anxiety, Present;KSADS_225
 Clinically significant distress due to Social Anxiety, Past;KSADS_226
 Duration (at least 6 months), Past;KSADS_227
-Specific Phobia  PRESENT (F40.2XX;KSADS_228
-Specific Phobia  PAST (F40.2XX;KSADS_229
+Specific Phobia ��PRESENT (F40;KSADS_228
+Specific Phobia ��PAST (F40;KSADS_229
 Marked fear of phobic object, Present;KSADS_230
 Marked fear of phobic object, Past;KSADS_231
 PhobicObjectSpecialCase, Past;KSADS_232
@@ -1381,10 +1408,10 @@ Distress due to fear or avoidance of phobic object, Present;KSADS_237
 Distress due to fear or avoidance of phobic object, Past;KSADS_238
 Duration of phobia at least 6 months, Present;KSADS_239
 Duration of past phobia at least 6 months, Present;KSADS_240
-Generalized Anxiety Disorder –Present (F41.;KSADS_241
-Generalized Anxiety Disorder –Past (F41.;KSADS_242
+Generalized Anxiety Disorder ���Present;KSADS_241
+Generalized Anxiety Disorder ���Past;KSADS_242
 Other Specified Anxiety Disorder (Generalized Anxiety Disorder, impairment, does not meet minimum duration) F41.8;KSADS_243
-Other Specified Anxiety Disorder (Generalized Anxiety Disorder, impairment, does not meet minimum duration), PAST,  F41.;KSADS_244
+Other Specified Anxiety Disorder (Generalized Anxiety Disorder, impairment, does not meet minimum duration), PAST, ��;KSADS_244
 Excessive worries more days than not, Present;KSADS_245
 Excessive worries more days than not, Past;KSADS_246
 Worrying has lasted at least 6 months, Present;KSADS_247
@@ -1399,8 +1426,8 @@ Impairment in functioning due to worries, Past;KSADS_255
 Clinically significant distress due to worries, Present;KSADS_256
 Clinically significant distress due to worries, Past;KSADS_257
 Worrying has lasted at least 6 months, Past;KSADS_258
-Obsessive-Compulsive Disorder –Present (F4;KSADS_259
-Obsessive-Compulsive Disorder –Past (F4;KSADS_260
+Obsessive-Compulsive Disorder ���Prese;KSADS_259
+Obsessive-Compulsive Disorder ���Pa;KSADS_260
 Other Specified Obsessive-Compulsive and Related Disorder, present , does not meet full criteria (F42);KSADS_261
 Other Specified Obsessive-Compulsive and Related Disorder, past, does not meet full criteria (F42);KSADS_262
 Obsessive thoughts experienced as Intrusive/unwanted, Present;KSADS_263
@@ -1439,15 +1466,15 @@ Impairment due to Enuresis, Present;KSADS_295
 Impairment due to Enuresis, Past;KSADS_296
 Encopresis, Present;KSADS_297
 Encopresis, Past;KSADS_298
-Encopresis at least once a month for  3 months, Presen;KSADS_299
-Encopresis at least once a month for  3 months, Pas;KSADS_300
+Encopresis at least once a month for ��3 months, Pr;KSADS_299
+Encopresis at least once a month for ��3 months,;KSADS_300
 Encopresis not due to medical illness, Present;KSADS_301
 Encopresis not due to medical illness, Past;KSADS_302
-Anorexia Nervosa (F50.02)  Binge eating/purging subtype, PRESEN;KSADS_303
-Anorexia Nervosa (F50.02)  Binge eating/purging subtype, PRESENT, IN PARTIAL REMISSIO;KSADS_304
+Anorexia Nervosa (F50.02) ��Binge eating/purging subtype, PR;KSADS_303
+Anorexia Nervosa (F50.02) ��Binge eating/purging subtype, PRESENT, IN PARTIAL REMI;KSADS_304
 Anorexia Nervosa (F50.02) Binge eating/purging subtype, PAST;KSADS_305
-Anorexia Nervosa (F50.01)  Restricting subtype, PRESEN;KSADS_306
-Anorexia Nervosa (F50.01)  Restricting subtype, PRESENT, IN PARTIAL REMISSIO;KSADS_307
+Anorexia Nervosa (F50.01) ��Restricting subtype, PR;KSADS_306
+Anorexia Nervosa (F50.01) ��Restricting subtype, PRESENT, IN PARTIAL REMI;KSADS_307
 Anorexia Nervosa (F50.01) Restricting subtype,PAST;KSADS_308
 Bulimia Nervosa (F50.2) PRESENT;KSADS_309
 Bulimia Nervosa (F50.2) PAST;KSADS_310
@@ -1465,8 +1492,8 @@ Emaciation, Present;KSADS_321
 Emaciation, Past;KSADS_322
 Weight control vomiting, Present;KSADS_323
 Weight control vomiting, Past;KSADS_324
-Weight control other (laxatives, exercise, dieting, pills), Present �;KSADS_325
-Weight control other (laxatives, exercise, dieting, pills), Past�;KSADS_326
+Weight control other (laxatives, exercise, dieting, pills), Present �;KSADS_325
+Weight control other (laxatives, exercise, dieting, pills), Past�;KSADS_326
 Binge Eating, Present;KSADS_327
 Binge Eating, Past;KSADS_328
 Self-worth tied to weight, Present;KSADS_329
@@ -1486,7 +1513,7 @@ Attention-Deficit/Hyperactivity Disorder Past;KSADS_342
 Attention-Deficit/Hyperactivity Disorder, IN PARTIAL REMISSION;KSADS_343
 Unspecified Attention-Deficit/Hyperactivity Disorder (F90.9);KSADS_344
 Often makes careless mistakes, Present;KSADS_345
-Often doesn’t seem to listen when spoken to, Prese;KSADS_346
+Often doesn���t seem to listen when spoken to,;KSADS_346
 Difficulty following Instructions, Present;KSADS_347
 Difficulty organizing tasks, Present;KSADS_348
 Avoids tasks requiring attention, Present;KSADS_349
@@ -1502,7 +1529,7 @@ Often Interrupts or intrudes on others, Present;KSADS_358
 Often talks excessively, Present;KSADS_359
 Symptoms interfere with social, academic or occupational functioning, Present;KSADS_360
 Often makes careless mistakes, Past;KSADS_361
-Often doesn’t seem to listen when spoken to, Pa;KSADS_362
+Often doesn���t seem to listen when spoken ;KSADS_362
 Difficulty following Instructions, Past;KSADS_363
 Difficulty organizing tasks, Past;KSADS_364
 Avoids tasks requiring attention, Past;KSADS_365
@@ -1528,7 +1555,7 @@ Easily distracted since elementary school, Present;KSADS_384
 Easily distracted, Past;KSADS_385
 Easily distracted for more than one school year, Past;KSADS_386
 Difficulty remaining seated, Present;KSADS_387
-Difficulty remaining seated since elementary school,  Present ;KSADS_388
+Difficulty remaining seated since elementary school, ��Pres;KSADS_388
 Difficulty remaining seated, Past;KSADS_389
 Difficulty remaining seated for more than one school year, Past;KSADS_390
 Impulsivity, Present;KSADS_391
@@ -1572,7 +1599,7 @@ Stealing while confronting victim, Past;KSADS_428
 Fire setting, Present;KSADS_429
 Fire setting, Past;KSADS_430
 Stays out late at night despite parental prohibition, Present;KSADS_431
-Stays out late at night despite parental prohibition,  Past ;KSADS_432
+Stays out late at night despite parental prohibition, ��P;KSADS_432
 Ran away overnight, Present;KSADS_433
 Ran away overnight, Past;KSADS_434
 Use of a weapon that can cause serious harm, Present;KSADS_435
@@ -1593,7 +1620,7 @@ Often bullies others, Present;KSADS_449
 Often bullies others, Past;KSADS_450
 Stealing, Present;KSADS_451
 Stealing, Past;KSADS_452
-Unspecified Tic Disorder, present  (F95.9;KSADS_453
+Unspecified Tic Disorder, present ��(F;KSADS_453
 Unspecified Tic Disorder, past (F95.9);KSADS_454
 Motor Tics, Present;KSADS_455
 Motor Tics, Past;KSADS_456
@@ -1601,7 +1628,7 @@ Phonic Tics, Present;KSADS_457
 Phonic Tics, Past;KSADS_458
 Other Specified Neurodevelopmental Disorder, Autism Spectrum Disorder, full criteria not assessed (F88.0);KSADS_459
 Unusual body movements, Present;KSADS_460
-Unusual body movements, Past�;KSADS_461
+Unusual body movements, Past�;KSADS_461
 Strict Routines, Present;KSADS_462
 Strict Routines, Past;KSADS_463
 Poor Eye Contact, Present;KSADS_464
@@ -1611,7 +1638,7 @@ Unspecified Alcohol-Related Disorder, past (F10.99);KSADS_467
 Alcohol Use Disorder Present;KSADS_468
 Alcohol Use Disorder Past;KSADS_469
 Often has three or more drinks a day, Present;KSADS_470
-Often has three or more drinks a day, Past�;KSADS_471
+Often has three or more drinks a day, Past�;KSADS_471
 Negative impact interpersonal problems, alcohol, Present;KSADS_472
 Negative impact interpersonal problems, alcohol, Past;KSADS_473
 Frequency of drinks, Past;KSADS_474
@@ -1645,7 +1672,7 @@ Alcohol Abstinence, Present;KSADS_501
 Unspecified Substance Related Disorder, Present (F10.99);KSADS_502
 Unspecified Substance Related Disorder, Past (F10.99);KSADS_503
 Cannabis Use Disorder Present;KSADS_504
-Stimulant Use Disorder Present:  Amphetamine-type substanc;KSADS_505
+Stimulant Use Disorder Present: ��Amphetamine-type subs;KSADS_505
 Sedative, Hypnotic or Anxiolytic Use Disorder Present;KSADS_506
 Stimulant Use Disorder Present: Cocaine;KSADS_507
 Opiod Use Disorder Present;KSADS_508
@@ -1654,7 +1681,7 @@ Phencycllidine (PCP) Use Disorder Present;KSADS_510
 Inhalant Use Disorder Present;KSADS_511
 Other Drugs Use Disorder Present;KSADS_512
 Cannabis Use Disorder Past;KSADS_513
-Stimulant Use Disorder Past:  Amphetamine-type substanc;KSADS_514
+Stimulant Use Disorder Past: ��Amphetamine-type subs;KSADS_514
 Sedative, Hypnotic or Anxiolytic Use Disorder Past;KSADS_515
 Stimulant Use Disorder Past: Cocaine;KSADS_516
 Opiod Use Disorder Past;KSADS_517
@@ -1967,8 +1994,8 @@ FrequencyDrugUseSpecial, Present;KSADS_823
 FrequencyDrugUse, Past;KSADS_824
 Negative impact role obligations, miss work, drug use, Present;KSADS_825
 Negative impact role obligations, miss work, drug use, Past;KSADS_826
-Negative impact  interpersonal problems, drug use, Presen;KSADS_827
-Negative impact  interpersonal problems, drug use, Pas;KSADS_828
+Negative impact ��interpersonal problems, drug use, Pr;KSADS_827
+Negative impact ��interpersonal problems, drug use,;KSADS_828
 Post-Traumatic Stress Disorder PRESENT (F94.1);KSADS_829
 Post-Traumatic Stress Disorder PAST (F94.1);KSADS_830
 Other Specified Trauma-and Stressor-Related Disorder, present (PTSD, impairment, does not meet full criteria (F43.8);KSADS_831
@@ -1990,8 +2017,8 @@ Distress at reminders, external cues, Present;KSADS_846
 Distress at reminders, external cues, Past;KSADS_847
 Physiological reactivity to reminders of trauma, Present;KSADS_848
 Physiological reactivity to reminders of trauma, Past;KSADS_849
-Inability to  recall aspects of trauma, Presen;KSADS_850
-Inability to  recall aspects of trauma, Pas;KSADS_851
+Inability to ��recall aspects of trauma, Pr;KSADS_850
+Inability to ��recall aspects of trauma,;KSADS_851
 Persistent negative beliefs or expectations, Present;KSADS_852
 Persistent negative beliefs or expectations, Past;KSADS_853
 Distorted cognitions about the causes of the trauma, Present;KSADS_854
@@ -2093,6 +2120,7 @@ Impairment in functioning due to selective mutism, Present;KSADS_949
 Impairment in functioning due to selective mutism, Past;KSADS_950
 Duration at least month for selective mutism, Present;KSADS_951
 Duration at least month for selective mutism, Past;KSADS_952
+Forward Length;DS_f_length
 Backwards Length;DS_b_length
 Forward Raw Score;DS_f_raw
 Backwards Raw Score;DS_b_raw
@@ -2123,6 +2151,7 @@ hurt the peer or to get what she wants from the peer.";dishion_part2_13
 activities.";dishion_part2_15
 16. This student is well liked by peers of the same sex.;dishion_part2_16
 17. This student is well liked by peers of the opposite sex.;dishion_part2_17
+Participant opted out of drug screen;drug_opt_out
 Amphetamines;AMP500
 Barbiturates;BAR300
 Bupenorphine;BUP10
@@ -2138,18 +2167,19 @@ Propoxyphene;PPX300
 Tricyclic anti-depressants;TCA1000
 THC (Marijuana);THC50
 If the participant screened positive for any of the above, was it prescribed by a doctor?;perscribed
+1. Feeling distressed or upset is unbearable to me.;DTS_01
 2. When I feel distressed or upset, all I can think about is  how bad I feel;DTS_02
-3. I can’t handle feeling distressed or upset. ;DTS_03
+3. I can���t handle feeling distressed or u;DTS_03
 4. My feelings of distress are so intense that they completely take over;DTS_04
-5. There’s nothing worse than feeling distressed or ups;DTS_05
+5. There���s nothing worse than feeling distressed ;DTS_05
 6. I can tolerate being distressed or upset as well as most  people;DTS_06
 7. My feelings of distress or being upset are not   acceptable;DTS_07
-8. I’ll do anything to avoid feeling distressed or upset. ;DTS_08
+8. I���ll do anything to avoid feeling distressed or u;DTS_08
 9. Other people seem to be able to tolerate feeling distressed or upset better than I am;DTS_09
 10. Being distressed or upset is always a major ordeal for me;DTS_10
 11. I am ashamed of myself when I feel distressed or   upset;DTS_11
 12. My feelings of distress or being upset scare me.;DTS_12
-13. I’ll do anything to stop feeling distressed or upset;DTS_13
+13. I���ll do anything to stop feeling distressed or;DTS_13
 14. When I feel distressed or upset, I must do something about  it immediately;DTS_14
 15. When I feel distressed or upset, I cannot help but  concentrate on how bad the distress actually feels.;DTS_15
 Absorption subscale;DTS_absorption
@@ -2157,6 +2187,7 @@ Appraisal subscale;DTS_appraisal
 Regulation subscale;DTS_regulation
 Tolerance subscale;DTS_tolerance
 DTS Total Score;DTS_total
+Does participant qualify for EEG?;qualify_eeg
 If no, reason:;DNQ_reason
 Willing to participate in EEG?;attempt
 If no, reason:;no_attempt_reason
@@ -2221,6 +2252,7 @@ Surround Supression 3 Notes;EEG_11_notes
 Surround Supression 3 Program Crashed (Skipped);EEG11_crash
 Surround Supression 3 Abbreviated Protocol;EEG11_abb
 Surround Supression 3 Participant Unwilling;EEG11_behav
+Writing;EHQ_01
 Drawing;EHQ_02
 Throwing;EHQ_03
 Using Scissors;EHQ_04
@@ -2236,6 +2268,7 @@ Holding a Hammer;EHQ_13
 Holding a Brush or Comb;EHQ_14
 Holding a Cup While Drinking;EHQ_15
 Laterality Index (Score);EHQ_Total
+1a. Have you ever heard of marijuana (grass, pot) or hashish (has, hash oil)?;ESPAD_01a
 1b. Have you ever used marijuana (grass, pot) or hashish (hash, hash oil)?;ESPAD_01b
 2a. Have you ever sniffed a substance (glue, aerosols, etc.) to get high?;ESPAD_02a
 "3a. Have you ever used tranquillizers or sedatives (without a doctor's prescription) (e.g. benzodiazepines such as valium or xanax;barbiturates, barbs or downers such as amytal, or seconal)?";ESPAD_03a
@@ -2624,23 +2657,21 @@ Laterality Index (Score);EHQ_Total
 8A. Concentrate;MDD_8A
 8B. Make decisions ;MDD_8B
 9. Feel life is worth living;MDD_9
-Compared to other children of the same age, how well does this child:;
 1. Tolerate feelings of anxiety in social situations;SocAnx_01
 2. Handle fears of appearing anxious in social situations;SocAnx_02
 3. Stay relaxed in social situations;SocAnx_03
 4a. Seek out social activities;SocAnx_04A
 4b. Enjoy participating in social activities;SocAnx_04B
 5. Control anxiety in challenging social situations;SocAnx_05
-Compared to other children of the same age, most of the time, how well does this child:;
-1a. Avoid or control ‘arguing or yelling’ at ;DMDD_1A
-1b. Avoid or control ‘arguing or yelling’ with fri;DMDD_1B
-1c. Avoid or control ‘arguing or yelling’ at sc;DMDD_1C
-2a. Avoid or control ‘getting into fights’  at ;DMDD_2A
-2b. Avoid or control ‘getting into fights’  with fri;DMDD_2B
-2c. Avoid or control ‘getting into fights’ at sc;DMDD_2C
-3a. Avoid or control ‘taking anger out on objects or throwing things at people’ at ;DMDD_3A
-3b. Avoid or control ‘taking anger out on objects or throwing things at people’ with fri;DMDD_3B
-3c. Avoid or control ‘taking anger out on objects or throwing things at people’ at sc;DMDD_3C
+1a. Avoid or control ���arguing or yelling�;DMDD_1A
+1b. Avoid or control ���arguing or yelling��;DMDD_1B
+1c. Avoid or control ���arguing or yelling�;DMDD_1C
+2a. Avoid or control ���getting into fights�;DMDD_2A
+2b. Avoid or control ���getting into fights���;DMDD_2B
+2c. Avoid or control ���getting into fights�;DMDD_2C
+3a. Avoid or control ���taking anger out on objects or throwing things at people�;DMDD_3A
+3b. Avoid or control ���taking anger out on objects or throwing things at people��;DMDD_3B
+3c. Avoid or control ���taking anger out on objects or throwing things at people�;DMDD_3C
 4a. Control the intensity of anger at home;DMDD_4A
 4b. Control the intensity of anger with friends;DMDD_4B
 4c. Control the intensity of anger at school;DMDD_4C
@@ -2662,8 +2693,7 @@ Compared to other children of the same age, most of the time, how well does this
 10a. Compared to other children of the same age, over the past year, how well has this child maintained appropriate mood and behavior at home;DMDD_10A
 10b. Compared to other children of the same age, over the past year, how well has this child maintained appropriate mood and behavior with friends;DMDD_10B
 10c. Compared to other children of the same age, over the past year, how well has this child maintained appropriate mood and behavior at school;DMDD_10C
-Compared to other children of the same age, most of the time, how well does this child:;
-1. Avoid or limit moments of intense fear or discomfort that occur ‘out of the blu;Panic_A01
+1. Avoid or limit moments of intense fear or discomfort that occur ���out of t;Panic_A01
 2. Keep the mind free from worries about experiencing intense fear or discomfort;Panic_A02
 3. Return to typical behaviors/activities after experiencing a moment of intense fear or discomfort;Panic_A03
 1. Keep a regular heartbeat ;Panic_B01
@@ -2679,13 +2709,7 @@ Compared to other children of the same age, most of the time, how well does this
 11. Maintain awareness of oneself;Panic_B11
 12. Feel in control;Panic_B12
 13. Feel physically safe;Panic_B13
-If incomplete, reason:;EVT_IncompleteReason
-Was EVT administration valid?;EVT_Valid
-If invalid, reason:;EVT_Invalid_Reason
-Invalid possibly due to language background;EVT_Valid_Possible
-EVT Raw Score;EVT2_RawScore
-EVT Standard Score;EVT2_StandardScore
-EVT Percentile;EVT2_Percentile
+Was FitnessGram complete?;FG_A_Complete
 If incomplete, reason:;FG_A_Incomplete_Reason
 Curl Up;FG_A_CU
 Trunk lift;FG_A_TL
@@ -2699,6 +2723,7 @@ Push Up descriptive category;FG_A_PU_Range
 Sit and reach, both sides descriptive category;FG_A_SR_Range
 Grip Strength (dominant) descriptive category;FG_A_GSD_Rane
 Grip Strength (non-dominant) descriptive category;FG_A_GSND_Range
+Was FitnessGram completed?;FGC_Complete
 If not complete, reason:;FGC_Incomplete_Reason
 Curl up total;FGC_CU
 Curl up fitness zone;FGC_CU_Zone
@@ -2714,6 +2739,7 @@ Grip Strength total (dominant);FGC_GSD
 Grip Strength fitness zone (dominant);FGC_GSD_Zone
 Grip Strength  total (non-dominant);FGC_GSND
 Grip Strength fitness zone (non-dominant);FGC_GDND_Zone
+Was fitness assessment complete?;Fitness_Complete
 If not, reason;Fitness_Incomplete_Reason
 Final PAR Code;Final_PAR
 Predicted V02 Max (based on vitals and PAR questions);Predicted_V02Max
@@ -2757,16 +2783,18 @@ Participant had excessive movement;b_movement
 Participant was holding the bars on the treadmill;b_holding
 Othe disruptive behavior by participant;b_other
 Participant was not following instructions;b_instruction
+Were vitals are treadmill completed?;Fitness_Complete
 If incomplete, reason:;Fitness_Incomplete_Reason
 Exact time completed: Minutes;Time_Mins
 Exact time completed: Seconds;Time_Sec
 Maximum stage reached;Max_Stage
 Reason for stopping: Priority 1 criteria;Stop_Criteria
 Reason for stopping: Priority 2 criteria;Stop_Criteria_Priority_2
+From where do you get your health insurance?;FSQ_01
 Are you currently employed?;FSQ_02
 Is the child's other caregiver currently employed?;FSQ_03
 What is your annual household income?;FSQ_04
-Supplemental Security Income (SSI)�;FSQ_05a
+Supplemental Security Income (SSI)�;FSQ_05a
 Social Security Disability (SSD);FSQ_05b
 Social Security Retirement Benefits;FSQ_05c
 Social Security Survivors Benefits;FSQ_05d
@@ -2779,6 +2807,7 @@ NYC Cash Assistance Program ;FSQ_05j
 Do you own or rent your residence?;FSQ_06
 What type of residence is this?;FSQ_07
 How many people live in this home?;FSQ_08
+Are you currently a smoker?;FTND_01
 Have you been a smoker within the past two years?;FTND_02
 How soon after you wake up do you smoke your first cigarette?;FTND_03
 Do you find it difficult to refrain from smoking in the places where it is forbidden (e.g. in church, at the library, in cinema)?;FTND_04
@@ -2787,6 +2816,7 @@ How many cigarettes/day do you smoke?;FTND_06
 Do you smoke more frequently during the first hours after waking than during the rest of the day?;FTND_07
 Do you smoke if you are so ill that you are in bed most of the day?;FTND_08
 Total Score;FTND_Total
+Do you currently smoke?;FTQA_01
 How many cigarettes a day do you smoke?;FTQA_02_A
 Do you inhale?;FTQA_03_A
 How soon after you wake do you smoke your first cigarette?;FTQA_04_A
@@ -2795,6 +2825,7 @@ Do you find it difficult to refrain from smoking in places where it is forbidden
 Do you smoke if you are so ill that you are in bed most of the day?;FTQA_07_A
 Do you smoke more during the first 2 hours than during the rest of the day?;FTQA_08
 Total Score;FTQA_Total
+If left alone, the majority of the individual's time will be spent in repetitive or stereotyped behaviors;GARS_01
 Is preoccupied with specific stimuli that are abnormal in intensity;GARS_02
 Stares at hands, objects, or items in the environment for at least 5 secounds;GARS_03
 Flicks fingers rapidly in front of eyes for periods of 5 seconds or more;GARS_04
@@ -2844,7 +2875,7 @@ Talks about a single subject excessively;GARS_47
 Displays superior knowledge or skill in specific subjects;GARS_48
 Displays excellent memory ;GARS_49
 Shows an intense, obsessive interest in specific intellectual subjects;GARS_50
-Makes naïve remarks (unaware of reaction produced in others;GARS_51
+Makes na��ve remarks (unaware of reaction produced in ot;GARS_51
 Repeats (echoes) words or phrases verbally or with signs;GARS_52
 Repeats words out of context (repeats words or phrases heard at an earlier time);GARS_53
 Speaks (or signs) with flat tone, affect;GARS_54
@@ -2876,6 +2907,7 @@ Autism Index;GARS_AI
 Autism Index Percentile Rank;GARS_AI_Perc
 Autism Index Probability;GARS_AI_Prob
 Autism Index Severity;GARS_AI_Sev
+Was GFTA part 1 (Sounds-in-words) completed?;complete
 If no, reason:;incomplete_reason
 Was GFTA part 1 (Sounds-in-words) administration valid?;valid
 If no, then possibly due to language background;reason
@@ -2890,6 +2922,7 @@ Sounds-in-words Percentile Rank;GFTA_SIW_Perc
 Sounds-in-sentences Raw Score;GFTA_SIS_Raw
 Sounds-in-sentences Standard Score;GFTA_SIS_Stnd
 Sounds-in-sentences Percentile Rank;GFTA_SIS_Perc
+I have overcome setbacks to conquer an important challenge.;GRIT_01
 New Ideas and projects sometimes distract me from previous ones;GRIT_02
 My interests change from year to year;GRIT_03
 Setbacks don't discourage me;GRIT_04
@@ -2902,6 +2935,7 @@ I have achieved a goal that took years of work;GRIT_10
 I become interested in new pursuits every few months;GRIT_11
 I am diligent;GRIT_12
 GRIT Score;GRIT_Total
+I can always manage to solve difficult problems if I try hard enough;GSE_01
 If someone opposes me, I can find the means and ways to get what I want ;GSE_02
 It is easy for me to stick to my aims and accomplish my goals.;GSE_03
 I am confident that I could deal efficiently with unexpected events. ;GSE_04
@@ -2912,6 +2946,7 @@ When I am confronted with a problem, I can usually find several solutions. ;GSE_
 If I am in trouble, I can usually think of a solution.;GSE_09
 I can usually handle whatever comes my way. ;GSE_10
 GSE Score;SCORES
+1. How often do you find that you stay on-line longer than you intended?;IAT_01
 2. How often do you neglect household chores to spend more time online?;IAT_02
 3. How often do you prefer the excitement of the Internet to intimacy with your partner?;IAT_03
 4. How often do you form new relationships with fellow on-line users?;IAT_04
@@ -2932,7 +2967,8 @@ GSE Score;SCORES
 19. How often do you choose to spend more time on-line over going out with others?;IAT_19
 20. How often do you feel depressed, moody, or nervous when you are off-line, which goes away once you are back online?;IAT_20
 IAT Total Score;IAT_Total
-2. Does not seem to know “right” from “wr;ICU_02
+1. Expresses his/her feelings openly. ;ICU_01
+2. Does not seem to know ���right���;ICU_02
 3. Is concerned about schoolwork. ;ICU_03
 4. Does not care who he/she hurts to get what he/she wants. ;ICU_04
 5. Feels bad or guilty when he/she has done something wrong. ;ICU_05
@@ -2946,8 +2982,8 @@ IAT Total Score;IAT_Total
 13. Easily admits to being wrong. ;ICU_13
 14. It is easy to tell how he/she is feeling. ;ICU_14
 15. Always tries his/her best. ;ICU_15
-16. Apologizes (“says he/she is sorry”) to persons he/she has hu;ICU_16
-17. Tries not to hurt others’ feelings;ICU_17
+16. Apologizes (���says he/she is sorry���) to persons h;ICU_16
+17. Tries not to hurt others��� fe;ICU_17
 18. Shows no remorse when he/she has done something wrong. ;ICU_18
 19. Is very expressive and emotional. ;ICU_19
 20. Does not like to put the time into doing things well. ;ICU_20
@@ -2956,6 +2992,7 @@ IAT Total Score;IAT_Total
 23. Works hard on everything. ;ICU_23
 24. Does things to make others feel good. ;ICU_24
 Total Score;ICU_P_Total
+1. I express my feelings openly;ICU_SR_01
 "2. What I think is ""right"" and ""wrong"" is different from what other people think.";ICU_SR_02
 3. I care about how well I do at school or work;ICU_SR_03
 4. I do not care who I hurt to get what I want. ;ICU_SR_04
@@ -2980,6 +3017,7 @@ Total Score;ICU_P_Total
 23. I work hard on everything I do. ;ICU_SR_23
 24. I do things to make others feel good. ;ICU_SR_24
 Total Score;ICU_SR_Total
+Weekdays Web Surfing Frequency;IUQ_Wd_WebSurf_Freq
 Weekdays Web Surfing Hours per Day;IUQ_Wd_WebSurf_Hrs
 Weekdays Web Surfing primary time of Day;IUQ_Wd_WebSurf_Time
 Weekdays Web Surfing primary device;IUQ_Wd_WebSurf_Device
@@ -3124,6 +3162,7 @@ Music ;IUQ_Music
 Reading and News Media;IUQ_Reading_News
 Other Activity Discription;IUQ_Other_Desc
 Other;IUQ_Other
+Weekdays Web Surfing Frequency;IUQ_Wd_WebSurf_Freq
 Weekdays Web Surfing Hours per Day;IUQ_Wd_WebSurf_Hrs
 Weekdays Web Surfing primary time of Day;IUQ_Wd_WebSurf_Time
 Weekdays Web Surfing primary device;IUQ_Wd_WebSurf_Device
@@ -3256,6 +3295,7 @@ Weekend Other primary time of Day;IUQ_We_Other_Time
 Weekend Other primary device;IUQ_We_Other_Device
 Weekend Other parent monitor;IUQ_We_Other_Monitor
 Weekend Other parent restriction;IUQ_We_Other_Restrict
+Was KBIT Complete?;KBIT_Complete
 If no, reason:;KBIT_Incomplete_Reason
 Was this administration valid?;KBIT_Valid
 If no, reason:;KBIT_Invalid_Reason
@@ -3270,6 +3310,7 @@ Verbal Descriptive Category;KBIT_V_Desc
 IQ Composite Standard Score;KBIT_IQ_Comp
 IQ Composite Percentile Rank;KBIT_IQ_P
 IQ Composite Descriptive Category;KBIT_IQ_Desc
+1. S/he felt miserable or unhappy.;MFQ_P_01
 2. S/he didn't enjoy anything at all.;MFQ_P_02
 3. S/he was less hungry than usual.;MFQ_P_03
 4. S/he ate more than usual.;MFQ_P_04
@@ -3304,6 +3345,7 @@ IQ Composite Descriptive Category;KBIT_IQ_Desc
 33. S/he slept a lot more than usual.;MFQ_P_33
 34. S/he wasn't as happy as usual, even when s/he was praised or rewarded.;MFQ_P_34
 Total Score;MFQ_P_Total
+1. I felt miserable or unhappy.;MFQ_SR_01
 2. I didn't enjoy anything at all.;MFQ_SR_02
 3. I was less hungry than usual.;MFQ_SR_03
 4. I ate more than usual.;MFQ_SR_04
@@ -3337,6 +3379,7 @@ Total Score;MFQ_P_Total
 32. I didn't sleep as well as I usually sleep.;MFQ_SR_32
 33. I slept a lot more than usual.;MFQ_SR_33
 Total Score;MFQ_SR_Total
+Did participant qualify for MRI scan?;Qualify
 Scan Location;Scan_Location
 Were all scans completed?;Complete
 If incomplete, reason:;incomplete_reason
@@ -3357,6 +3400,7 @@ Movie 2 (The Present) complete?;Movie2
 Resting State 2 complete?;RS2
 Magnetization Transfer On complete?;MT_ON
 Magnetization Transfer Off complete?;MT_OFF
+Age;Age
 Sex;Sex
 Handedness;Handedness
 Card Sort Raw Score;NIH_Card_Sort_Raw
@@ -3407,6 +3451,7 @@ Picture Sequence Age-Corrected Standard Score;NIH_Picture_Seq_Age_Corr_Stnd
 Picture Sequence Instrument Breakoff;NIH_Picture_Seq_Inst_Breakoff
 Picture Sequence Instrument Status;NIH_Picture_Seq_Inst_Status
 Was Picture Sequence Rescored?;NIH_Picture_Seq_Rescored
+Was NIH Toolbox Completed?;NIH7_Complete
 If no, reason:;NIH7_Incomplete_Reason
 Dimensional Change Card Sort Age 3+ Age-adjusted Scale Score;NIH7_Card
 Dimensional Change Card Sort Age 3+ National Percentile (age-adjusted);NIH7_Card_P
@@ -3420,6 +3465,7 @@ Pattern Comparison Process Speed 7+ Age-adjusted Score;NIH7_Pattern
 Pattern Comparison Process Speed 7+ National Percentile (age-adjusted);NIH7_Pattern_P
 Picture Sequence Memory Age 3+ Age-adjusted Score;NIH7_Picture
 Picture Sequence Memory Age 3+ National Percentile (age-adjusted) ;NIH7_Picture_P
+1a. The child's brother/sister was in serious trouble (such as trouble with the law, school, or drugs);NLES_P_01a
 1b. If yes, the child was aware that his/her brother/sister was in serious trouble;NLES_P_01b
 1c. If yes, how upset was the child that his/her brother/sister was in serious trouble;NLES_P_01c
 2a. The child's close friend had serious troubles, problems, illness, or injury;NLES_P_02a
@@ -3486,6 +3532,7 @@ Total # of Negative Events;NLES_P_TotalEvents
 # of Negative Events the Child was aware of;NLES_P_Aware
 Child's Total Upsetness/Negative Events;NLES_P_Upset_Total
 Child's Average Upsetness/Negative Events;NLES_P_Upset_Avg
+1a. Your brother/sister was in serious trouble (such as trouble with the law, school, or drugs);NLES_SR_01a
 1b. If yes, how many times did this happen?;NLES_SR_01b
 1c. If yes, how upset were you that your brother or sister was in serious trouble?;NLES_SR_01c
 2a. Your close friend had serious troubles, problems, illness, or injury;NLES_SR_02a
@@ -3620,51 +3667,7 @@ Sunday;PAQ_A_08g
 Were you sick last week, or did anything prevent you from doing your normal physical activities? (check one);PAQ_A_09
 Total Score for Question 1;PAQ_A_01_Average
 Activity Summary Score;PAQ_A_Total
-Skipping;PAQ_C_01a
-Rowing/canoeing;PAQ_C_01b
-In-line skating;PAQ_C_01c
-Tag;PAQ_C_01d
-Walking for exercise;PAQ_C_01e
-Bicycling;PAQ_C_01f
-Jogging or running;PAQ_C_01g
-Aerobics;PAQ_C_01h
-Swimming;PAQ_C_01i
-Baseball, softball;PAQ_C_01j
-Dance;PAQ_C_01k
-Football;PAQ_C_01l
-Badminton;PAQ_C_01m
-Skateboarding;PAQ_C_01n
-Soccer;PAQ_C_01o
-Street Hockey;PAQ_C_01p
-Volleyball;PAQ_C_01q
-Floor hockey;PAQ_C_01r
-Basketball;PAQ_C_01s
-Ice skating;PAQ_C_01t
-Cross-country skiing;PAQ_C_01u
-Ice hockey/ringette;PAQ_C_01v
-Name of other physical activity;PAQ_C_01w_text
-Frequency of other physical acitivity ;PAQ_C_01w
-Name of other physical activity;PAQ_C_01x_text
-Frequency of other physical acitivity ;PAQ_C_01x
-In the last 7 days, during your physical education (PE) classes, how often were you very active (playing hard, running, jumping, throwing)? (Check one only);PAQ_C_02
-In the last 7 days, what did you do most of the time at recess? (Check one only.) ;PAQ_C_03
-In the last 7 days, what did you normally do at lunch (besides eating lunch)? (Check one only.) ;PAQ_C_04
- In the last 7 days, on how many days right after school, did you do sports, dance, or play games in which you were very active? (Check one only.) ;PAQ_C_05
-In the last 7 days, on how many evenings did you do sports, dance, or play games in which you were very active? (Check one only.);PAQ_C_06
-On the last weekend, how many times did you do sports, dance, or play games in which you were very active? (Check one only.) ;PAQ_C_07
-"Which one of the following describes you best for the last 7 days?  Read all five statements before deciding on the one answer that describes you. 
- ";PAQ_C_08
-Monday;PAQ_C_09a
-Tuesday;PAQ_C_09b
-Wednesday;PAQ_C_09c
-Thursday;PAQ_C_09d
-Friday;PAQ_C_09e
-Saturday;PAQ_C_09f
-Sunday;PAQ_C_09g
-Question 9 Average;PAQ_C_Q9_Avg
-Were you sick last week, or did anything prevent you from doing your normal physical activities? (check one);PAQ_C_10
-Total Score for Question 1;PAQ_C_01_Average
-Activity Summary Score;PAQ_C_Total
+What is your relation to the child?;Relation
 Please tell us the date of birth of the biological mother:;PBQ_01
 ;PBQ_01A
 Please tell us the date of birth of the biological father:;PBQ_02
@@ -3726,6 +3729,7 @@ How old was your child when the mother/ you started feeding him/ her water, juic
 ;PBQ_26A
 How old was your child when the mother/ you started feeding him/ her cereals, fruit, vegetables, meat or other solid food?;PBQ_27
 ;PBQ_27A
+1. Is cheerful, happy;PBS_01
 2. Is warm, loving;PBS_02
 3. Is curious and exploring likes new experiences;PBS_03
 4. Gets along well with other kids;PBS_04
@@ -3750,6 +3754,7 @@ How old was your child when the mother/ you started feeding him/ her cereals, fr
 23. Sticks with an activity unitl it is finished;PBS_23
 24. Is eager to please;PBS_24
 Scores;PBS_Total
+1. How often does your child disobey time limits you set for online use?;PCIAT_01
 2. How often does your child neglect household chores to spend more time online?;PCIAT_02
 3. How often does your child prefer to spend time online rather than with the rest of your family?;PCIAT_03
 4. How often does your child form new relationships with fellow online users?;PCIAT_04
@@ -3770,6 +3775,7 @@ Scores;PBS_Total
 19. How often does your child choose to spend more time online than going out with friends?;PCIAT_19
 20. How often does your child feel depressed, moody, or nervous when off-line which seems to go away once back online?;PCIAT_20
 Total Score;PCIAT_Total
+In the last 12 months, has your child had headaches, other than headaches with an illness such as a cold or flu?;PM_01
 Has your child ever been diagnosed with a medical condition? (For example diabetes, epilepsy, asthma, etc);PM_02
 above question if YES specification;PM_02_Spec
 Has your child ever had an eye check-up?;PM_03
@@ -3808,6 +3814,7 @@ Has difficulty talking;PM_16e
 None of the above;PM_16f
 Don't Know;PM_17
 In the last 12 months, how often have headaches prevented your child from taking part in activities? (For example school, sports, after-school activities etc);PM_17
+Was WAIS completed?;peg_complete
 If no, reason:;peg_incomplete
 Was administration of WAIS valid?;peg_valid
 If invalid, reason:;peg_invalid
@@ -3818,9 +3825,11 @@ Dominant Hand - z-score;peg_z_d
 Non-dominant Hand - Number of drops;peg_drops_nd
 Non-dominant Hand - Completion time (sec);peg_time_nd
 Non-dominant Hand - z-score;peg_z_nd
+1. I feel safe walking in my neighborhood, day or night.;PhenX_NS_01
 2. Violence is not a problem in my neighborhood.;PhenX_NS_02
 3. My neighborhood is safe from crime.;PhenX_NS_03
-2. During the LAST FOUR WEEKS, how many whole days of school have you missed because you skipped or “cut;PhenX_School_02
+1. Putting them all together, what were your grades like last year?;PhenX_School_01
+2. During the LAST FOUR WEEKS, how many whole days of school have you missed because you skipped or ��;PhenX_School_02
 3. In my school, students have lots of chances to help decide things like class activities and rules.;PhenX_School_03
 4. Teachers ask me to work on special classroom projects.;PhenX_School_04
 5. My teacher(s) notices when I am doing a good job and lets me know about it.;PhenX_School_05
@@ -3838,15 +3847,16 @@ a. enjoy being in school?;PhenX_School_16a
 b. hate being in school?;PhenX_School_16b
 c. try to do your best work in school?;PhenX_School_16c
 17. Think about the school you (currently/last) (attend/attended). What grade (are/were) you in?;PhenX_School_17
-18. Most people in my school think it’s OK for people my age to drink alcoho;PhenX_School_18
+18. Most people in my school think it���s OK for people my age to drink ;PhenX_School_18
 19. What percentage of the students in your grade at your school have drunk any alcohol this year? Would you say...;PhenX_School_19
 20. What percentage of the students in your grade at your school have drunk any alcohol at least once or twice this month? Would you say...;PhenX_School_20
-21. Most people in my school think it’s OK for people my age to smoke cigarette;PhenX_School_21
+21. Most people in my school think it���s OK for people my age to smoke cig;PhenX_School_21
 22. What percentage of the students in your grade at your school have smoked any cigarettes this year? Would you say..;PhenX_School_22
 23. What percentage of the students in your grade at your school smoked cigarettes at least once or twice a month. Would you say...;PhenX_School_23
-24. Most people in my school think it’s OK to use marijuana (pot/grass;PhenX_School_24
+24. Most people in my school think it���s OK to use marijuana (pot;PhenX_School_24
 25. What percentage of the students in your grade in your school have smoked any marijuana this year? Would you say...;PhenX_School_25
 26. During the past year, what percentage of the students in your grade in your school have smoked marijuana at least once or twice a month? Would you say...;PhenX_School_26
+Participant Age;Age
 Participant Sex;Sex
 Height (in);Height
 Weight (lbs);Weight
@@ -3855,6 +3865,7 @@ Diastolic BP (mmHg);Diastolic_BP
 Systolic BP (mmHg);Systolic_BP
 BMI (kg/m^2);BMI
 Waist circumference (in);Waist_Circumference
+Little interest or pleasure in doing things?;PMHS_01
 Feeling down, depressed, or hopeless?;PMHS_02
 Feeling more irritated, grouchy, or angry than usual?;PMHS_03
 Sleeping less than usual, but still have a lot of energy?;PMHS_04
@@ -3891,6 +3902,7 @@ Using any of the following medicines ON YOUR OWN, that is, without a doctor's pr
 6. Have you begun to menstruate?;PPS_F_06
 Final Score (Male);PPS_M_Score
 Final Score (Female);PPS_F_Score
+Was PPVT complete?;PPVT_Complete
 If no, then reason:;PPVT_IncompleteReason
 Was PPVT administration valid?;PPVT_Valid
 If no, then reason:;PPVT_Invalid_Reason
@@ -3898,48 +3910,9 @@ If no, then possibly due to language background;PPVT4_Valid_Possible
 PPVT raw score;PPVT4_RawScore
 PPVT standard score;PPVT4_StandardScore
 PPVT percentile;PPVT4_Percentile
+Did participant opt out of pregnancy test?;pregnancy_opt_out
 Test result:;Preg_Test
 Age of participant;age
-What is your child's race?;Child_Race
-If other race, specify:;Child_Race_Other
-In what country was your child born?;Child_CountryOrigin
-Sex;P1_Sex
-Age;P1_Age
-Ethnicity;P1_Ethnicity
-Race;P1_Race
-If other race, specify:;P1_Race_Other
-In what country were you born?;P1_CountryOrigin
-Height (ft);P1_Height_Ft
-Height (in);P1_Height_In
-Weight (lbs);P1_Weight
-Relationship to child;P1_Relation
-How long have you been this child's caregiver?;P1_Time
-Time (years);P1_Time_Years
-Time (months);P1_Time_Months
-How is the quality of the relationship between you and the child?;P1_RelQuality
-Child does not have a second primary care giver or legal guardian;No_P2
-Sex;P2_Sex
-Age;P2_Age
-Ethnicity;P2_Ethnicity
-Race;P2_Race
-If other race, specify:;P2_Race_Other
-In what country were you born?;P2_CountryOrigin
-Height (ft);P2_Height_Ft
-Height (in);P2_Height_In
-Weight (lbs);P2_Weight
-Relationship to child;P2_Relation
-How long have you been this child's caregiver?;P2_Time
-Time (years);P2_Time_Years
-Time (months);P2_Time_Months
-How is the quality of the relationship between you and the child?;P2_RelQual
-Parent(s)/Guardian(s) Marital Status:;guardian_maritalstatus
-Length of domestic partnership (years);DP_Yrs
-Years separated;Sep_Yrs
-Years divorced;Divorced_Yrs
-Years married;Married_Yrs
-Who has legal guardianship over the child?;P1_LegalGuardian
-;P2_LegalGuardian
-If social service agency/child protective services has been involved:;SocialService
 With whom is your child living? Check all that apply (Unchecked = 0);living_01
 ;living_02
 ;living_03
@@ -4000,6 +3973,7 @@ Caretaker/family member 5- quality of relationship;nonfam_05_quality
 Caretaker/family member 6- age;nonfam_06_age
 Caretaker/family member 6- relation to child;nonfam_06_relation
 Caretaker/family member 6- quality of relationship;nonfam_06_quality
+Duration of pregnancy (weeks);preg_dur
 Spotting or vaginal bleeding;preg_symp_01
 Emotional problems;preg_symp_02
 Threatened miscarriage;preg_symp_03
@@ -4096,6 +4070,7 @@ For females: has she begun menstruating?;menstruation
 If yes, starting at age:;menstruation_age
 Have there been any concerns about your child's growth?;growth_concerns
 Has your child lost any skills or abilities?;lost_skills
+How many different schools has your child attended?;number_schools
 How many years has your child been in school?;yrs_school
 Does your child have an Individualized Education Plan (IEP)?;IEP
 Has your child ever had any neuropsychological testing?;NeuroPsych
@@ -4260,6 +4235,7 @@ Other respiratory problems;[family member]_resp_other
 Birth defects;[family member]_birthdefect
 Lead poisoning;[family member]_lead
 Motion sickness;[family member]_motionsick
+Caregiver relationship to child;caregiver_relation
 Caregiver relationship to child (other);caregiver_relation_other
 Oldest sibling sex;osib1sex
 Oldest sibling age;osib1age
@@ -4641,6 +4617,7 @@ Other relative language 3;OR_Lang3
 Has other relative spoken language 3 his/her whole life?;OR_Lang3_Life
 If no, at what age did (s)he begin speaking the language?;OR_Lang3_Age
 Other relative language 3 Setting;OR_Lang3_Setting
+Has your chid ever been diagnosed with a psychiatric or learning disorder?;Past_DX
 Past diagnosis 1;Past_DX1
 Child's age when diagnosis 1 given;Past_DX1_Age
 Past diagnosis 2;Past_DX2
@@ -4720,6 +4697,7 @@ Has your child had any severe aggressive behaviors or homicidality?;homicide
 Has your child had any exposure to violence or trauma?;trauma
 Any history of ACS involvement?;ACS
 Do you keep any firearms or other lethal means in your home?;firearms
+1. I often have the feeling that I cannot handle things very well.;PSI_01
 2. I find myself giving up more of my life to meet my children's needs than I ever expected.;PSI_02
 3. I feel trapped by my responsibilities as a parent.;PSI_03
 4. Since having this child, I have been unable to do new and different things.;PSI_04
@@ -4763,6 +4741,7 @@ Parental Distress Raw Score;PSI_PD
 Parental Distress T-Score;PSI_PD_T
 Total Raw Score;PSI_Total
 Total T-Score;PSI_Total_T
+Body rocking, Body swaying;RBS_01
 Rolls head, Nods head, Turns head;RBS_02
 Flaps hands, Wiggles or flicks fingers, Claps hands, Waves or shakes hand or arm;RBS_03
 Turns in circles, Whirls, Jumps, Bounces;RBS_04
@@ -4785,7 +4764,7 @@ Collects, hoards or hides specific items;RBS_20
 "Need to repeat routine events; In / out door, up / down from chair, clothing on/off";RBS_21
 Need to touch, tap, or rub items, surfaces, or people;RBS_22
 "Strongly prefers/insists on eating/drinking only certain things; Eats or drinks items in a set order; Insists that meal related items are arranged in a certain way";RBS_23
-"Insists on certain pre-bedtime routines; Arranges items in room –just so” prior to bedtime; Insists that certain items be present with him/her during sleep; Insists that another person be present prior to or during s";RBS_24
+"Insists on certain pre-bedtime routines; Arranges items in room ���just so��� prior to bedtime; Insists that certain items be present with him/her during sleep; Insists that another person be present prior to";RBS_24
 "Insists on specific order of activities or tasks related to using the bathroom, to washing, showering, bathing or dressing; Arranges items in a certain way in the bathroom or insists that bathroom items not be moved; Insists on wearing certain clothing items";RBS_25
 "Insists on taking certain routes/paths; Must sit in specific location in vehicles; Insists that certain items be present during travel, e.g., toy or material; Insists on seeing or touching certain things or places during travel such as a sign or store";RBS_26
 "Insists on certain play activities; Follows a rigid routine during play / leisure; Insists that certain items be present/available during play/leisure; Insists that other persons do certain things during play";RBS_27
@@ -4805,17 +4784,19 @@ Fascination, preoccupation with one subject or activity (e.g., trains, computers
 Strongly attached to one specific object;RBS_41
 Preoccupationg with part(s) or object rather than the whole object (e.g., buttons on clothes, wheels on toy cars);RBS_42
 Fascination, preoccupation with movement / things that move (e.g., fans, clocks);RBS_43
-Overall, if you “lump together” all of the behaviors described in this questionnaire, how much of a problem are these repetitive behaviors (both for the person with autism, as well as how they affect the people around them)? Please rate on a scale from 1 to 100, where 1 = not a problem at all, and 100 = as bad as you can imag;RBS_44
+Overall, if you ���lump together��� all of the behaviors described in this questionnaire, how much of a problem are these repetitive behaviors (both for the person with autism, as well as how they affect the people around them)? Please rate on a scale from 1 to 100, where 1 = not a problem at all, and 100 = as bad as ;RBS_44
 Subscale I Score - Stereotypic Behavior;Score_01
 Subscale II Score - Self-Injurious Behavior;Score_02
 Subscale III Score - Compulsive Behavior;Score_03
 Subscale IV Score - Ritualistic/Sameness Behavior;Score_04
 Subscale V Score - Restricted Interests;Score_05
+Enrolled remotely?;Remote_Enrollment
 KSADS administered remotely?;Remote_KSADS
 WIAT administered remotely?;Remote_WIAT
 CTOP administered remotely?;Remote_CTOPP
 TOWRE administered remotely?;Remote_TOWRE
 WISC administered remotely?;Remote_WISC
+Able to laugh around with others, for example accepting light-hearted teasing and responding appropriately.;SAS_01
 Easy to chat with, even if it isn't on a topic that specially interests him/her.;SAS_02
 Easy to chat with, even if it isn't on a topic that specially interests him/her.;SAS_03
 Finds the right thing to say or do in order to defuse a tense or embarrassing situation;SAS_04
@@ -4825,15 +4806,16 @@ By reading between the lines of what people say, s/he can work out what they are
 After doing something wrong, s/he's able to say sorry and sort it out so that there are no hard feelings.;SAS_08
 Can take the lead without others feeling they are being bossed about.;SAS_09
 Aware of what is and isn't appropriate in different social situations.;SAS_10
+1. When my child feels frightened, it is hard to breathe;SCARED_P_01
 2. My child gets headaches when he/she is at school;SCARED_P_02
-3. My child doesn’t like to be with people he/she does't know we;SCARED_P_03
+3. My child doesn���t like to be with people he/she does't k;SCARED_P_03
 4. My child gets scared if he/she sleeps away from home;SCARED_P_04
 5. My child worries about other people liking him/her;SCARED_P_05
 6. When my child gets frightened, he/she fells like passing out;SCARED_P_06
 7. My child is nervous;SCARED_P_07
 8. My child follows me wherever I go;SCARED_P_08
 9. People tell me that my child looks nervous;SCARED_P_09
-10. My child feels nervous with people he/she doesn’t know we;SCARED_P_10
+10. My child feels nervous with people he/she doesn���t k;SCARED_P_10
 11. My child gets stomachaches at school;SCARED_P_11
 12. When my child gets frightened, he/she feels like he/she is going crazy;SCARED_P_12
 13. My child worries about sleeping alone;SCARED_P_13
@@ -4863,7 +4845,7 @@ Aware of what is and isn't appropriate in different social situations.;SAS_10
 37. My child worries about things that have already happened ;SCARED_P_37
 38. When my child gets frightened, he/she feels dizzy;SCARED_P_38
 39. My child feels nervous when he/she is with other children or adults and he/she has to do something while they watch him/her (for example: read aloud, speak, play agame, play a sport);SCARED_P_39
-40. My child feels nervous when he/she is going to parties, dances, or any place where there will be people that he/she doesn’t know we;SCARED_P_40
+40. My child feels nervous when he/she is going to parties, dances, or any place where there will be people that he/she doesn���t k;SCARED_P_40
 41. My child is shy;SCARED_P_41
 Generalized Anxiety Disorder Score;SCARED_P_GD
 Panic Disorder Score;SCARED_P_PN
@@ -4871,15 +4853,16 @@ Social Anxiety Disorder Score;SCARED_P_SC
 Significant School Avoidance Score;SCARED_P_SH
 Separation Anxiety SOC Score;SCARED_P_SP
 Total Score;SCARED_P_Total
+1. When I feel frightened, it is hard to breathe ;SCARED_SR_01
 2. I get heacaches when I am at school ;SCARED_SR_02
-3. I don’t like to be with people I don’t know w;SCARED_SR_03
+3. I don���t like to be with people I don��;SCARED_SR_03
 4. I get scared when I sleep away from home ;SCARED_SR_04
 5. I worry about other people liking me ;SCARED_SR_05
 6. When I get frightened, I feel like passing out ;SCARED_SR_06
 7. I am nervous ;SCARED_SR_07
 8. I follow my mother or father wherever they go;SCARED_SR_08
 9. People tell me that I look nervous ;SCARED_SR_09
-10. I feel nervous with people I don’t know wel;SCARED_SR_10
+10. I feel nervous with people I don���t kn;SCARED_SR_10
 11. I get stomachaches at school ;SCARED_SR_11
 12. When I get frightened, I feel like I am going crazy ;SCARED_SR_12
 13. I worry about sleeping alone ;SCARED_SR_13
@@ -4895,13 +4878,13 @@ Total Score;SCARED_P_Total
 23. I am a worrier ;SCARED_SR_23
 24. I get really frieghtened for no reason at all ;SCARED_SR_24
 25. I am afraid to be alone in the house ;SCARED_SR_25
-26. It is hard for me to talk with people I don’t know wel;SCARED_SR_26
+26. It is hard for me to talk with people I don���t kn;SCARED_SR_26
 27. When I get frightened, I feel like I am choking ;SCARED_SR_27
 28. People tell me that I worry too much ;SCARED_SR_28
-29. I don’t like to be away from my famil;SCARED_SR_29
+29. I don���t like to be away from my;SCARED_SR_29
 30. I am afraid of having anxiety (or panic) attacks ;SCARED_SR_30
 31. I worry that somehting bad might happen to my parents ;SCARED_SR_31
-32. I feel shy with people I don’t know wel;SCARED_SR_32
+32. I feel shy with people I don���t kn;SCARED_SR_32
 33. I worry about what is going to happen in the future ;SCARED_SR_33
 34. When I get frightened, I feel like throwing up ;SCARED_SR_34
 35. I worry about how well I do things ;SCARED_SR_35
@@ -4909,7 +4892,7 @@ Total Score;SCARED_P_Total
 37. I worry about things that have already happened ;SCARED_SR_37
 38. When I get frightened, I feel dizzy ;SCARED_SR_38
 39. I feel nervous when I am with other children or adults and I have to do something while they watch me (for example: read aloud, speak, play a game, play a sport) ;SCARED_SR_39
-40. I feel nervous when I am going to parties, dances, or any place where there will be people that I don’t know wel;SCARED_SR_40
+40. I feel nervous when I am going to parties, dances, or any place where there will be people that I don���t kn;SCARED_SR_40
 41. I am shy ;SCARED_SR_41
 Generalized Anxiety Disorder ;SCARED_SR_GD
 Panic Disorder ;SCARED_SR_PN
@@ -4917,6 +4900,7 @@ Social Anxiety Disorder ;SCARED_SR_SC
 Significant School Avoidance;SCARED_SR_SH
 Separation Anxiety ;SCARED_SR_SP
 Total Score;SCARED_SR_Total
+1. Is she/he now able to talk using short phrases or sentences? If no, skip to question 8.;SCQ_01
 "2. Do you have a to and fro ""conversation"" with her/him that involves taking turns or building on what you have said?";SCQ_02
 3. Does she/he ever use odd phrases or say the same thing over and over in almost exactly the same way (either phrases that she/he hears other people use or ones that she/he makes up?;SCQ_03
 4. Does she/he ever use socially inappropriate questions or statements? For example, does she/he ever regularly ask personal questions or make personal comments at awkward times?;SCQ_04
@@ -4957,9 +4941,10 @@ Total Score;SCARED_SR_Total
 39. Does she/he ever play imaginative games with another child in such a way that you can tell that each child understands what the other is pretending?;SCQ_39
 40. Does she/he play cooperatively in games that need some form of joining in with a group of other children, such as hide-and-seek or ball games?;SCQ_40
 Total Score;SCQ_Total
+Considerate of other people's feelings;SDQ_01
 Restless, overactive, cannot stay still for long;SDQ_02
 Often complains of headaches, stomach-aches or sickness;SDQ_03
-Shares readily with other children, for example toys, treats, pencils (for 11-17 year olds: Shares readily with other youth, for example CD’s, games, foo;SDQ_04
+Shares readily with other children, for example toys, treats, pencils (for 11-17 year olds: Shares readily with other youth, for example CD���s, game;SDQ_04
 Often loses temper;SDQ_05
 Rather solitary, prefers to play alone (for 11-17 year olds: Would rather be alone than with other youth);SDQ_06
 Generally well behaved, usually does what adults request;SDQ_07
@@ -4998,6 +4983,7 @@ Hyperactivity Scale;Hyperactivity_Total
 Internalizing Score;Internalising_Total
 Peer Problems Scale;Peer_Problems_Total
 Prosocial Scale;Prosocial_Total
+1. How many hours of sleep does your child get on most nights?;SDS_01
 2. How long after going to bed does your child usually fall asleep?;SDS_02
 3. The child goes to bed reluctantly;SDS_03
 4. The child has difficulty getting to sleep at night;SDS_04
@@ -5017,7 +5003,7 @@ Prosocial Scale;Prosocial_Total
 18. You have observed the child talking in his/her sleep;SDS_18
 19. The child grinds teeth during sleep;SDS_19
 20. The child wakes from sleep screaming or confused so that you cannot seem to get through to him/her, but has no memory of these events the next morning;SDS_20
-21. The child has nightmares which he/she doesn’t remember the next d;SDS_21
+21. The child has nightmares which he/she doesn���t remember the ;SDS_21
 22. The child is unusually difficult to wake up in the morning;SDS_22
 23. The child awakes in the morning feeling tired;SDS_23
 24. The child feels unable to move when waking up in the morning;SDS_24
@@ -5037,6 +5023,7 @@ Sleep hyperhydrosis Raw Score;SDS_SHY_Raw
 Sleep hyperhydrosis T-Score;SDS_SHY_T
 Total Raw Score;SDS_Total_Raw
 Total T-Score;SDS_Total_T
+1. Seems much more fidgety in social situations than when alone.;SRS_01
 2. Expressions on his or her face don't match what he or she is saying.;SRS_02
 3. Seems self-confident when interacting with others.;SRS_03
 4. When under stress, he or she shows rigid or inflexible patterns of behavior that seem odd.;SRS_04
@@ -5066,7 +5053,7 @@ Total T-Score;SDS_Total_T
 28. Thinks or talks about the same thing over and over.;SRS_28
 29. Is regarded by other children as odd or weird.;SRS_29
 30. Becomes upset in a situation with lots of things going on.;SRS_30
-31. Can’t get his or her mind off something once he or she starts thinking about i;SRS_31
+31. Can���t get his or her mind off something once he or she starts thinking a;SRS_31
 32. Has good personal hygiene.;SRS_32
 33. Is socially awkward, even when he or she is trying to be polite.;SRS_33
 34. Avoids people who want to be emotionally close to him or her.;SRS_34
@@ -5117,6 +5104,7 @@ Social Communication and Interaction Raw Score;SRS_SCI
 Social Communication and Interaction T-Score;SRS_SCI_T
 Total Raw Score;SRS_Total
 Total T-Score;SRS_Total_T
+1. Seems much more fidgety in social situations than when alone.;SRS_P_01
 2. Expressions on his or her face don't match what he or she is saying.;SRS_P_02
 3. Seems self-confident when interacting with others.;SRS_P_03
 "4. When under stress, child seems to go on ""autopilot"" (for example, shows rigid or inflexible patterns of behavior that seem odd.";SRS_P_04
@@ -5197,6 +5185,7 @@ Social Communication and Interaction Raw Score;SRS_SCI
 Social Communication and Interaction T-Score;SRS_SCI_T
 Total Raw Score;SRS_Total
 Total T-Score;SRS_Total_T
+1. I feel calm;STAI_01
 2. I feel secure;STAI_02
 3. I am tense;STAI_03
 4. I feel strained;STAI_04
@@ -5242,6 +5231,7 @@ STAI Total State Anxiety Raw Score;STAI_SA_T
 STAI Trait Anxiety T-Score;STAI_TA
 STAI Trait Anxiety Percentile Rank;STAI_TA_P
 STAI Total Trait Anxiety Raw Score;STAI_TA_T
+1. Gives close attention to detail and avoids careless mistakes;SWAN_01
 2. Sustains attention on tasks or play activities;SWAN_02
 3. Listens when spoken to directly;SWAN_03
 4. Follows through on instructions and finishes school work and chores;SWAN_04
@@ -5262,301 +5252,7 @@ STAI Total Trait Anxiety Raw Score;STAI_TA_T
 Inattention Average;SWAN_IN
 Hyperactivity Average;SWAN_HY
 SWAN Average;SWAN_Total
-1. Feels sad and down most days for at least 1 week;Current
-;Past
-2. Often feels annoyed and irritated;Current
-;Past
-3. Has a loss of interest in previously enjoyable activities;Current
-;Past
-4. Often feels overly happy and silly, above and beyond a normal feeling;Current
-;Past
-5. Has strong and explosive feelings of anger;Current
-;Past
-6. Has periods of unusual energy and activity;Current
-;Past
-7. Has times when he/she sleeps much less than usual but still feels rested;Current
-;Past
-8. Has times when he/she is much more interested in sex than usual;Current
-;Past
-9. Hears, sees, or smells things that other people cannot;Current
-;Past
-10. Has unusual thoughts or beliefs that others cannot understand or believe;Current
-;Past
-11. Has anxiety attacks, where out of the blue he/she suddenly feels scared;Current
-;Past
-12 Feels very afraid of being in a crowded place, or going outside in public alone;Current
-;Past
-13. Feels very afraid of being on a bridge or traveling in a car, bus, or train;Current
-;Past
-14. Worries about being separated from parent/guardian because of getting lost or kidnapped;Current
-;Past
-15. Worries excessively about harm occuring to parents/guardians;Current
-;Past
-16. Often does not want to go to school, due to worry about parent/guardian separation ;Current
-;Past
-17. Often has trouble going to sleep without parent/guardian nearby;Current
-;Past
-18. Is afraid of being alone at home or in a different room than parent/guardian;Current
-;Past
-19. Often feels very nervous around people;Current
-;Past
-20. Often feels very nervous when he/she has to do things in front of others;Current
-;Past
-21. Is unable to speak in specific situations, such as school, despite being able to speak without a problem in other situations;Current
-;Past
-22. Has intense fears of specific animals, situations, or anything else;Current
-;Past
-23. Worries most days of the week;Current
-;Past
-24. Often misses school or other activities because he/she doesn't feel well;Current
-;Past
-25. Feels very nervous and unable to relax most days of the week;Current
-;Past
-26. Is bothered by thoughts which keep coming into his/her head for no reason;Current
-;Past
-27. Feels like he/she has to do certain things in a very specific way (handwashing, checking, doing things multiple times);Current
-;Past
-28. Often has accidents when he/she wets the bed or self during the day;Current
-;Past
-29. Often has accidents when he/she soild the bed or self during the day;Current
-;Past
-30. Feels extremely worried about gaining weight or becoming fat;Current
-;Past
-31. Is underweight for his/her age and height;Current
-;Past
-32. Uses diet pills, throws up, or works out excessively to try to lose weight;Current
-;Past
-33. Has frequent eating binges, and it feels out of control;Current
-;Past
-34. Has trouble paying attention, and it affects school work or performance;Current
-;Past
-35. Is often easily distracted;Current
-;Past
-36. Has difficulty remaining seated at home or school;Current
-;Past
-37. Often acts before thinking;Current
-;Past
-38. Often becomes really upset and loses his/her temper;Current
-;Past
-39. Argues or talks back to adults, more than others his/her age;Current
-;Past
-40. Actively disobeys or doesn't listen to adult rules;Current
-;Past
-41. Frequently lies;Current
-;Past
-42. Has skipped a part or a whole day of school;Current
-;Past
-43. Frequently starts physical fights with peers;Current
-;Past
-44. Bullies, threatens, or intimidates others;Current
-;Past
-45. Has stolen or shoplifted items;Current
-;Past
-46. Notices muscles moving uncontrollably (blinking a lot, shrugging);Current
-;Past
-47. Makes noises that he/she can't control (repeating sounds, sniffing);Current
-;Past
-48. Has unusual physical mannerisms (rocked body or flapping hands);Current
-;Past
-49. Feels really upset when there is an unexpected change in his/her schedule;Current
-;Past
-50. Is preoccupied with very specific objects, routines, or interests;Current
-;Past
-51. Often has a difficult time making eye contact;Current
-;Past
-52. Has a hard time expressing feelings on his/her face during social interactions;Current
-;Past
-53. Smokes or chews tobacco;Current
-;Past
-54. Drinks alcohol;Current
-;Past
-     a. Cannabis (marijuana, pot, hash, THC);Current
-;Past
-     b. Stimulants (speed, amphetamines, dexedrine, diet pills, crystal meth);Current
-;Past
-     c. Sedatives/Hypnotics (barbiturates, quaalude, valium, xanax);Current
-;Past
-     d. Cocaine (coke, crack);Current
-;Past
-     e. Opioids (heroin, morphine, codeine, methadone, percodan, oxycotin);Current
-;Past
-     f. PCP (angel dust);Current
-;Past
-     g. Hallucinogens (psychedelics, LSD, mescaline, peyote);Current
-;Past
-     h. Solvents/Inhalants (glue, gasoline, chloroform, ether, paint);Current
-;Past
-in a car or bike accident?;TBI_02a
-from being hit by something?;TBI_02b
-in a fight?;TBI_02c
-playing sports?;TBI_02d
-by a family member?;TBI_02e
-while serving in the military?;TBI_02f
-being near an explosion?;TBI_02g
-From a fall?;TBI_02h
-Other? ;TBI_02_Other
-If Other, please describe;TBI_02_OtherDesc
-Have you ever been treated in an emergency room, or hospitalized following an injury?;TBI_03
-Were you ever injured and should have received medical attention but didn't?;TBI_04
-incident 1;TBI_05_type
-Age at time of incident 1;TBI_05_age
-Were you dazed or confused (D/C), have a lapse in memory (Mem), or actually knocked out (KO)?;TBI_05_effect
-If knocked out, how long (min) ?;TBI_05_Kotime
-Where you treated in the ER, hospitalized, or admitted to a rehabilitation facility?;TBI_05_treatment
-incident 2;TBI_06_type
-Age at time of incident 2;TBI_06_age
-Were you dazed or confused (D/C), have a lapse in memory (Mem), or actually knocked out (KO)?;TBI_06_effect
-If knocked out, how long (min) ?;TBI_06_Kotime
-Where you treated in the ER, hospitalized, or admitted to a rehabilitation facility?;TBI_06_treatment
-incident 3;TBI_07_type
-Age at time of incident 3;TBI_07_age
-Were you dazed or confused (D/C), have a lapse in memory (Mem), or actually knocked out (KO)?;TBI_07_effect
-If knocked out, how long (min) ?;TBI_07_Kotime
-Where you treated in the ER, hospitalized, or admitted to a rehabilitation facility?;TBI_07_treatment
-incident 3;TBI_08_type
-Age at time of incident 3;TBI_08_age
-Were you dazed or confused (D/C), have a lapse in memory (Mem), or actually knocked out (KO)?;TBI_08_effect
-If knocked out, how long (min) ?;TBI_08_Kotime
-Where you treated in the ER, hospitalized, or admitted to a rehabilitation facility?;TBI_08_treatment
-incident 4;TBI_09_type
-Age at time of incident 4;TBI_09_age
-Were you dazed or confused (D/C), have a lapse in memory (Mem), or actually knocked out (KO)?;TBI_09_effect
-If knocked out, how long (min) ?;TBI_09_Kotime
-Where you treated in the ER, hospitalized, or admitted to a rehabilitation facility?;TBI_09_treatment
-incident 5;TBI_10_type
-Age at time of incident 5;TBI_10_age
-Were you dazed or confused (D/C), have a lapse in memory (Mem), or actually knocked out (KO)?;TBI_10_effect
-If knocked out, how long (min) ?;TBI_10_Kotime
-Where you treated in the ER, hospitalized, or admitted to a rehabilitation facility?;TBI_10_treatment
-Headaches;TBI_11
-Dizziness or balance problems;TBI_12
-Tiredness or fatigue;TBI_13
-Problems paying attention or concentrating ;TBI_14
-Being sensitive to bright lights or loud noises;TBI_15
-Have new problems at work or school, or lose a job? ;TBI_16
-Notice changes in your relationships with your family?;TBI_17
-Have trouble remembering things or solving problems?;TBI_18
-Feel depressed or anxious more than before the injury?;TBI_19
-Have trouble controlling your temper? ;TBI_20
-Run 1, Trial 2 Response Time;Temp_Disc_run1_trial2_RT
-Run 1, Trial 3 Response Time;Temp_Disc_run1_trial3_RT
-Run 1, Trial 4 Response Time;Temp_Disc_run1_trial4_RT
-Run 1, Trial 5 Response Time;Temp_Disc_run1_trial5_RT
-Run 1, Trial 1 Delay;Temp_Disc_run1_trial1_delay
-Run 1, Trial 2 Delay;Temp_Disc_run1_trial2_delay
-Run 1, Trial 3 Delay;Temp_Disc_run1_trial3_delay
-Run 1, Trial 4 Delay;Temp_Disc_run1_trial4_delay
-Run 1, Trial 5 Delay;Temp_Disc_run1_trial5_delay
-Run 1, Trial 1 Response;Temp_Disc_run1_trial1_resp
-Run 1, Trial 2 Response;Temp_Disc_run1_trial2_resp
-Run 1, Trial 3 Response;Temp_Disc_run1_trial3_resp
-Run 1, Trial 4 Response;Temp_Disc_run1_trial4_resp
-Run 1, Trial 5 Response ;Temp_Disc_run1_trial5_resp
-Run 1 discount rate;Temp_Disc_run1_k
-Run 1 effective delay 50%;Temp_Disc_run1_ed50
-Run 2, Trial 1 Response Time;Temp_Disc_run2_trial1_RT
-Run 2, Trial 2 Response Time;Temp_Disc_run2_trial2_RT
-Run 2, Trial 3 Response Time;Temp_Disc_run2_trial3_RT
-Run 2, Trial 4 Response Time;Temp_Disc_run2_trial4_RT
-Run 2, Trial 5 Response Time;Temp_Disc_run2_trial5_RT
-Run 2, Trial 1 Delay;Temp_Disc_run2_trial1_delay
-Run 2, Trial 2 Delay;Temp_Disc_run2_trial2_delay
-Run 2, Trial 3 Delay;Temp_Disc_run2_trial3_delay
-Run 2, Trial 4 Delay;Temp_Disc_run2_trial4_delay
-Run 2, Trial 5 Delay;Temp_Disc_run2_trial5_delay
-Run 2, Trial 1 Response;Temp_Disc_run2_trial1_resp
-Run 2, Trial 2 Response;Temp_Disc_run2_trial2_resp
-Run 2, Trial 3 Response;Temp_Disc_run2_trial3_resp
-Run 2, Trial 4 Response;Temp_Disc_run2_trial4_resp
-Run 2, Trial 5 Response ;Temp_Disc_run2_trial5_resp
-Run 2 discount rate;Temp_Disc_run2_k
-Run 2 effective delay 50%;Temp_Disc_run2_ed50
-Run 3, Trial 1 Response Time;Temp_Disc_run3_trial1_RT
-Run 3, Trial 2 Response Time;Temp_Disc_run3_trial2_RT
-Run 3, Trial 3 Response Time;Temp_Disc_run3_trial3_RT
-Run 3, Trial 4 Response Time;Temp_Disc_run3_trial4_RT
-Run 3, Trial 5 Response Time;Temp_Disc_run3_trial5_RT
-Run 3, Trial 1 Delay;Temp_Disc_run3_trial1_delay
-Run 3, Trial 2 Delay;Temp_Disc_run3_trial2_delay
-Run 3, Trial 3 Delay;Temp_Disc_run3_trial3_delay
-Run 3, Trial 4 Delay;Temp_Disc_run3_trial4_delay
-Run 3, Trial 5 Delay;Temp_Disc_run3_trial5_delay
-Run 3, Trial 1 Response;Temp_Disc_run3_trial1_resp
-Run 3, Trial 2 Response;Temp_Disc_run3_trial2_resp
-Run 3, Trial 3 Response;Temp_Disc_run3_trial3_resp
-Run 3, Trial 4 Response;Temp_Disc_run3_trial4_resp
-Run 3, Trial 5 Response ;Temp_Disc_run3_trial5_resp
-Run 3 discount rate;Temp_Disc_run3_k
-Run 3 effective delay 50%;Temp_Disc_run3_ed50
-Run 4, Trial 1 Response Time;Temp_Disc_run4_trial1_RT
-Run 4, Trial 2 Response Time;Temp_Disc_run4_trial2_RT
-Run 4, Trial 3 Response Time;Temp_Disc_run4_trial3_RT
-Run 4, Trial 4 Response Time;Temp_Disc_run4_trial4_RT
-Run 4, Trial 5 Response Time;Temp_Disc_run4_trial5_RT
-Run 4, Trial 1 Delay;Temp_Disc_run4_trial1_delay
-Run 4, Trial 2 Delay;Temp_Disc_run4_trial2_delay
-Run 4, Trial 3 Delay;Temp_Disc_run4_trial3_delay
-Run 4, Trial 4 Delay;Temp_Disc_run4_trial4_delay
-Run 4, Trial 5 Delay;Temp_Disc_run4_trial5_delay
-Run 4, Trial 1 Response;Temp_Disc_run4_trial1_resp
-Run 4, Trial 2 Response;Temp_Disc_run4_trial2_resp
-Run 4, Trial 3 Response;Temp_Disc_run4_trial3_resp
-Run 4, Trial 4 Response;Temp_Disc_run4_trial4_resp
-Run 4, Trial 5 Response ;Temp_Disc_run4_trial5_resp
-Run 4 discount rate;Temp_Disc_run4_k
-Run 4 effective delay 50%;Temp_Disc_run4_ed50
-Run 5, Trial 1 Response Time;Temp_Disc_run5_trial1_RT
-Run 5, Trial 2 Response Time;Temp_Disc_run5_trial2_RT
-Run 5, Trial 3 Response Time;Temp_Disc_run5_trial3_RT
-Run 5, Trial 4 Response Time;Temp_Disc_run5_trial4_RT
-Run 5, Trial 5 Response Time;Temp_Disc_run5_trial5_RT
-Run 5, Trial 1 Delay;Temp_Disc_run5_trial1_delay
-Run 5, Trial 2 Delay;Temp_Disc_run5_trial2_delay
-Run 5, Trial 3 Delay;Temp_Disc_run5_trial3_delay
-Run 5, Trial 4 Delay;Temp_Disc_run5_trial4_delay
-Run 5, Trial 5 Delay;Temp_Disc_run5_trial5_delay
-Run 5, Trial 1 Response;Temp_Disc_run5_trial1_resp
-Run 5, Trial 2 Response;Temp_Disc_run5_trial2_resp
-Run 5, Trial 3 Response;Temp_Disc_run5_trial3_resp
-Run 5, Trial 4 Response;Temp_Disc_run5_trial4_resp
-Run 5, Trial 5 Response ;Temp_Disc_run5_trial5_resp
-Run 5 discount rate;Temp_Disc_run5_k
-Run 5 effective delay 50%;Temp_Disc_run5_ed50
-Run 6, Trial 1 Response Time;Temp_Disc_run6_trial1_RT
-Run 6, Trial 2 Response Time;Temp_Disc_run6_trial2_RT
-Run 6, Trial 3 Response Time;Temp_Disc_run6_trial3_RT
-Run 6, Trial 4 Response Time;Temp_Disc_run6_trial4_RT
-Run 6, Trial 5 Response Time;Temp_Disc_run6_trial5_RT
-Run 6, Trial 1 Delay;Temp_Disc_run6_trial1_delay
-Run 6, Trial 2 Delay;Temp_Disc_run6_trial2_delay
-Run 6, Trial 3 Delay;Temp_Disc_run6_trial3_delay
-Run 6, Trial 4 Delay;Temp_Disc_run6_trial4_delay
-Run 6, Trial 5 Delay;Temp_Disc_run6_trial5_delay
-Run 6, Trial 1 Response;Temp_Disc_run6_trial1_resp
-Run 6, Trial 2 Response;Temp_Disc_run6_trial2_resp
-Run 6, Trial 3 Response;Temp_Disc_run6_trial3_resp
-Run 6, Trial 4 Response;Temp_Disc_run6_trial4_resp
-Run 6, Trial 5 Response ;Temp_Disc_run6_trial5_resp
-Run 6 discount rate;Temp_Disc_run6_k
-Run 6 effective delay 50%;Temp_Disc_run6_ed50
-If no, reason;TOWRE_IncompleteReason
-Was administration of TOWRE screener valid?;TOWRE_Valid
-If invalid, for what reason?;TOWRE_Invalid_Reason
-Phonemic Decoding Efficiency Raw Score;TOWRE_PDE_Raw
-Phonemic Decoding Efficiency Scaled Score;TOWRE_PDE_Scaled
-Phonemic Decoding Efficiency Percentile Rank;TOWRE_PDE_Perc
-Phonemic Decoding Efficiency Age Equivalent;TOWRE_PDE_AE
-Phonemic Decoding Efficiency Grade Equivalent;TOWRE_PDE_GE
-Phonemic Decoding Efficiency Descriptive Term;TOWRE_PDE_Desc
-Sight Word Efficiency Raw Score;TOWRE_SWE_Raw
-Sight Word Efficiency Scaled Score;TOWRE_SWE_Scaled
-Sight Word Efficiency Percentile Rank;TOWRE_SWE_Perc
-Sight Word Efficiency Age Equivalent;TOWRE_SWE_AE
-Sight Word Efficiency Grade Equivalent;TOWRE_SWE_GE
-Sight Word Efficiency Descriptive Term;TOWRE_SWE_Desc
-Total Word Reading Efficiency Scaled Score;TOWRE_Total_Scaled
-Total Word Reading Efficiency Percentile Rank;TOWRE_Total_Perc
-Total Word Reading Efficiency Descriptive Term;TOWRE_Total_Desc
+1. Acts too young for his/her age;TRF_01
 2. Hums or makes other odd noises in class;TRF_02
 3. Argues a lot;TRF_03
 4. Fails to finish things he/she starts;TRF_04
@@ -5674,7 +5370,6 @@ Total Word Reading Efficiency Descriptive Term;TOWRE_Total_Desc
 113a. Please write in any problems the pupils has that were not listed above.;TRF_113a
 113b. Please write in any problems the pupils has that were not listed above.;TRF_113b
 113c. Please write in any problems the pupils has that were not listed above.;TRF_113c
-Syndrome Scale Scores;
 Aggressive Behavior Raw Score;TRF_AB
 Aggressive Behavior T-Score;TRF_AB_T
 Anxious/Depressed Raw Score;TRF_AD
@@ -5713,6 +5408,7 @@ Somatic Problems T-Score;TRF_DSM_SP_T
 Sluggish Cognitive Tempo Raw Score;TRF_SCT
 Obsessive-Compulsive Problems Raw Score;TRF_OCP
 Post-traumatic Stress Problems Raw Score;TRF_PTS
+"1. Aches or pains (without medical cause; do not include stomach or headaches)";TRF_P_01
 2. Acts too young for age;TRF_P_02
 3. Afraid to try new things;TRF_P_03
 4. Avoids looking others in the eye;TRF_P_04
@@ -5811,7 +5507,6 @@ Post-traumatic Stress Problems Raw Score;TRF_PTS
 97. Whining;TRF_P_97
 98. Withdrawn, doesn't get involved with others;TRF_P_98
 99. Worries;TRF_P_99
-Syndrome Scale Scores;
 Aggressive Behavior Raw Score;TRF_P_AB
 Aggressive Behavior T-Score;TRF_P_AB_T
 Anxious/Depressed Raw Score;TRF_P_AD
@@ -5841,6 +5536,7 @@ Oppositional Defiant Problems Raw Score;TRF_P_DSM_OD
 Oppositional Defiant Problems T-Score;TRF_P_DSM_OD_T
 Autism Spectrum Problems Raw Score;TRF_P_DSM_PD
 Autism Spectrum Problems T-Score;TRF_P_DSM_PD_T
+Communication- Receptive Subdomain Raw Score;VL_Comm1_Raw
 Communication- Receptive Subdomain Total Scaled Score;VL_Comm1_Scale
 Communication- Expressive Subdomain Raw Score;VL_Comm2_Raw
 Communication- Expressive Subdomain Total Scaled Score;VL_Comm2_Scale
@@ -5867,6 +5563,7 @@ Socialization Coping Skills Subdomain Scaled Score;VL_Social3_Scale
 Socialization Total Scaled Score;VL_Social_Stnd
 Socialization Total Domain Standard Score;VL_Social_Scale
 Socialization Percentile Rank;VL_Social_Rank
+Was WAIS completed?;WAIS_Complete
 If no, reason:;WAIS_incomplete_reason
 Was administration of WAIS valid?;WAIS_Valid
 If invalid, reason:;WAIS_Invalid_Reason
@@ -5930,6 +5627,7 @@ Perceptual Reasoning Index Descriptive Range;WAIS_PRI_RANGE
 Working Memory Index Descriptive Range;WAIS_WMI_RANGE
 Processing Speed Index Descriptive Range;WAIS_PSI_RANGE
 Full Scale IQ Descriptive Range;WAIS_FSIQ_RANGE
+Was WAIS completed?;WAIS_Complete
 If no, reason:;WAIS_incomplete_reason
 Was WAIS valid?;WAIS_Valid
 If no, reason:;WAIS_Invalid_Reason
@@ -5948,6 +5646,7 @@ Digit Span Symbol Search Scaled Score;WAIS_SYM_S
 Processing Speed Sum of Scaled Scores;WAIS_PSI_Sum
 Processing Speed Index Composite;WAIS_PSI_Comp
 Processing Speed Index Percentile;WAIS_PSI_P
+Was WASI completed?;WASI_Complete
 If no, reason:;WASI_incomplete_reason
 Was this administration valid?;WASI_Valid
 If no, reason:;WASI_Invalid_Reason
@@ -5971,6 +5670,7 @@ Block Design T Score;WASI_BD_T
 Full Scale IQ;WASI_FSIQ
 Full Scale IQ Percentile;WASI_FSIQ_P
 Full Scale Sum of T-Scores;Full_Scale
+In the past 30 days, how much difficulty did your child have in standing for long periods such as 30 minutes?;WHODAS_P_01
 In the past 30 days, how much difficulty did your child have in taking care of his/her household responsibilities?;WHODAS_P_02
 In the past 30 days, how much difficulty did your child have in learning a new task, for example, learning how to get to a new place?;WHODAS_P_03
 In the past 30 days, how much difficulty did your child have in how much of a problem did he/she have joining in community activities (e.g., festivities, religious, etc) in the same way as anyone else can?;WHODAS_P_04
@@ -5986,6 +5686,7 @@ Overall, in the past 30 days, how many days were these difficulties present?;WHO
  In the past 30 days, for how many days was he/she totally unable to carry out his/her usual activities or work because of any health condition?;WHODAS_P_Days02
 In the past 30 days, not counting the days that he/she was totally unable, for how many days did he/she cut back or reduce his/her usual activities or work because of any health condition?;WHODAS_P_Days03
 WHODAS_P Score;WHODAS_P_Score
+In the past 30 days, how much difficulty did you have in standing for long periods such as 30 minutes?;WHODAS_SR_01
 In the past 30 days, how much difficulty did you have in taking care of your household responsibilities?;WHODAS_SR_02
 In the past 30 days, how much difficulty did you have in learning a new task, for example, learning how to get to a new place?;WHODAS_SR_03
 In the past 30 days, how much of a problem did you have joining in community activities (e.g., festivities, religious, or other) in the same way as anyone else can?;WHODAS_SR_04
@@ -6001,6 +5702,7 @@ Overall, in the past 30 days, how many days were these difficulties present?;WHO
 In the past 30 days, for how many days were you totally unable to carry out your usual activities or work because of any health condition?;WHODAS_SR_Days03
 In the past 30 days, not counting the days that you were totally unable, for how many days did you cut back or reduce your usual activities or work because of any health condition?;WHODAS_SR_Days02
 WHODAS_SR Score;WHODAS_SR_Score
+Was WIAT completed?;WIAT_Complete
 If no, reason:;WIAT_Incomplete_reason
 Was this administration valid?;WIAT_Valid
 If no, reason:;WIAT_Invalid_Reason
@@ -6030,7 +5732,6 @@ Reading Comprehension Percentile Rank;WIAT_RC_P
 Math Problem Solving Raw Score;WIAT_MP_Raw
 Math Problem Solving Standard Score;WIAT_MP_Stnd
 Math Problem Solving Percentile Rank;WIAT_MP_P
-If no, reason;incomplete _reason
 Block Design Raw Score;WISC_BD_Raw
 Block Design Scaled Score;WISC_BD_Scaled
 Similarities Raw Score;WISC_Similarities_Raw
@@ -6069,6 +5770,7 @@ Processing Speed Percentile Rank;WISC_PSI_Percentile
 Full Scale Sum of Scaled Scores;WISC_FSIQ_Sum
 FSIQ Composite Score;WISC_FSIQ
 Full Scale Percentile Rank;WISC_FSIQ_Percentile
+1. I find that when I start eating certain foods, I end up eating much more than planned;YFAS_01
 2. I find myself continuing to consume certain foods even though I am no longer hungry;YFAS_02
 3. I eat to the point where I feel physically ill;YFAS_03
 4. Not eating certain types of food or cutting down on certain types of food is something I worry about;YFAS_04
@@ -6133,7 +5835,7 @@ Use causes clinically significant impairment;YFAS_Score_08
 4. I worry about eating too much food.;YFAS_04
 5. I feel tired a lot because I eat too much.;YFAS_05
 6. I eat food all day long.;YFAS_06
-7. If I can not find a food I want, I will try hard to get it (ex. ask a friend to get it for me, find a vending machine, sneak food when people aren’t looking;YFAS_07
+7. If I can not find a food I want, I will try hard to get it (ex. ask a friend to get it for me, find a vending machine, sneak food when people aren���t l;YFAS_07
 8. I eat food rather than do other things I like (ex. play, hang out with friends).;YFAS_08
 9. I eat so much that I feel bad afterwards. I feel so bad that I do not do things I like (ex. play, hang out with friends).;YFAS_09
 10. I avoid places that have a lot of food, because I might eat too much.;YFAS_10
@@ -6160,6 +5862,7 @@ Use continues despite knowledge of adverse consequences (e.g. failure to fulfill
 "Tolerance (marked increase in amount; marked decrease in effect)";YFAS_Score_06
 "Characteristic withdrawal symptoms; substance taken no relieve withdrawal";YFAS_Score_07
 Use causes clinically significant impairment;YFAS_Score_08
+1. I act too young for my age;YSR_01
 2. I drink alcohol without my parents' approval (describe):;YSR_02
 3. I argue a lot;YSR_03
 4. I fail to finish things that I start;YSR_04
@@ -6302,3 +6005,129 @@ Other Problems;YSR_OP
 C Score;YSR_C
 Total Raw Score;YSR_Total
 Total T-Score;YSR_Total_T
+1. Feels sad and down most days for at least 1 week (Current);CSC_01C
+1. Feels sad and down most days for at least 1 week (Past);CSC_01P
+2. Often feels annoyed and irritated (Current);CSC_02C
+2. Often feels annoyed and irritated (Past);CSC_02P
+3. Has a loss of interest in previously enjoyable activities (Current);CSC_03C
+3. Has a loss of interest in previously enjoyable activities (Past);CSC_03P
+4. Often feels overly happy and silly, above and beyond a normal feeling (Current);CSC_04C
+4. Often feels overly happy and silly, above and beyond a normal feeling (Past);CSC_04P
+5. Has strong and explosive feelings of anger (Current);CSC_05C
+5. Has strong and explosive feelings of anger (Past);CSC_05P
+6. Has periods of unusual energy and activity (Current);CSC_06C
+6. Has periods of unusual energy and activity (Past);CSC_06P
+7. Has times when he/she sleeps much less than usual but still feels rested (Current);CSC_07C
+7. Has times when he/she sleeps much less than usual but still feels rested (Past);CSC_07P
+8. Has times when he/she is much more interested in sex than usual (Current);CSC_08C
+8. Has times when he/she is much more interested in sex than usual (Past);CSC_08P
+9. Hears, sees, or smells things that other people cannot (Current);CSC_09P
+9. Hears, sees, or smells things that other people cannot (Past);CSC_09C
+10. Has unusual thoughts or beliefs that others cannot understand or believe (Current);CSC_10C
+10. Has unusual thoughts or beliefs that others cannot understand or believe (Past);CSC_10P
+11. Has anxiety attacks, where out of the blue he/she suddenly feels scared (Current);CSC_11C
+11. Has anxiety attacks, where out of the blue he/she suddenly feels scared (Past);CSC_11P
+12 Feels very afraid of being in a crowded place, or going outside in public alone (Current);CSC_12C
+12 Feels very afraid of being in a crowded place, or going outside in public alone (Past);CSC_12P
+13. Feels very afraid of being on a bridge or traveling in a car, bus, or train (Current);CSC_13C
+13. Feels very afraid of being on a bridge or traveling in a car, bus, or train (Past);CSC_13P
+14. Worries about being separated from parent/guardian because of getting lost or kidnapped (Current);CSC_14C
+14. Worries about being separated from parent/guardian because of getting lost or kidnapped (Past);CSC_14P
+15. Worries excessively about harm occuring to parents/guardians (Current);CSC_15C
+15. Worries excessively about harm occuring to parents/guardians (Past);CSC_15P
+16. Often does not want to go to school, due to worry about parent/guardian separation  (Current);CSC_16C
+16. Often does not want to go to school, due to worry about parent/guardian separation  (Past);CSC_16P
+17. Often has trouble going to sleep without parent/guardian nearby (Current);CSC_17C
+17. Often has trouble going to sleep without parent/guardian nearby (Past);CSC_17P
+18. Is afraid of being alone at home or in a different room than parent/guardian (Current);CSC_18C
+18. Is afraid of being alone at home or in a different room than parent/guardian (Past);CSC_18P
+19. Often feels very nervous around people (Current);CSC_19C
+19. Often feels very nervous around people (Past);CSC_19P
+20. Often feels very nervous when he/she has to do things in front of others (Current);CSC_20C
+20. Often feels very nervous when he/she has to do things in front of others (Past);CSC_20P
+21. Is unable to speak in specific situations, such as school, despite being able to speak without a problem in other situations (Current);CSC_21C
+21. Is unable to speak in specific situations, such as school, despite being able to speak without a problem in other situations (Past);CSC_21P
+22. Has intense fears of specific animals, situations, or anything else (Current);CSC_22C
+22. Has intense fears of specific animals, situations, or anything else (Past);CSC_22P
+23. Worries most days of the week (Current);CSC_23C
+23. Worries most days of the week (Past);CSC_23P
+24. Often misses school or other activities because he/she doesn't feel well (Current);CSC_24C
+24. Often misses school or other activities because he/she doesn't feel well (Past);CSC_24P
+25. Feels very nervous and unable to relax most days of the week (Current);CSC_25C
+25. Feels very nervous and unable to relax most days of the week (Past);CSC_25P
+26. Is bothered by thoughts which keep coming into his/her head for no reason (Current);CSC_26C
+26. Is bothered by thoughts which keep coming into his/her head for no reason (Past);CSC_26P
+27. Feels like he/she has to do certain things in a very specific way (handwashing, checking, doing things multiple times) (Current);CSC_27C
+27. Feels like he/she has to do certain things in a very specific way (handwashing, checking, doing things multiple times) (Past);CSC_27P
+28. Often has accidents when he/she wets the bed or self during the day (Current);CSC_28C
+28. Often has accidents when he/she wets the bed or self during the day (Past);CSC_28P
+29. Often has accidents when he/she soild the bed or self during the day (Current);CSC_29C
+29. Often has accidents when he/she soild the bed or self during the day (Past);CSC_29P
+30. Feels extremely worried about gaining weight or becoming fat (Current);CSC_30C
+30. Feels extremely worried about gaining weight or becoming fat (Past);CSC_30P
+31. Is underweight for his/her age and height (Current);CSC_31C
+31. Is underweight for his/her age and height (Past);CSC_31P
+32. Uses diet pills, throws up, or works out excessively to try to lose weight (Current);CSC_32C
+32. Uses diet pills, throws up, or works out excessively to try to lose weight (Past);CSC_32P
+33. Has frequent eating binges, and it feels out of control (Current);CSC_33C
+33. Has frequent eating binges, and it feels out of control (Past);CSC_33P
+34. Has trouble paying attention, and it affects school work or performance (Current);CSC_34C
+34. Has trouble paying attention, and it affects school work or performance (Past);CSC_34P
+35. Is often easily distracted (Current);CSC_35C
+35. Is often easily distracted (Past);CSC_35P
+36. Has difficulty remaining seated at home or school (Current);CSC_36C
+36. Has difficulty remaining seated at home or school (Past);CSC_36P
+37. Often acts before thinking (Current);CSC_37C
+37. Often acts before thinking (Past);CSC_37P
+38. Often becomes really upset and loses his/her temper (Current);CSC_38C
+38. Often becomes really upset and loses his/her temper (Past);CSC_38P
+39. Argues or talks back to adults, more than others his/her age (Current);CSC_39C
+39. Argues or talks back to adults, more than others his/her age (Past);CSC_39P
+40. Actively disobeys or doesn't listen to adult rules (Current);CSC_40C
+40. Actively disobeys or doesn't listen to adult rules (Past);CSC_40P
+41. Frequently lies (Current);CSC_41C
+41. Frequently lies (Past);CSC_41P
+42. Has skipped a part or a whole day of school (Current);CSC_42C
+42. Has skipped a part or a whole day of school (Past);CSC_42P
+43. Frequently starts physical fights with peers (Current);CSC_43C
+43. Frequently starts physical fights with peers (Past);CSC_43P
+44. Bullies, threatens, or intimidates others (Current);CSC_44C
+44. Bullies, threatens, or intimidates others (Past);CSC_44P
+45. Has stolen or shoplifted items (Current);CSC_45C
+45. Has stolen or shoplifted items (Past);CSC_45P
+46. Notices muscles moving uncontrollably (blinking a lot, shrugging) (Current);CSC_46C
+46. Notices muscles moving uncontrollably (blinking a lot, shrugging) (Past);CSC_46P
+47. Makes noises that he/she can't control (repeating sounds, sniffing) (Current);CSC_47C
+47. Makes noises that he/she can't control (repeating sounds, sniffing) (Past);CSC_47P
+48. Has unusual physical mannerisms (rocked body or flapping hands) (Current);CSC_48C
+48. Has unusual physical mannerisms (rocked body or flapping hands) (Past);CSC_48P
+49. Feels really upset when there is an unexpected change in his/her schedule (Current);CSC_49C
+49. Feels really upset when there is an unexpected change in his/her schedule (Past);CSC_49P
+50. Is preoccupied with very specific objects, routines, or interests (Current);CSC_50C
+50. Is preoccupied with very specific objects, routines, or interests (Past);CSC_50P
+51. Often has a difficult time making eye contact (Current);CSC_51C
+51. Often has a difficult time making eye contact (Past);CSC_51P
+52. Has a hard time expressing feelings on his/her face during social interactions (Current);CSC_52C
+52. Has a hard time expressing feelings on his/her face during social interactions (Past);CSC_52P
+53. Smokes or chews tobacco (Current);CSC_53C
+53. Smokes or chews tobacco (Past);CSC_53P
+54. Drinks alcohol (Current);CSC_54C
+54. Drinks alcohol (Past);CSC_54P
+     a. Cannabis (marijuana, pot, hash, THC) (Current);CSC_55aC
+     a. Cannabis (marijuana, pot, hash, THC) (Past);CSC_55aP
+     b. Stimulants (speed, amphetamines, dexedrine, diet pills, crystal meth) (Current);CSC_55bC
+     b. Stimulants (speed, amphetamines, dexedrine, diet pills, crystal meth) (Past);CSC_55bP
+     c. Sedatives/Hypnotics (barbiturates, quaalude, valium, xanax) (Current);CSC_55cC
+     c. Sedatives/Hypnotics (barbiturates, quaalude, valium, xanax) (Past);CSC_55cP
+     d. Cocaine (coke, crack) (Current);CSC_55dC
+     d. Cocaine (coke, crack) (Past);CSC_55dP
+     e. Opioids (heroin, morphine, codeine, methadone, percodan, oxycotin) (Current);CSC_55eC
+     e. Opioids (heroin, morphine, codeine, methadone, percodan, oxycotin) (Past);CSC_55eP
+     f. PCP (angel dust) (Current);CSC_55fC
+     f. PCP (angel dust) (Past);CSC_55fP
+     g. Hallucinogens (psychedelics, LSD, mescaline, peyote) (Current);CSC_55gC
+     g. Hallucinogens (psychedelics, LSD, mescaline, peyote) (Past);CSC_55gP
+     h. Solvents/Inhalants (glue, gasoline, chloroform, ether, paint) (Current);CSC_55hC
+     h. Solvents/Inhalants (glue, gasoline, chloroform, ether, paint) (Past);CSC_55hP
+     i. Other (prescription drugs, nitrous oxide, ecstasy, MDMA, etc.) (Current);CSC_55iC
+     i. Other (prescription drugs, nitrous oxide, ecstasy, MDMA, etc.) (Past);CSC_55iP
