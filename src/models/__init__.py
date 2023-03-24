@@ -5,4 +5,4 @@ from models.helpers.get_feature_subsets_from_sfs import get_feature_subsets_from
 from models.helpers.get_performance_on_feature_subsets import get_performances_on_feature_subsets
 from models.helpers.idenitfy_thresholds import calculate_thresholds
 from models.helpers.file_helpers import *
-from models.helpers.print_top_features_from_lr import *
+from models.helpers.lr_coefficients_helpers import *
