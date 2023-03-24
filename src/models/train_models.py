@@ -238,6 +238,13 @@ def dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_cla
     dump(scores_of_best_classifiers, dirs["reports_dir"]+'scores-of-best-classifiers.joblib', compress=1)
     dump(sds_of_scores_of_best_classifiers, dirs["reports_dir"]+'sds-of-scores-of-best-classifiers.joblib', compress=1)
 
+def save_coefficients_of_lr_models(best_classifiers, datasets, diag_cols, output_dir):
+    for diag in diag_cols:
+        best_classifier = best_classifiers[diag]
+        if util.get_base_model_name_from_pipeline(best_classifier) == "logisticregression":
+            X_train = datasets[diag]["X_train_train"]
+            models.save_coefficients_from_lr(diag, best_classifier, X_train, output_dir)
+
 def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_file = 1):
     models_from_file = int(models_from_file)
     use_other_diags_as_input = int(use_other_diags_as_input)
@@ -258,7 +265,8 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
     diag_cols = find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set)
     if DEBUG_MODE: # Only use first two diagnoses for debugging
         print(diag_cols)
-        #diag_cols = diag_cols[-2:]
+        diag_cols = diag_cols[-1:]
+        #diag_cols = diag_cols
     print(diag_cols)
 
     if models_from_file == 1:
@@ -286,9 +294,13 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
         # Save best classifiers and thresholds 
         dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers)
        
+    # Build and save dataframe of best classifiers and their scores
     df_of_best_classifiers_and_their_score_sds = build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers, full_dataset)
     df_of_best_classifiers_and_their_score_sds.to_csv(dirs["reports_dir"] + "df_of_best_classifiers_and_their_scores.csv")
     print(df_of_best_classifiers_and_their_score_sds)
+
+    # Save feature coefficients for logistic regression models
+    save_coefficients_of_lr_models(best_classifiers, datasets, diag_cols, dirs["reports_dir"])
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], sys.argv[3])
