@@ -198,13 +198,13 @@ def main(models_from_file = 1):
 
     feature_subsets = load(dirs["input_reports_dir"]+'feature-subsets.joblib')
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
-    best_classifiers = load(dirs["input_models_dir"]+'best-classifiers.joblib')
+    best_estimators = load(dirs["input_models_dir"]+'best-estimators.joblib')
 
     if DEBUG_MODE == True:
         # In debug mode, only use first diagnosis
         datasets = {list(datasets.keys())[0]: datasets[list(datasets.keys())[0]]}
         feature_subsets = {list(feature_subsets.keys())[0]: feature_subsets[list(feature_subsets.keys())[0]]}
-        best_classifiers = {list(best_classifiers.keys())[0]: best_classifiers[list(best_classifiers.keys())[0]]}
+        best_estimators = {list(best_estimators.keys())[0]: best_estimators[list(best_estimators.keys())[0]]}
 
     if models_from_file == 1:
         load_dirs = set_up_load_directories()
@@ -218,7 +218,7 @@ def main(models_from_file = 1):
         dump(cv_scores_on_feature_subsets, dirs["output_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
         dump(optimal_thresholds, dirs["output_reports_dir"]+'optimal-thresholds.joblib')
     else:
-        performances_on_feature_subsets, cv_scores_on_feature_subsets, optimal_thresholds = models.get_performances_on_feature_subsets(feature_subsets, datasets, best_classifiers, use_test_set = 1)
+        performances_on_feature_subsets, cv_scores_on_feature_subsets, optimal_thresholds = models.get_performances_on_feature_subsets(feature_subsets, datasets, best_estimators, use_test_set = 1)
         dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
         dump(cv_scores_on_feature_subsets, dirs["output_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
         dump(optimal_thresholds, dirs["output_reports_dir"]+'optimal-thresholds.joblib')

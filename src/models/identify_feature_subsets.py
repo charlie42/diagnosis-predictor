@@ -44,20 +44,20 @@ def set_up_load_directories():
     load_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir+ "reports/identify_feature_subsets/")
     return {"load_reports_dir": load_reports_dir}
 
-def get_feature_subsets(best_classifiers, datasets, number_of_features_to_check, dirs):
+def get_feature_subsets(best_estimators, datasets, number_of_features_to_check, dirs):
     feature_subsets = {}
-    for diag in best_classifiers.keys():
-        base_model_type = util.get_base_model_name_from_pipeline(best_classifiers[diag])
-        base_model = util.get_estimator_from_pipeline(best_classifiers[diag])
+    for diag in best_estimators.keys():
+        base_model_type = util.get_base_model_name_from_pipeline(best_estimators[diag])
+        base_model = util.get_estimator_from_pipeline(best_estimators[diag])
         print(diag, base_model_type)
         if DEBUG_MODE and base_model_type != "logisticregression": # Don't do RF models in debug mode, takes long
             continue
         # If base model is exposes feature importances, use RFE to get first 50 feature, then use SFS to get the rest.
         if not (base_model_type == "svc" and base_model.kernel != "linear"):
-            feature_subsets[diag] = models.get_feature_subsets_from_rfe_then_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
+            feature_subsets[diag] = models.get_feature_subsets_from_rfe_then_sfs(diag, best_estimators, datasets, number_of_features_to_check)
         # If base model doesn't expose feature importances, use SFS to get feature subsets directly (will take very long)
         else:
-            feature_subsets[diag] = models.get_feature_subsets_from_sfs(diag, best_classifiers, datasets, number_of_features_to_check)
+            feature_subsets[diag] = models.get_feature_subsets_from_sfs(diag, best_estimators, datasets, number_of_features_to_check)
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
     return feature_subsets
 
@@ -97,7 +97,7 @@ def main(number_of_features_to_check = 126, importances_from_file = 0):
 
     dirs = set_up_directories()
 
-    best_classifiers = load(dirs["models_dir"]+'best-classifiers.joblib')
+    best_estimators = load(dirs["models_dir"]+'best-estimators.joblib')
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
 
     if importances_from_file == 1:
@@ -107,7 +107,7 @@ def main(number_of_features_to_check = 126, importances_from_file = 0):
         # Save reports to newly created directories
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
     else:
-        feature_subsets = get_feature_subsets(best_classifiers, datasets, number_of_features_to_check, dirs)
+        feature_subsets = get_feature_subsets(best_estimators, datasets, number_of_features_to_check, dirs)
         
     write_feature_subsets_to_text_file(feature_subsets, dirs["output_reports_dir"])
     
