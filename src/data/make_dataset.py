@@ -275,7 +275,7 @@ def remove_irrelavent_missing_markers(data_up_to_dropped, data_up_to_dropped_ite
         
     for col in was_missing_col_originals:
         if col not in data_up_to_dropped_total_scores.columns and col +"_WAS_MISSING" in data_up_to_dropped_total_scores.columns:
-            data_up_to_SCARED_total_scores = data_up_to_dropped_total_scores.drop(col+"_WAS_MISSING", axis=1)
+            data_up_to_dropped_total_scores = data_up_to_dropped_total_scores.drop(col+"_WAS_MISSING", axis=1)
         
     for col in was_missing_col_originals:
         if col not in data_up_to_dropped_subscale_scores.columns and col +"_WAS_MISSING" in data_up_to_dropped_subscale_scores.columns:
@@ -291,22 +291,22 @@ def export_datasets(data_up_to_dropped, data_up_to_dropped_item_lvl, data_up_to_
     for impairment_assessment in  impairment_assessments:
         impairment_columns.extend([x for x in data_up_to_dropped if x.startswith(impairment_assessment) and x not in ["WHODAS_P,WHODAS_P_Total", "CIS_P,CIS_P_Score", "WHODAS_SR,WHODAS_SR_Score", "CIS_SR,CIS_SR_Total"]])
 
-    data_up_to_SCARED_item_lvl_wo_impairment = data_up_to_dropped_item_lvl[[x for x in data_up_to_dropped_item_lvl.columns if x not in impairment_columns]]
-    data_up_to_SCARED_subscale_scores_wo_impairment = data_up_to_dropped_subscale_scores[[x for x in data_up_to_dropped_subscale_scores.columns if x not in impairment_columns]]
-    data_up_to_SCARED_total_scores_wo_impairment = data_up_to_dropped_total_scores[[x for x in data_up_to_dropped_total_scores.columns if x not in impairment_columns]]
+    data_up_to_dropped_item_lvl_wo_impairment = data_up_to_dropped_item_lvl[[x for x in data_up_to_dropped_item_lvl.columns if x not in impairment_columns]]
+    data_up_to_dropped_subscale_scores_wo_impairment = data_up_to_dropped_subscale_scores[[x for x in data_up_to_dropped_subscale_scores.columns if x not in impairment_columns]]
+    data_up_to_dropped_total_scores_wo_impairment = data_up_to_dropped_total_scores[[x for x in data_up_to_dropped_total_scores.columns if x not in impairment_columns]]
 
-    data_up_to_SCARED_item_lvl_wo_impairment.to_csv(data_output_dir + "item_lvl_wo_impairment.csv", index=False)
-    data_up_to_SCARED_subscale_scores_wo_impairment.to_csv(data_output_dir + "subscale_scores_wo_impairment.csv", index=False)
-    data_up_to_SCARED_total_scores_wo_impairment.to_csv(data_output_dir + "total_scores_wo_impairment.csv", index=False)
+    data_up_to_dropped_item_lvl_wo_impairment.to_csv(data_output_dir + "item_lvl_wo_impairment.csv", index=False)
+    data_up_to_dropped_subscale_scores_wo_impairment.to_csv(data_output_dir + "subscale_scores_wo_impairment.csv", index=False)
+    data_up_to_dropped_total_scores_wo_impairment.to_csv(data_output_dir + "total_scores_wo_impairment.csv", index=False)
 
     ## Predicting diagnoses
-    data_up_to_SCARED_item_lvl_w_impairment = data_up_to_dropped_item_lvl
-    data_up_to_SCARED_subscale_scores_w_impairment = data_up_to_dropped_subscale_scores
-    data_up_to_SCARED_total_scores_w_impairment = data_up_to_dropped_total_scores
+    data_up_to_dropped_item_lvl_w_impairment = data_up_to_dropped_item_lvl
+    data_up_to_dropped_subscale_scores_w_impairment = data_up_to_dropped_subscale_scores
+    data_up_to_dropped_total_scores_w_impairment = data_up_to_dropped_total_scores
 
-    data_up_to_SCARED_item_lvl_w_impairment.to_csv(data_output_dir + "item_lvl_w_impairment.csv", index=False)
-    data_up_to_SCARED_subscale_scores_w_impairment.to_csv(data_output_dir + "subscale_scores_w_impairment.csv", index=False)
-    data_up_to_SCARED_total_scores_w_impairment.to_csv(data_output_dir + "total_scores_w_impairment.csv", index=False)
+    data_up_to_dropped_item_lvl_w_impairment.to_csv(data_output_dir + "item_lvl_w_impairment.csv", index=False)
+    data_up_to_dropped_subscale_scores_w_impairment.to_csv(data_output_dir + "subscale_scores_w_impairment.csv", index=False)
+    data_up_to_dropped_total_scores_w_impairment.to_csv(data_output_dir + "total_scores_w_impairment.csv", index=False)
 
 def main(only_assessment_distribution, first_assessment_to_drop):
     only_assessment_distribution = int(only_assessment_distribution)
