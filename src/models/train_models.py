@@ -139,7 +139,7 @@ def get_base_models_and_param_grids():
     
     return base_models_and_param_grids
 
-def get_best_classifier(base_model, grid, X_train, y_train):
+def get_best_estimator(base_model, grid, X_train, y_train):
     cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 8)
     rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
     
@@ -156,35 +156,35 @@ def get_best_classifier(base_model, grid, X_train, y_train):
 
     return (best_estimator, best_score, sd_of_score_of_best_estimator)
 
-def find_best_classifier_for_diag_and_its_score(X_train, y_train, performance_margin):
+def find_best_estimator_for_diag_and_its_score(X_train, y_train, performance_margin):
     base_models_and_param_grids = get_base_models_and_param_grids()
-    best_classifiers_and_scores = []
+    best_estimators_and_scores = []
     
     for (base_model, grid) in base_models_and_param_grids:
-        best_classifier_for_model, best_score_for_model, sd_of_score_of_best_estimator_for_model = get_best_classifier(base_model, grid, X_train, y_train)
+        best_estimator_for_model, best_score_for_model, sd_of_score_of_best_estimator_for_model = get_best_estimator(base_model, grid, X_train, y_train)
         model_type = list(base_model.named_steps.keys())[-1]
-        best_classifiers_and_scores.append([model_type, best_classifier_for_model, best_score_for_model, sd_of_score_of_best_estimator_for_model])
+        best_estimators_and_scores.append([model_type, best_estimator_for_model, best_score_for_model, sd_of_score_of_best_estimator_for_model])
     
-    best_classifiers_and_scores = pd.DataFrame(best_classifiers_and_scores, columns = ["Model type", "Best classifier", "Best score", "SD of best score"])
-    print(best_classifiers_and_scores)
-    best_classifier = best_classifiers_and_scores.sort_values("Best score", ascending=False)["Best classifier"].iloc[0]
-    best_score = best_classifiers_and_scores[best_classifiers_and_scores["Best classifier"] == best_classifier]["Best score"].iloc[0]
-    sd_of_score_of_best_classifier = best_classifiers_and_scores[best_classifiers_and_scores["Best classifier"] == best_classifier]["SD of best score"].iloc[0]
+    best_estimators_and_scores = pd.DataFrame(best_estimators_and_scores, columns = ["Model type", "Best estimator", "Best score", "SD of best score"])
+    print(best_estimators_and_scores)
+    best_estimator = best_estimators_and_scores.sort_values("Best score", ascending=False)["Best estimator"].iloc[0]
+    best_score = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["Best score"].iloc[0]
+    sd_of_score_of_best_estimator = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["SD of best score"].iloc[0]
     
     # If LogisticRegression is not much worse than the best model, prefer LogisticRegression (much faster than rest)
-    best_base_model = best_classifiers_and_scores[best_classifiers_and_scores["Best classifier"] == best_classifier]["Model type"].iloc[0]
+    best_base_model = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["Model type"].iloc[0]
     if best_base_model != "logisticregression":
-        lr_score = best_classifiers_and_scores[best_classifiers_and_scores["Model type"] == "logisticregression"]["Best score"].iloc[0]
+        lr_score = best_estimators_and_scores[best_estimators_and_scores["Model type"] == "logisticregression"]["Best score"].iloc[0]
         print("lr_score: ", lr_score, "; best_score: ", best_score)
         if best_score - lr_score <= performance_margin:
-            best_classifier = best_classifiers_and_scores[best_classifiers_and_scores["Model type"] == "logisticregression"]["Best classifier"].iloc[0]
-            best_score = best_classifiers_and_scores[best_classifiers_and_scores["Best classifier"] == best_classifier]["Best score"].iloc[0]
-            sd_of_score_of_best_classifier = best_classifiers_and_scores[best_classifiers_and_scores["Best classifier"] == best_classifier]["SD of best score"].iloc[0]
+            best_estimator = best_estimators_and_scores[best_estimators_and_scores["Model type"] == "logisticregression"]["Best estimator"].iloc[0]
+            best_score = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["Best score"].iloc[0]
+            sd_of_score_of_best_estimator = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["SD of best score"].iloc[0]
         
-    print("best classifier:")
-    print(best_classifier)
+    print("best estimator:")
+    print(best_estimator)
     
-    return best_classifier, best_score, sd_of_score_of_best_classifier
+    return best_estimator, best_score, sd_of_score_of_best_estimator
 
 def find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set):
     diags_w_enough_positive_examples_in_val_set = []
@@ -197,53 +197,53 @@ def find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, sp
             diags_w_enough_positive_examples_in_val_set.append(diag)
     return diags_w_enough_positive_examples_in_val_set
 
-# Find best classifier
-def find_best_classifiers_and_scores(datasets, diag_cols, performance_margin):
-    best_classifiers = {}
-    scores_of_best_classifiers = {}
-    sds_of_scores_of_best_classifiers = {}
+# Find best estimator
+def find_best_estimators_and_scores(datasets, diag_cols, performance_margin):
+    best_estimators = {}
+    scores_of_best_estimators = {}
+    sds_of_scores_of_best_estimators = {}
     for diag in diag_cols:
         print(diag)
 
         X_train = datasets[diag]["X_train_train"]
         y_train = datasets[diag]["y_train_train"]
         
-        best_classifier_for_diag, best_score_for_diag, sd_of_score_of_best_classifier_for_diag = find_best_classifier_for_diag_and_its_score(X_train, y_train, performance_margin)
-        best_classifiers[diag] = best_classifier_for_diag
-        sds_of_scores_of_best_classifiers[diag] = sd_of_score_of_best_classifier_for_diag
-        scores_of_best_classifiers[diag] = best_score_for_diag
+        best_estimator_for_diag, best_score_for_diag, sd_of_score_of_best_estimator_for_diag = find_best_estimator_for_diag_and_its_score(X_train, y_train, performance_margin)
+        best_estimators[diag] = best_estimator_for_diag
+        sds_of_scores_of_best_estimators[diag] = sd_of_score_of_best_estimator_for_diag
+        scores_of_best_estimators[diag] = best_score_for_diag
 
-        if DEBUG_MODE and util.get_base_model_name_from_pipeline(best_classifiers[diag]) == "logisticregression":
+        if DEBUG_MODE and util.get_base_model_name_from_pipeline(best_estimators[diag]) == "logisticregression":
             # In debug mode print top features from LR
-            models.print_top_features_from_lr(best_classifiers[diag], X_train, 10)
+            models.print_top_features_from_lr(best_estimators[diag], X_train, 10)
             
-    return best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers
+    return best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators
 
-def build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers, full_dataset):
-    best_classifiers_and_score_sds = []
-    for diag in best_classifiers.keys():
-        best_classifier = best_classifiers[diag]
-        score_of_best_classifier = scores_of_best_classifiers[diag]
-        sd_of_score_of_best_classifier = sds_of_scores_of_best_classifiers[diag]
-        model_type = util.get_base_model_name_from_pipeline(best_classifier)
+def build_df_of_best_estimators_and_their_score_sds(best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators, full_dataset):
+    best_estimators_and_score_sds = []
+    for diag in best_estimators.keys():
+        best_estimator = best_estimators[diag]
+        score_of_best_estimator = scores_of_best_estimators[diag]
+        sd_of_score_of_best_estimator = sds_of_scores_of_best_estimators[diag]
+        model_type = util.get_base_model_name_from_pipeline(best_estimator)
         number_of_positive_examples = full_dataset[diag].sum()
-        best_classifiers_and_score_sds.append([diag, model_type, best_classifier, score_of_best_classifier, sd_of_score_of_best_classifier, number_of_positive_examples])
-    best_classifiers_and_score_sds = pd.DataFrame(best_classifiers_and_score_sds, columns = ["Diag", "Model type", "Best classifier", "Best score", "SD of best score", "Number of positive examples"])
-    best_classifiers_and_score_sds["Score - SD"] = best_classifiers_and_score_sds['Best score'] - best_classifiers_and_score_sds['SD of best score'] 
-    return best_classifiers_and_score_sds
+        best_estimators_and_score_sds.append([diag, model_type, best_estimator, score_of_best_estimator, sd_of_score_of_best_estimator, number_of_positive_examples])
+    best_estimators_and_score_sds = pd.DataFrame(best_estimators_and_score_sds, columns = ["Diag", "Model type", "Best estimator", "Best score", "SD of best score", "Number of positive examples"])
+    best_estimators_and_score_sds["Score - SD"] = best_estimators_and_score_sds['Best score'] - best_estimators_and_score_sds['SD of best score'] 
+    return best_estimators_and_score_sds
 
-def dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers):
+def dump_estimators_and_performances(dirs, best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators):
     print(dirs["models_dir"])
-    dump(best_classifiers, dirs["models_dir"]+'best-classifiers.joblib', compress=1)
-    dump(scores_of_best_classifiers, dirs["reports_dir"]+'scores-of-best-classifiers.joblib', compress=1)
-    dump(sds_of_scores_of_best_classifiers, dirs["reports_dir"]+'sds-of-scores-of-best-classifiers.joblib', compress=1)
+    dump(best_estimators, dirs["models_dir"]+'best-estimators.joblib', compress=1)
+    dump(scores_of_best_estimators, dirs["reports_dir"]+'scores-of-best-estimators.joblib', compress=1)
+    dump(sds_of_scores_of_best_estimators, dirs["reports_dir"]+'sds-of-scores-of-best-estimators.joblib', compress=1)
 
-def save_coefficients_of_lr_models(best_classifiers, datasets, diag_cols, output_dir):
+def save_coefficients_of_lr_models(best_estimators, datasets, diag_cols, output_dir):
     for diag in diag_cols:
-        best_classifier = best_classifiers[diag]
-        if util.get_base_model_name_from_pipeline(best_classifier) == "logisticregression":
+        best_estimator = best_estimators[diag]
+        if util.get_base_model_name_from_pipeline(best_estimator) == "logisticregression":
             X_train = datasets[diag]["X_train_train"]
-            models.save_coefficients_from_lr(diag, best_classifier, X_train, output_dir)
+            models.save_coefficients_from_lr(diag, best_estimator, X_train, output_dir)
 
 def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_file = 1):
     models_from_file = int(models_from_file)
@@ -274,13 +274,13 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
         datasets = load(load_dirs["load_data_dir"]+'datasets.joblib')
         print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
 
-        best_classifiers = load(load_dirs["load_models_dir"]+'best-classifiers.joblib')
-        scores_of_best_classifiers = load(load_dirs["load_reports_dir"]+'scores-of-best-classifiers.joblib')
-        sds_of_scores_of_best_classifiers = load(load_dirs["load_reports_dir"]+'sds-of-scores-of-best-classifiers.joblib')
+        best_estimators = load(load_dirs["load_models_dir"]+'best-estimators.joblib')
+        scores_of_best_estimators = load(load_dirs["load_reports_dir"]+'scores-of-best-estimators.joblib')
+        sds_of_scores_of_best_estimators = load(load_dirs["load_reports_dir"]+'sds-of-scores-of-best-estimators.joblib')
 
         # Save data, models, and reports to newly created directories
         dump(datasets, dirs["output_data_dir"]+'datasets.joblib', compress=1)
-        dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers)
+        dump_estimators_and_performances(dirs, best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators)
     else: 
         # Create datasets for each diagnosis (different input and output columns)
         datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
@@ -289,18 +289,18 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
         dump(datasets, dirs["output_data_dir"]+'datasets.joblib', compress=1)
 
         # Find best models for each diagnosis
-        best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers = find_best_classifiers_and_scores(datasets, diag_cols, performance_margin)
+        best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators = find_best_estimators_and_scores(datasets, diag_cols, performance_margin)
         
-        # Save best classifiers and thresholds 
-        dump_classifiers_and_performances(dirs, best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers)
+        # Save best estimators and thresholds 
+        dump_estimators_and_performances(dirs, best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators)
        
-    # Build and save dataframe of best classifiers and their scores
-    df_of_best_classifiers_and_their_score_sds = build_df_of_best_classifiers_and_their_score_sds(best_classifiers, scores_of_best_classifiers, sds_of_scores_of_best_classifiers, full_dataset)
-    df_of_best_classifiers_and_their_score_sds.to_csv(dirs["reports_dir"] + "df_of_best_classifiers_and_their_scores.csv")
-    print(df_of_best_classifiers_and_their_score_sds)
+    # Build and save dataframe of best estimators and their scores
+    df_of_best_estimators_and_their_score_sds = build_df_of_best_estimators_and_their_score_sds(best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators, full_dataset)
+    df_of_best_estimators_and_their_score_sds.to_csv(dirs["reports_dir"] + "df_of_best_estimators_and_their_scores.csv")
+    print(df_of_best_estimators_and_their_score_sds)
 
     # Save feature coefficients for logistic regression models
-    save_coefficients_of_lr_models(best_classifiers, datasets, diag_cols, dirs["reports_dir"])
+    save_coefficients_of_lr_models(best_estimators, datasets, diag_cols, dirs["reports_dir"])
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], sys.argv[3])

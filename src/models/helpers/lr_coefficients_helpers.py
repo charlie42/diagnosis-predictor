@@ -8,9 +8,9 @@ sys.path.insert(0, parentdir)
 import util
 
 def get_coefficients_df_from_lr(pipeline, data):
-    # Get the coefficients from classifier 
-    classifier = util.get_estimator_from_pipeline(pipeline)
-    coef = classifier.coef_[0]
+    # Get the coefficients from estimator 
+    estimator = util.get_estimator_from_pipeline(pipeline)
+    coef = estimator.coef_[0]
     # Get the feature names
     feature_names = data.columns
     # Create a dataframe of the coefficients and feature names

@@ -2,14 +2,14 @@ from sklearn.metrics import roc_curve
 import numpy as np
 
 # Calculate probability threshold
-def calculate_thresholds(classifier, X_train_train, y_train_train, X_val, y_val):
+def calculate_thresholds(estimator, X_train_train, y_train_train, X_val, y_val):
     from numpy import nanargmax
 
     # Fit model on train set
-    classifier.fit(X_train_train, y_train_train)
+    estimator.fit(X_train_train, y_train_train)
     
     # Get predicted probabilities values
-    y_val_pred_prob = classifier.predict_proba(X_val)
+    y_val_pred_prob = estimator.predict_proba(X_val)
 
     # calculate roc curve
     fpr, tpr, thresholds = roc_curve(y_val, y_val_pred_prob[:,1], drop_intermediate=False)
@@ -25,17 +25,17 @@ def calculate_thresholds(classifier, X_train_train, y_train_train, X_val, y_val)
     return [thresholds, threshold]
 
 # Find best thresholds
-def find_best_thresholds(best_classifiers, datasets):
+def find_best_thresholds(best_estimators, datasets):
     best_thresholds = {}
     for diag in datasets.keys():
-        best_classifier_for_diag = best_classifiers[diag]
+        best_estimator_for_diag = best_estimators[diag]
         X_train_train, y_train_train, X_val, y_val = \
             datasets[diag]["X_train_train"], \
             datasets[diag]["y_train_train"], \
             datasets[diag]["X_val"], \
             datasets[diag]["y_val"]
         thresholds = calculate_thresholds(
-            best_classifier_for_diag, 
+            best_estimator_for_diag, 
             X_train_train, y_train_train, X_val, y_val, 
         )
         best_thresholds[diag] = thresholds
