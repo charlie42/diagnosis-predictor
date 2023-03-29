@@ -252,7 +252,7 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
 
     dirs = set_up_directories(use_other_diags_as_input)
 
-    full_dataset = pd.read_csv(dirs["input_data_dir"] + "item_lvl_w_impairment.csv")
+    full_dataset = pd.read_csv(dirs["input_data_dir"] + "item_lvl.csv")
 
     # Print dataset shape
     print("Full dataset shape: ", full_dataset.shape)
