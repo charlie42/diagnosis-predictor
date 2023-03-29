@@ -110,8 +110,8 @@ def get_relevant_id_cols_by_popularity(assessment_answer_counts):
     #   relevant cognitive tests, Questionnaire Measures of Emotional and Cognitive Status, and 
     #   Questionnaire Measures of Family Structure, Stress, and Trauma (from Assessment_List_Jan2019.xlsx)
     relevant_EID_list = [x+",EID" for x in ["Basic_Demos", "PreInt_EduHx", "PreInt_DevHx", "SympChck", "SCQ", "Barratt", 
-        "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "APQ_P", "PCIAT", "DTS", "ESWAN", "MFQ_P", "APQ_SR", 
-        "WHODAS_P", "CIS_P", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_SR", 
+        "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "APQ_P", "PCIAT", "IAT", "DTS", "ESWAN", "MFQ_P", "APQ_SR", 
+        "WHODAS_P", "CIS_P", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_P", "SCARED_SR", 
         "C3SR", "CCSC", "CPIC", "YSR", "PhenX_SchoolRisk", "CBCL_Pre", "SRS_Pre", "ASR"]]
 
     # Get relevant ID columns sorted by popularity    
@@ -227,13 +227,26 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped, columns_until_droppe
                         "DTS,DTS_Total",
                         "MFQ_P,MFQ_P_Total",
                         "APQ_SR,APQ_SR_Total",
-                        #"WHODAS_P,WHODAS_P_Total", # Don't remove impairment scores - to predict
-                        #"CIS_P,CIS_P_Score", # Don't remove impairment scores - to predict
+                        "WHODAS_P,WHODAS_P_Total", 
+                        "CIS_P,CIS_P_Score", 
                         "PSI,PSI_Total",
                         "PSI,PSI_Total_T",
                         "RBS,RBS_Total",
-                        #"WHODAS_SR,WHODAS_SR_Score", # Don't remove impairment scores - to predict
-                        #"CIS_SR,CIS_SR_Total" # Don't remove impairment scores - to predict
+                        "SCARED_P,SCARED_P_Total",
+                        "SCARED_SR,SCARED_SR_Total",
+                        "WHODAS_SR,WHODAS_SR_Score", 
+                        "CIS_SR,CIS_SR_Total" 
+                        # "C3SR,C3SR_Total", # Doesn't have a total
+                        # "CCSC,CCSC_Total",  # Doesn't have a total
+                        # "CPIC,CPIC_Total", # Doesn't have a total
+                        "YSR,YSR_Total",
+                        "YSR,YSR_Total_T",
+                        "CBCL_Pre,CBCL_Pre_Total",
+                        "CBCL_Pre,CBCL_Pre_Total_T",
+                        "SRS_Pre,SRS_Pre_Total",
+                        "SRS_Pre,SRS_Pre_Total_T",
+                        "ASR,ASR_Total",
+                        "ASR,ASR_Total_T",
                     ]
     total_score_raw_cols = [x.strip("_T") for x in total_score_cols_w_raw if x.endswith("_T")]
     subscale_score_cols_w_raw = ["Barratt,Barratt_Total_Edu", "Barratt,Barratt_Total_Occ",
@@ -246,7 +259,15 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped, columns_until_droppe
                         "APQ_SR,APQ_SR_CP", "APQ_SR,APQ_SR_ID", "APQ_SR,APQ_SR_INV_D", "APQ_SR,APQ_SR_INV_M", "APQ_SR,APQ_SR_OPD", "APQ_SR,APQ_SR_PM", "APQ_SR,APQ_SR_PP",
                         "PSI,PSI_DC_T", "PSI,PSI_DC", "PSI,PSI_PCDI_T", "PSI,PSI_PCDI", "PSI,PSI_PD_T", "PSI,PSI_PD",
                         "RBS,RBS_Score_01", "RBS,RBS_Score_02", "RBS,RBS_Score_03", "RBS,RBS_Score_04", "RBS,RBS_Score_05",  
+                        "SCARED_P,SCARED_P_GD", "SCARED_P,SCARED_P_PN", "SCARED_P,SCARED_P_SC", "SCARED_P,SCARED_P_SH", "SCARED_P,SCARED_P_SP",
+                        "SCARED_SR,SCARED_SR_GD", "SCARED_SR,SCARED_SR_PN", "SCARED_SR,SCARED_SR_SC", "SCARED_SR,SCARED_SR_SH", "SCARED_SR,SCARED_SR_SP",
                         "C3SR,C3SR_AG", "C3SR,C3SR_AG_T", "C3SR,C3SR_FR", "C3SR,C3SR_FR_T", "C3SR,C3SR_HY", "C3SR,C3SR_HY_T", "C3SR,C3SR_IN", "C3SR,C3SR_IN_T", "C3SR,C3SR_LP", "C3SR,C3SR_LP_T", "C3SR,C3SR_NI", "C3SR,C3SR_PI",
+                        "CCSC,CCSC_PFC", "CCSC,CCSC_CDM", "CCSC,CCSC_DPS", "CCSC,CCSC_SU", "CCSC,CCSC_AC", "CCSC,CCSC_AA", "CCSC,CCSC_REP", "CCSC,CCSC_WT", "CCSC,CCSC_PCR", "CCSC,CCSC_CON", "CCSC,CCSC_OPT", "CCSC,CCSC_POS", "CCSC,CCSC_REL", "CCSC,CCSC_SS", "CCSC,CCSC_SUPMF", "CCSC,CCSC_SUPOA", "CCSC,CCSC_SUPEER", "CCSC,CCSC_SUPSIB",
+                        "CPIC,CPIC_Frequency_Total", "CPIC,CPIC_Intensity_Total", "CPIC,CPIC_Resolution_Total", "CPIC,CPIC_Content_Total", "CPIC,CPIC_Perceived_Threat_Total", "CPIC,CPIC_Self_Blame_Total", "CPIC,CPIC_Triangulation_Total", "CPIC,CPIC_Stability_Total",
+                        "YSR,YSR_AB", "YSR,YSR_AB_T", "YSR,YSR_AD", "YSR,YSR_AD_T", "YSR,YSR_AP", "YSR,YSR_AP_T", "YSR,YSR_WD", "YSR,YSR_WD_T", "YSR,YSR_RBB", "YSR,YSR_RBB_T", "YSR,YSR_SC", "YSR,YSR_SC_T", "YSR,YSR_SP", "YSR,YSR_SP_T", "YSR,YSR_TP", "YSR,YSR_TP_T", "YSR,YSR_Ext", "YSR,YSR_Ext_T", "YSR,YSR_Int", "YSR,YSR_Int_T", "YSR,YSR_OP", "YSR,YSR_C", "YSR,YSR_Total", "YSR,YSR_Total_T",
+                        "CBCL_Pre,CBCL_Pre_AB", "CBCL_Pre,CBCL_Pre_AB_T", "CBCL_Pre,CBCL_Pre_AD", "CBCL_Pre,CBCL_Pre_AD_T", "CBCL_Pre,CBCL_Pre_AP", "CBCL_Pre,CBCL_Pre_AP_T", "CBCL_Pre,CBCL_Pre_SC", "CBCL_Pre,CBCL_Pre_SC_T", "CBCL_Pre,CBCL_Pre_SP", "CBCL_Pre,CBCL_Pre_SP_T", "CBCL_Pre,CBCL_Pre_WD", "CBCL_Pre,CBCL_Pre_WD_T", "CBCL_Pre,CBCL_Pre_Ext", "CBCL_Pre,CBCL_Pre_Ext_T", "CBCL_Pre,CBCL_Pre_Int", "CBCL_Pre,CBCL_Pre_Int_T", "CBCL_Pre,CBCL_Pre_DSM_ADHP", "CBCL_Pre,CBCL_Pre_DSM_ADHP_T", "CBCL_Pre,CBCL_Pre_DSM_AnxP", "CBCL_Pre,CBCL_Pre_DSM_AnxP_T", "CBCL_Pre,CBCL_Pre_DSM_AP", "CBCL_Pre,CBCL_Pre_DSM_AP_T", "CBCL_Pre,CBCL_Pre_DSM_ODP", "CBCL_Pre,CBCL_Pre_DSM_ODP_T", "CBCL_Pre,CBCL_Pre_DSM_PDP", "CBCL_Pre,CBCL_Pre_DSM_PDP_T", "CBCL_Pre,CBCL_Pre_OP", "CBCL_Pre,CBCL_Pre_Total", "CBCL_Pre,CBCL_Pre_Total_T",
+                        # SRS_Pre subscales have the same names as SRS subscales, rename them if you want to use them!,
+                        "ASR,ASR_AD", "ASR,ASR_AD_T", "ASR,ASR_WD", "ASR,ASR_WD_T", "ASR,ASR_SC", "ASR,ASR_SC_T", "ASR,ASR_TP", "ASR,ASR_TP_T", "ASR,ASR_AP", "ASR,ASR_AP_T", "ASR,ASR_RBB", "ASR,ASR_RBB_T", "ASR,ASR_AB", "ASR,ASR_AB_T", "ASR,ASR_OP", "ASR,ASR_Int", "ASR,ASR_Int_T", "ASR,ASR_Ext", "ASR,ASR_Ext_T", "ASR,ASR_Intrusive", "ASR,ASR_Intrusive_T", "ASR,ASR_C", 
                         ]
     subscale_score_raw_cols = [x.strip("_T") for x in subscale_score_cols_w_raw if x.endswith("_T")]
 
@@ -283,30 +304,10 @@ def remove_irrelavent_missing_markers(data_up_to_dropped, data_up_to_dropped_ite
 
     return data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores
 
-def export_datasets(data_up_to_dropped, data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_output_dir):
-    ## Predicting impairment (remove impairment questionnaires from input)
-    impairment_assessments = ["WHODAS_SR,", "WHODAS_P,", "CIS_SR,", "CIS_P,"]
-
-    impairment_columns = [] # All item-level impairment (keep total impairment scores for output)
-    for impairment_assessment in  impairment_assessments:
-        impairment_columns.extend([x for x in data_up_to_dropped if x.startswith(impairment_assessment) and x not in ["WHODAS_P,WHODAS_P_Total", "CIS_P,CIS_P_Score", "WHODAS_SR,WHODAS_SR_Score", "CIS_SR,CIS_SR_Total"]])
-
-    data_up_to_dropped_item_lvl_wo_impairment = data_up_to_dropped_item_lvl[[x for x in data_up_to_dropped_item_lvl.columns if x not in impairment_columns]]
-    data_up_to_dropped_subscale_scores_wo_impairment = data_up_to_dropped_subscale_scores[[x for x in data_up_to_dropped_subscale_scores.columns if x not in impairment_columns]]
-    data_up_to_dropped_total_scores_wo_impairment = data_up_to_dropped_total_scores[[x for x in data_up_to_dropped_total_scores.columns if x not in impairment_columns]]
-
-    data_up_to_dropped_item_lvl_wo_impairment.to_csv(data_output_dir + "item_lvl_wo_impairment.csv", index=False)
-    data_up_to_dropped_subscale_scores_wo_impairment.to_csv(data_output_dir + "subscale_scores_wo_impairment.csv", index=False)
-    data_up_to_dropped_total_scores_wo_impairment.to_csv(data_output_dir + "total_scores_wo_impairment.csv", index=False)
-
-    ## Predicting diagnoses
-    data_up_to_dropped_item_lvl_w_impairment = data_up_to_dropped_item_lvl
-    data_up_to_dropped_subscale_scores_w_impairment = data_up_to_dropped_subscale_scores
-    data_up_to_dropped_total_scores_w_impairment = data_up_to_dropped_total_scores
-
-    data_up_to_dropped_item_lvl_w_impairment.to_csv(data_output_dir + "item_lvl_w_impairment.csv", index=False)
-    data_up_to_dropped_subscale_scores_w_impairment.to_csv(data_output_dir + "subscale_scores_w_impairment.csv", index=False)
-    data_up_to_dropped_total_scores_w_impairment.to_csv(data_output_dir + "total_scores_w_impairment.csv", index=False)
+def export_datasets(data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_output_dir):
+    data_up_to_dropped_item_lvl.to_csv(data_output_dir + "item_lvl.csv", index=False)
+    data_up_to_dropped_subscale_scores.to_csv(data_output_dir + "subscale_scores.csv", index=False)
+    data_up_to_dropped_total_scores.to_csv(data_output_dir + "total_scores.csv", index=False)
 
 def main(only_assessment_distribution, first_assessment_to_drop):
     only_assessment_distribution = int(only_assessment_distribution)
@@ -375,8 +376,9 @@ def main(only_assessment_distribution, first_assessment_to_drop):
         # Remove EID columns: not needed anymore
         data_up_to_dropped = data_up_to_dropped.drop(EID_columns_until_dropped, axis=1)
 
-        # Aggregare demographics input columns: remove per parent data from Barratt
-        data_up_to_dropped = data_up_to_dropped.drop(["Barratt,Barratt_P1_Edu", "Barratt,Barratt_P1_Occ", "Barratt,Barratt_P2_Edu", "Barratt,Barratt_P2_Occ"], axis=1)
+        # Aggregare demographics input columns: remove PER parent data from Barratt, only keep aggregated scores
+        if "Barratt,Barratt_P1_Edu" in data_up_to_dropped.columns:
+            data_up_to_dropped = data_up_to_dropped.drop(["Barratt,Barratt_P1_Edu", "Barratt,Barratt_P1_Occ", "Barratt,Barratt_P2_Edu", "Barratt,Barratt_P2_Occ"], axis=1)
 
         # Transform PreInt_DevHx columns
         data_up_to_dropped = transform_devhx_eduhx_cols(data_up_to_dropped)
@@ -392,7 +394,8 @@ def main(only_assessment_distribution, first_assessment_to_drop):
         data_up_to_dropped = remove_cols_w_missing_over_n(data_up_to_dropped, 40, missing_values_df)
 
         # Special case: replace missing "CBCL,CBCL_56H" with 0 ("Other")
-        data_up_to_dropped[["CBCL,CBCL_56H"]] = data_up_to_dropped[["CBCL,CBCL_56H"]].fillna(value=0)
+        if "CBCL,CBCL_56H" in data_up_to_dropped.columns:
+            data_up_to_dropped[["CBCL,CBCL_56H"]] = data_up_to_dropped[["CBCL,CBCL_56H"]].fillna(value=0)
 
         # Add missingness marker for columns with more than 5% missing data 
         data_up_to_dropped = add_missingness_markers(data_up_to_dropped, 5, missing_values_df)
@@ -416,7 +419,7 @@ def main(only_assessment_distribution, first_assessment_to_drop):
             data_up_to_dropped_subscale_scores)
 
         # Export final datasets
-        export_datasets(data_up_to_dropped, data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_output_dir)
+        export_datasets(data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_output_dir)
 
 
 if __name__ == "__main__":
