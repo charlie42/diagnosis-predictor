@@ -28,8 +28,11 @@ def set_up_directories():
 
     # Input dirs
     input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/train_models/")
+    print("Reading data from: " + input_data_dir)
     models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
+    print("Reading models from: " + models_dir)
     input_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir+ "reports/train_models/")
+    print("Reading reports from: " + input_reports_dir)
 
     # Output dirs
     params_from_previous_script = models.get_params_from_current_data_dir_name(input_data_dir)
@@ -67,7 +70,7 @@ def fix_data_dict(names_df):
     return names_df
 
 def append_feature_names_to_feature_subsets(feature_subsets):
-    names_df = fix_data_dict(pd.read_csv("references/item-names.csv", index_col=1, encoding = "ISO-8859-1", names=["Name", "ID"], sep=";"))
+    names_df = fix_data_dict(pd.read_csv("references/item-names.csv", index_col=1, encoding = "ISO-8859-1", names=["questions", "keys"], sep=","))
     feature_subsets_with_names = {}
     for diag in feature_subsets.keys():
         feature_subsets_with_names[diag] = {}
@@ -75,7 +78,7 @@ def append_feature_names_to_feature_subsets(feature_subsets):
             # Append item name to each item ID 
             #   Remove name from assessment from feauture name, only keep item name (already contains assessment name)
             #   Don't append name to basic demographics, self explanatory item IDs
-            feature_subsets_with_names[diag][subset] = [x + f': {names_df.loc[x.split(",")[1]]["Name"]}' 
+            feature_subsets_with_names[diag][subset] = [x + f': {names_df.loc[x.split(",")[1]]["questions"]}' 
                 for x in feature_subsets[diag][subset] 
                 if not x.startswith("Basic_Demos")
                 and not x.endswith("WAS_MISSING")
