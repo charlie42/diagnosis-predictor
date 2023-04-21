@@ -16,6 +16,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 
 from sklearn.model_selection import RandomizedSearchCV
+from sklearn.metrics import brier_score_loss, make_scorer
 
 import sys, inspect
 
@@ -139,12 +140,20 @@ def get_base_models_and_param_grids():
     
     return base_models_and_param_grids
 
+def make_brier_scorer():
+    # Define custom scorer
+    brier_scorer = make_scorer(brier_score_loss, greater_is_better=False)
+    return brier_scorer
+
 def get_best_estimator(base_model, grid, X_train, y_train):
     cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 8)
-    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
+    scorer = make_brier_scorer()
+    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring=scorer, n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1, error_score = 'raise')
     
     print("Fitting", base_model, "...")
     rs.fit(X_train, y_train) 
+
+    print("DEBUG", rs.cv_results_)
     
     best_estimator = rs.best_estimator_
     best_score = rs.best_score_
