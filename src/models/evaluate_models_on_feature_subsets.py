@@ -29,8 +29,11 @@ def set_up_directories():
 
     # Input dirs
     input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/train_models/")
+    print("Reading data from: " + input_data_dir)
     input_models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
+    print("Reading models from: " + input_models_dir)
     input_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir+ "reports/identify_feature_subsets/")
+    print("Reading reports from: " + input_reports_dir)
     
     # Output dirs
     params_from_previous_script = models.get_params_from_current_data_dir_name(input_data_dir)
@@ -133,10 +136,14 @@ def make_performance_tables_opt_nb_features(performances_on_feature_subsets, opt
         optimal_nb_features = optimal_nbs_features[diag]
         
         for threshold in performances_on_feature_subsets[diag][optimal_nb_features]: # Each row in the table will have the threshold, specificity, and sensitivity for that threshold
-            row = [threshold, performances_on_feature_subsets[diag][optimal_nb_features][threshold][1], performances_on_feature_subsets[diag][optimal_nb_features][threshold][2]]
+            row = [threshold, 
+                   performances_on_feature_subsets[diag][optimal_nb_features][threshold][1], 
+                   performances_on_feature_subsets[diag][optimal_nb_features][threshold][2],
+                   performances_on_feature_subsets[diag][optimal_nb_features][threshold][3],
+                     performances_on_feature_subsets[diag][optimal_nb_features][threshold][4]]
             sens_spec_table_diag = sens_spec_table_diag + [row]
 
-        sens_spec_tables[diag] = pd.DataFrame(sens_spec_table_diag, columns=["Threshold", "Sensitivity", "Specificity"])
+        sens_spec_tables[diag] = pd.DataFrame(sens_spec_table_diag, columns=["Threshold", "Sensitivity", "Specificity", "PPV", "NPV"])
 
         # Replace Thresholds with numbers 1, 2, 3, etc. to obscure the actual thresholds
         sens_spec_tables[diag]["Threshold"] = range(1, len(sens_spec_tables[diag]) + 1)
@@ -182,9 +189,9 @@ def make_and_write_test_set_performance_tables(performances_on_feature_subsets, 
     auc_sens_spec_test_set_opt_thres_opt_nb_features = []
     diags = auc_test_set_table_optimal_threshold.columns
     for diag in diags:
-        auc_test_set_optimal_threshold = auc_test_set_table_optimal_threshold[diag].iloc[optimal_nbs_features[diag]]
-        sens_test_set_optimal_threshold = sens_test_set_table_optimal_threshold[diag].iloc[optimal_nbs_features[diag]]
-        spec_test_set_optimal_threshold = spec_test_set_table_optimal_threshold[diag].iloc[optimal_nbs_features[diag]]
+        auc_test_set_optimal_threshold = auc_test_set_table_optimal_threshold[diag].loc[optimal_nbs_features[diag]]
+        sens_test_set_optimal_threshold = sens_test_set_table_optimal_threshold[diag].loc[optimal_nbs_features[diag]]
+        spec_test_set_optimal_threshold = spec_test_set_table_optimal_threshold[diag].loc[optimal_nbs_features[diag]]
         auc_sens_spec_test_set_opt_thres_opt_nb_features.append([diag, optimal_nbs_features[diag], auc_test_set_optimal_threshold, sens_test_set_optimal_threshold, spec_test_set_optimal_threshold])
     
     auc_sens_spec_test_set_opt_thres_opt_nb_features = pd.DataFrame(auc_sens_spec_test_set_opt_thres_opt_nb_features, columns=["Diagnosis", "Number of features", "AUC", "Sensitivity", "Specificity"])
