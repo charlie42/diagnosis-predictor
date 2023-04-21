@@ -59,7 +59,7 @@ def get_matrix_metrics(real_values,pred_values):
     Predicted_Positive_Ratio = round( (TP+FP) / Population,2)
     
     mat_met = [TP,TN,FP,FN,Prevalence,Accuracy,Precision,NPV,FDR,FOR,check_Pos,check_Neg,Recall,FPR,FNR,TNR,check_Pos2,check_Neg2,LRPos,LRNeg,DOR,F1,MCC,BM,MK,Predicted_Positive_Ratio]
-    metric_names = ['TP','TN','FP','FN','Prevalence','Accuracy','Precision','NPV','FDR','FOR','check_Pos','check_Neg','Recall (Sensitivity)','FPR','FNR','TNR (Specificity)','check_Pos2','check_Neg2','LR+','LR-','DOR','F1','MCC','BM','MK','Predicted Positive Ratio','ROC AUC']   
+    metric_names = ['TP','TN','FP','FN','Prevalence','Accuracy','PPV (Precision)','NPV','FDR','FOR','check_Pos','check_Neg','Recall (Sensitivity)','FPR','FNR','TNR (Specificity)','check_Pos2','check_Neg2','LR+','LR-','DOR','F1','MCC','BM','MK','Predicted Positive Ratio','ROC AUC']   
 
     return (mat_met, metric_names)
 
@@ -88,36 +88,39 @@ def get_top_n_features(feature_subsets, diag, n):
 def get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_estimators):
     cv_scores_on_feature_subsets = {}
     
-    for diag in datasets.keys():
-        print("Getting CV scores on feature subsets for " + diag)
-        cv_scores_on_feature_subsets[diag] = []
-        for nb_features in feature_subsets[diag].keys():
-            X_train, y_train = datasets[diag]["X_train"], datasets[diag]["y_train"]
-            top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
-            new_estimator = make_pipeline(SimpleImputer(missing_values=np.nan, strategy='median'), StandardScaler(), clone(best_estimators[diag][2]))
-            cv_scores = cross_val_score(new_estimator, X_train[top_n_features], y_train, cv = StratifiedKFold(n_splits=8), scoring='roc_auc')
-            cv_scores_on_feature_subsets[diag].append(cv_scores.mean())
+    for diag in feature_subsets.keys():
+        if diag in datasets.keys():
+            print("Getting CV scores on feature subsets for " + diag)
+            cv_scores_on_feature_subsets[diag] = []
+            for nb_features in feature_subsets[diag].keys():
+                X_train, y_train = datasets[diag]["X_train"], datasets[diag]["y_train"]
+                top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
+                new_estimator = make_pipeline(SimpleImputer(missing_values=np.nan, strategy='median'), StandardScaler(), clone(best_estimators[diag][2]))
+                cv_scores = cross_val_score(new_estimator, X_train[top_n_features], y_train, cv = StratifiedKFold(n_splits=8), scoring='roc_auc')
+                cv_scores_on_feature_subsets[diag].append(cv_scores.mean())
     return cv_scores_on_feature_subsets
 
 def re_train_models_on_feature_subsets_per_output(diag, feature_subsets, datasets, best_estimators):
     estimators_on_feature_subsets = {}
 
-    for nb_features in feature_subsets[diag].keys():
-        X_train, y_train = datasets[diag]["X_train_train"], datasets[diag]["y_train_train"]
+    if diag in datasets.keys():
+        for nb_features in feature_subsets[diag].keys():
+            X_train, y_train = datasets[diag]["X_train_train"], datasets[diag]["y_train_train"]
 
-        # Create new pipeline with the params of the best estimator (need to re-train the imputer on less features)
-        top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
-        new_estimator = fit_estimator_on_subset_of_features(best_estimators, diag, X_train[top_n_features], y_train)
-        estimators_on_feature_subsets[nb_features] = new_estimator
-    
+            # Create new pipeline with the params of the best estimator (need to re-train the imputer on less features)
+            top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
+            new_estimator = fit_estimator_on_subset_of_features(best_estimators, diag, X_train[top_n_features], y_train)
+            estimators_on_feature_subsets[nb_features] = new_estimator
+            
     return estimators_on_feature_subsets
 
 def re_train_models_on_feature_subsets(feature_subsets, datasets, best_estimators):
     estimators_on_feature_subsets = {}
-    for diag in datasets.keys():
-        print("Re-training models on feature subsets for output: " + diag)
-        estimators_on_feature_subsets[diag] = re_train_models_on_feature_subsets_per_output(diag, feature_subsets, datasets, best_estimators)
-        
+    for diag in feature_subsets.keys():
+        if diag in datasets.keys():
+            print("Re-training models on feature subsets for output: " + diag)
+            estimators_on_feature_subsets[diag] = re_train_models_on_feature_subsets_per_output(diag, feature_subsets, datasets, best_estimators)
+            
     return estimators_on_feature_subsets
 
 def calculate_thresholds_for_feature_subsets_per_output(diag, feature_subsets, estimators_on_feature_subsets, datasets):
@@ -126,50 +129,55 @@ def calculate_thresholds_for_feature_subsets_per_output(diag, feature_subsets, e
 
     thresholds_on_feature_subsets = {}
 
-    for nb_features in feature_subsets[diag].keys():
-        top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
+    if diag in datasets.keys():
+        for nb_features in feature_subsets[diag].keys():
+            top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
 
-        thresholds_on_feature_subsets[nb_features] = models.calculate_thresholds(
-            estimators_on_feature_subsets[diag][nb_features], 
-            X_train[top_n_features], 
-            y_train,
-            X_val[top_n_features], 
-            y_val
-            )
+            thresholds_on_feature_subsets[nb_features] = models.calculate_thresholds(
+                estimators_on_feature_subsets[diag][nb_features], 
+                X_train[top_n_features], 
+                y_train,
+                X_val[top_n_features], 
+                y_val
+                )
 
     return thresholds_on_feature_subsets
 
 def calculate_thresholds_for_feature_subsets(feature_subsets, estimators_on_feature_subsets, datasets):
     thresholds_on_feature_subsets = {}
-    for diag in datasets.keys():
-        thresholds_on_feature_subsets[diag] = calculate_thresholds_for_feature_subsets_per_output(diag, feature_subsets, estimators_on_feature_subsets, datasets)
+    for diag in feature_subsets.keys():
+        if diag in datasets.keys():
+            thresholds_on_feature_subsets[diag] = calculate_thresholds_for_feature_subsets_per_output(diag, feature_subsets, estimators_on_feature_subsets, datasets)
     return thresholds_on_feature_subsets
 
 def get_performances_on_feature_subsets_per_output(diag, feature_subsets, estimators_on_feature_subsets, thresholds_on_feature_subsets, datasets, use_test_set):
 
-    if use_test_set == 1:
-        X_test, y_test = datasets[diag]["X_test"], datasets[diag]["y_test"]
-    else:
-        X_test, y_test = datasets[diag]["X_val"], datasets[diag]["y_val"]
+    if diag in datasets.keys():
+        if use_test_set == 1:
+            X_test, y_test = datasets[diag]["X_test"], datasets[diag]["y_test"]
+        else:
+            X_test, y_test = datasets[diag]["X_val"], datasets[diag]["y_val"]
 
-    metrics_on_subsets = {}
-    optimal_thresholds = {}
-    
-    for nb_features in feature_subsets[diag].keys():
-        # Create new pipeline with the params of the best estimator (need to re-train the imputer on less features)
-        print("Getting metrics on feature subsets for " + diag + " with " + str(nb_features) + " features")
-        top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
-        new_estimator = estimators_on_feature_subsets[diag][nb_features]
-        thresholds = thresholds_on_feature_subsets[diag][nb_features][0]
-        optimal_thresholds[nb_features] = thresholds_on_feature_subsets[diag][nb_features][1]
-        metrics_on_subsets[nb_features] = {}
-        for threshold in thresholds:
-            metrics, metric_names = get_metrics(new_estimator, threshold, X_test[top_n_features], y_test)
-            relevant_metrics = [
-                metrics[-1], # AUC ROC
-                metrics[metric_names.index("Recall (Sensitivity)")],
-                metrics[metric_names.index("TNR (Specificity)")]]
-            metrics_on_subsets[nb_features][threshold] = relevant_metrics
+        metrics_on_subsets = {}
+        optimal_thresholds = {}
+        
+        for nb_features in feature_subsets[diag].keys():
+            # Create new pipeline with the params of the best estimator (need to re-train the imputer on less features)
+            print("Getting metrics on feature subsets for " + diag + " with " + str(nb_features) + " features")
+            top_n_features = get_top_n_features(feature_subsets, diag, nb_features)
+            new_estimator = estimators_on_feature_subsets[diag][nb_features]
+            thresholds = thresholds_on_feature_subsets[diag][nb_features][0]
+            optimal_thresholds[nb_features] = thresholds_on_feature_subsets[diag][nb_features][1]
+            metrics_on_subsets[nb_features] = {}
+            for threshold in thresholds:
+                metrics, metric_names = get_metrics(new_estimator, threshold, X_test[top_n_features], y_test)
+                relevant_metrics = [
+                    metrics[-1], # AUC ROC
+                    metrics[metric_names.index("Recall (Sensitivity)")],
+                    metrics[metric_names.index("TNR (Specificity)")],
+                    metrics[metric_names.index("PPV (Precision)")],
+                    metrics[metric_names.index("NPV")]]
+                metrics_on_subsets[nb_features][threshold] = relevant_metrics
         
     return metrics_on_subsets, optimal_thresholds
 
@@ -181,7 +189,8 @@ def get_performances_on_feature_subsets(feature_subsets, datasets, best_estimato
     performances_on_subsets = {}
     optimal_thresholds = {}
     
-    for diag in datasets.keys():
-        performances_on_subsets[diag], optimal_thresholds[diag] = get_performances_on_feature_subsets_per_output(diag, feature_subsets, estimators_on_feature_subsets, thresholds_on_feature_subsets, datasets, use_test_set)
+    for diag in feature_subsets.keys():
+        if diag in datasets.keys():
+            performances_on_subsets[diag], optimal_thresholds[diag] = get_performances_on_feature_subsets_per_output(diag, feature_subsets, estimators_on_feature_subsets, thresholds_on_feature_subsets, datasets, use_test_set)
 
     return performances_on_subsets, cv_scores_on_feature_subsets, optimal_thresholds
