@@ -17,6 +17,7 @@ from sklearn.pipeline import make_pipeline
 
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.metrics import brier_score_loss, make_scorer
+from sklearn.calibration import calibration_curve
 
 import sys, inspect
 
@@ -152,8 +153,6 @@ def get_best_estimator(base_model, grid, X_train, y_train):
     
     print("Fitting", base_model, "...")
     rs.fit(X_train, y_train) 
-
-    print("DEBUG", rs.cv_results_)
     
     best_estimator = rs.best_estimator_
     best_score = rs.best_score_
@@ -242,10 +241,16 @@ def build_df_of_best_estimators_and_their_score_sds(best_estimators, scores_of_b
     return best_estimators_and_score_sds
 
 def dump_estimators_and_performances(dirs, best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators):
-    print(dirs["models_dir"])
     dump(best_estimators, dirs["models_dir"]+'best-estimators.joblib', compress=1)
     dump(scores_of_best_estimators, dirs["reports_dir"]+'scores-of-best-estimators.joblib', compress=1)
     dump(sds_of_scores_of_best_estimators, dirs["reports_dir"]+'sds-of-scores-of-best-estimators.joblib', compress=1)
+
+def build_calibration_curves(best_estimators, datasets, diag_cols, output_dir):
+    for diag in diag_cols:
+        best_estimator = best_estimators[diag]
+        y_true = datasets[diag]["y_val"]
+        y_pred = best_estimator.predict_proba(datasets[diag]["X_val"])[:,1]
+        models.build_calibration_curve(y_true, y_pred, output_dir, diag)
 
 def save_coefficients_of_lr_models(best_estimators, datasets, diag_cols, output_dir):
     for diag in diag_cols:
@@ -274,7 +279,8 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
     diag_cols = find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set)
     if DEBUG_MODE: # Only use first two diagnoses for debugging
         print(diag_cols)
-        diag_cols = diag_cols[-1:]
+        diag_cols = diag_cols[-5:]
+        #diag_cols = ["Diag.Enuresis", "Diag.ADHD-Combined Type"]
         #diag_cols = diag_cols
     print(diag_cols)
 
@@ -306,6 +312,7 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
     # Build and save dataframe of best estimators and their scores
     df_of_best_estimators_and_their_score_sds = build_df_of_best_estimators_and_their_score_sds(best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators, full_dataset)
     df_of_best_estimators_and_their_score_sds.to_csv(dirs["reports_dir"] + "df_of_best_estimators_and_their_scores.csv")
+    build_calibration_curves(best_estimators, datasets, diag_cols, dirs["reports_dir"])
     print(df_of_best_estimators_and_their_score_sds)
 
     # Save feature coefficients for logistic regression models
