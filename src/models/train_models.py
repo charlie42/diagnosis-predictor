@@ -36,33 +36,32 @@ def build_params_dict_for_dir_name(other_diags_as_input):
     params_dict["debug_mode"] = DEBUG_MODE
     return params_dict
 
-def build_output_dir_name(other_diags_as_input, params_from_make_dataset):
+def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
     # Part with the params
-    params = build_params_dict_for_dir_name(other_diags_as_input)
-    params_part = models.build_param_string_for_dir_name(params_from_make_dataset) + "___" +  models.build_param_string_for_dir_name(params) 
+    params_part = util.build_param_string_for_dir_name(params_from_create_datasets)
     
     return datetime_part + "___" + params_part
 
-def set_up_directories(other_diags_as_input):
+def set_up_directories():
 
     # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
     data_dir = "../diagnosis_predictor_data/"
     util.create_dir_if_not_exists(data_dir)
 
     # Input dirs
-    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/make_dataset/")
+    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
 
     # Create directory inside the output directory with the run timestamp and params:
-    #    - [params from make_dataset.py]
+    #    - [params from create_datasets.py]
     #    - use other diags as input
     #    - debug mode
-    params_from_make_dataset = models.get_params_from_current_data_dir_name(input_data_dir)
-    current_output_dir_name = build_output_dir_name(other_diags_as_input, params_from_make_dataset)
+    params_from_create_datasets = models.get_params_from_current_data_dir_name(input_data_dir)
+    current_output_dir_name = build_output_dir_name(params_from_create_datasets)
 
-    output_data_dir = data_dir + "data/train_models/" + current_output_dir_name + "/"
+    output_data_dir = data_dir + "data/create_datasets/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(output_data_dir)
 
     models_dir = data_dir + "models/" + "train_models/" + current_output_dir_name + "/"
@@ -79,7 +78,7 @@ def set_up_load_directories():
 
     data_dir = "../diagnosis_predictor_data/"
     
-    load_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/train_models/")
+    load_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
     load_models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
     load_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "reports/train_models/")
     
@@ -186,17 +185,6 @@ def find_best_estimator_for_diag_and_its_score(X_train, y_train, performance_mar
     
     return best_estimator, best_score, sd_of_score_of_best_estimator
 
-def find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set):
-    diags_w_enough_positive_examples_in_val_set = []
-    for diag in all_diags:
-        positive_examples_full_ds = full_dataset[full_dataset[diag] == 1].shape[0]
-        # First get # of positive examples in the train set, then from those, get # of positive examples in the validation set 
-        # (first we split the dataset into train and test set, then we split the train set into train and validation set)
-        positive_examples_val_set = positive_examples_full_ds * (1-split_percentage) * split_percentage 
-        if positive_examples_val_set >= min_pos_examples_val_set:
-            diags_w_enough_positive_examples_in_val_set.append(diag)
-    return diags_w_enough_positive_examples_in_val_set
-
 # Find best estimator
 def find_best_estimators_and_scores(datasets, diag_cols, performance_margin):
     best_estimators = {}
@@ -245,49 +233,29 @@ def save_coefficients_of_lr_models(best_estimators, datasets, diag_cols, output_
             X_train = datasets[diag]["X_train_train"]
             models.save_coefficients_from_lr(diag, best_estimator, X_train, output_dir)
 
-def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_file = 1):
+def main(performance_margin = 0.02, models_from_file = 1):
     models_from_file = int(models_from_file)
-    use_other_diags_as_input = int(use_other_diags_as_input)
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
 
-    dirs = set_up_directories(use_other_diags_as_input)
+    dirs = set_up_directories()
+    load_dirs = set_up_load_directories()
 
-    full_dataset = pd.read_csv(dirs["input_data_dir"] + "item_lvl.csv")
+    full_dataset = pd.read_csv(load_dirs["load_data_dir"] + "item_lvl.csv")
+    datasets = load(load_dirs["load_data_dir"]+'datasets.joblib')
+    diag_cols = list(datasets.keys())
+    print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
 
-    # Print dataset shape
-    print("Full dataset shape: ", full_dataset.shape)
-
-    # Get list of column names with "Diag." prefix, where number of 
-    # positive examples is > threshold
-    min_pos_examples_val_set = 20
-    split_percentage = 0.2
-    all_diags = [x for x in full_dataset.columns if x.startswith("Diag.")]
-    diag_cols = find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set)
-    if DEBUG_MODE: # Only use first two diagnoses for debugging
-        print(diag_cols)
-        diag_cols = diag_cols[-1:]
-        #diag_cols = diag_cols
-    print(diag_cols)
+    if DEBUG_MODE:
+        diag_cols = diag_cols[:1]
 
     if models_from_file == 1:
-        load_dirs = set_up_load_directories()
-        datasets = load(load_dirs["load_data_dir"]+'datasets.joblib')
-        print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
-
+        
         best_estimators = load(load_dirs["load_models_dir"]+'best-estimators.joblib')
         scores_of_best_estimators = load(load_dirs["load_reports_dir"]+'scores-of-best-estimators.joblib')
         sds_of_scores_of_best_estimators = load(load_dirs["load_reports_dir"]+'sds-of-scores-of-best-estimators.joblib')
 
-        # Save data, models, and reports to newly created directories
-        dump(datasets, dirs["output_data_dir"]+'datasets.joblib', compress=1)
         dump_estimators_and_performances(dirs, best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators)
     else: 
-        # Create datasets for each diagnosis (different input and output columns)
-        datasets = data.create_datasets(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
-        print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
-
-        dump(datasets, dirs["output_data_dir"]+'datasets.joblib', compress=1)
-
         # Find best models for each diagnosis
         best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators = find_best_estimators_and_scores(datasets, diag_cols, performance_margin)
         
@@ -303,4 +271,4 @@ def main(performance_margin = 0.02, use_other_diags_as_input = 0, models_from_fi
     save_coefficients_of_lr_models(best_estimators, datasets, diag_cols, dirs["reports_dir"])
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(sys.argv[1], sys.argv[2])

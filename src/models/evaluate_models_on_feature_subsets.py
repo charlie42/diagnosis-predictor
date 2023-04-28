@@ -18,17 +18,17 @@ import models, util
 DEBUG_MODE = False
 
 def build_output_dir_name(params_from_previous_script):
-    # Part with the datetime
+    # Part with the datetimeS
     datetime_part = util.get_string_with_current_datetime()
 
-    return datetime_part + "___" + models.build_param_string_for_dir_name(params_from_previous_script)
+    return datetime_part + "___" + util.build_param_string_for_dir_name(params_from_previous_script)
 
 def set_up_directories():
 
     data_dir = "../diagnosis_predictor_data/"
 
     # Input dirs
-    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/train_models/")
+    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
     print("Reading data from: " + input_data_dir)
     input_models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
     print("Reading models from: " + input_models_dir)

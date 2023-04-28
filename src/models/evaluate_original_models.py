@@ -17,14 +17,15 @@ def build_output_dir_name(params_from_train_models, params_from_evaluate_origina
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
-    return datetime_part + "___" + models.build_param_string_for_dir_name(params_from_train_models) + "___" + models.build_param_string_for_dir_name(params_from_evaluate_original_models)
+    return datetime_part + "___" + util.build_param_string_for_dir_name(params_from_train_models) + "___" +\
+        util.build_param_string_for_dir_name(params_from_evaluate_original_models)
 
 def set_up_directories(use_test_set):
 
     data_dir = "../diagnosis_predictor_data/"
 
     # Input dirs
-    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/train_models/")
+    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
     models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
     input_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir+ "reports/train_models/")
 
@@ -94,6 +95,7 @@ def get_roc_aucs(best_estimators, datasets, use_test_set, only_healthy_controls,
 
 def main(use_test_set=1, only_healthy_controls=0):
     use_test_set = int(use_test_set)
+    only_healthy_controls = int(only_healthy_controls)
 
     dirs = set_up_directories(use_test_set)
 
