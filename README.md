@@ -16,9 +16,9 @@ Arguments: performance_margin = 0.02, use_other_diags_as_input = 0, models_from_
 
 ## 3 step:
 
-`python -W ignore src/models/evaluate_original_models.py 1`
+`python -W ignore src/models/evaluate_original_models.py 1 0`
 
-Arguments: use_test_set=1
+Arguments: use_test_set=1, only_healthy_controls=0
 
 ## 4 step:
 
