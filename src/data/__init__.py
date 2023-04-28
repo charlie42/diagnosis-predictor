@@ -1,2 +1,1 @@
-from data.helpers.get_only_healthy_controls import get_only_healthy_controls
 from data.helpers.make_full_dataset import make_full_dataset
