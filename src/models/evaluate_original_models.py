@@ -71,11 +71,8 @@ def get_aucs_on_test_set(best_estimators, datasets, use_test_set, diag_cols):
 
         roc_auc = get_roc_auc(X, y, estimator)
 
-        # Only calculate ROC AUC on healthy controls if more than 20 positive cases, and if diag is not Diag.No Diagnosis Given
-        if y_hc.sum() > 20 and diag != "Diag.No Diagnosis Given":
-            roc_auc_hc = get_roc_auc(X_hc, y_hc, estimator) 
-        else:
-            roc_auc_hc = np.nan
+        # Only calculate ROC AUC on healthy controls if diag is not Diag.No Diagnosis Given
+        roc_auc_hc = get_roc_auc(X_hc, y_hc, estimator) if diag != "Diag.No Diagnosis Given" else np.nan
         
         aucs[diag] = [roc_auc, roc_auc_hc]
 
