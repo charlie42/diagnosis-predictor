@@ -43,6 +43,15 @@ def remove_chars_forbidden_in_file_names(string):
         string = string.replace(char, '.')
     return string
 
+def build_param_string_for_dir_name(params):
+    param_string = ""
+    for param_name, param_value in params.items():
+        param_string += param_name + "__" + str(param_value) + "___"
+    # Drop last "___"
+    param_string = param_string[:-3]
+    return param_string
+
+
 
 # Model Utilities
 def get_base_model_name_from_estimator(estimator):

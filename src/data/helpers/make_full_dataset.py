@@ -15,33 +15,6 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util
-
-def build_output_dir_name(first_assessment_to_drop):
-    # Part with the datetime
-    datetime_part = util.get_string_with_current_datetime()
-
-    # Part with the params
-    params_part = "first_dropped_assessment__" + first_assessment_to_drop
-    
-    return datetime_part + "___" + params_part
-
-def set_up_directories(first_assessment_to_drop):
-
-    # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
-    data_dir = "../diagnosis_predictor_data/"
-    util.create_dir_if_not_exists(data_dir)
-
-    # Create directory inside the output directory with the run timestamp and first_assessment_to_drop param
-    current_output_dir_name = build_output_dir_name(first_assessment_to_drop)
-
-    data_statistics_dir = data_dir + "reports/make_dataset/" + current_output_dir_name + "/"
-    util.create_dir_if_not_exists(data_statistics_dir)
-    util.create_dir_if_not_exists(data_statistics_dir+"figures/")
-
-    data_output_dir = data_dir + "data/make_dataset/" + current_output_dir_name + "/"
-    util.create_dir_if_not_exists(data_output_dir)
-
-    return data_statistics_dir, data_output_dir
     
 def remove_admin_cols(full):
     # Remove uninteresting columns
@@ -309,10 +282,8 @@ def export_datasets(data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores
     data_up_to_dropped_subscale_scores.to_csv(data_output_dir + "subscale_scores.csv", index=False)
     data_up_to_dropped_total_scores.to_csv(data_output_dir + "total_scores.csv", index=False)
 
-def main(only_assessment_distribution, first_assessment_to_drop):
+def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, dirs):
     only_assessment_distribution = int(only_assessment_distribution)
-
-    data_statistics_dir, data_output_dir = set_up_directories(first_assessment_to_drop)
 
     # LORIS saved query (all data)
     full = pd.read_csv("data/raw/LORIS-release-10.csv", dtype=object)
@@ -348,17 +319,17 @@ def main(only_assessment_distribution, first_assessment_to_drop):
 
     # Check how many people filled each assessments
     assessment_answer_counts = get_assessment_answer_count(full_wo_underscore, EID_cols)
-    assessment_answer_counts.to_csv(data_statistics_dir + "assessment-filled-distrib.csv")
+    assessment_answer_counts.to_csv(dirs["data_statistics_dir"] + "assessment-filled-distrib.csv")
 
     # Get relevant ID columns sorted by popularity
     EID_columns_by_popularity = get_relevant_id_cols_by_popularity(assessment_answer_counts)    
 
     # Get cumulative distribution of assessments: number of people who took all top 1, top 2, top 3, etc. popular assessments 
     cumul_number_of_examples_df = get_cumul_number_of_examples_df(full_wo_underscore, EID_columns_by_popularity)
-    cumul_number_of_examples_df.to_csv(data_statistics_dir + "assessment-filled-distrib-cumul.csv")
+    cumul_number_of_examples_df.to_csv(dirs["data_statistics_dir"] + "assessment-filled-distrib-cumul.csv")
 
     # Plot cumulative distribution of assessments
-    plot_comul_number_of_examples(cumul_number_of_examples_df, data_statistics_dir)
+    plot_comul_number_of_examples(cumul_number_of_examples_df, dirs["data_statistics_dir"])
 
     ### => The first drop-off in number of respondents is at ICU_P, 
     # then SCARED_SR (the biggest drop off, and it's the first assessment with an age restriction). Last drop off is at CPIC.
@@ -388,7 +359,7 @@ def main(only_assessment_distribution, first_assessment_to_drop):
 
         # Save report of missing values
         missing_values_df = get_missing_values_df(data_up_to_dropped)
-        missing_values_df.to_csv(data_statistics_dir + "missing-values-report.csv")
+        missing_values_df.to_csv(dirs["data_statistics_dir"] + "missing-values-report.csv")
 
         # Remove columns with more than 40% missing data
         data_up_to_dropped = remove_cols_w_missing_over_n(data_up_to_dropped, 40, missing_values_df)
@@ -419,8 +390,4 @@ def main(only_assessment_distribution, first_assessment_to_drop):
             data_up_to_dropped_subscale_scores)
 
         # Export final datasets
-        export_datasets(data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_output_dir)
-
-
-if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+        export_datasets(data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, dirs["data_output_dir"])
