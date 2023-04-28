@@ -54,7 +54,7 @@ def get_roc_auc(X, y, estimator):
     roc_auc = roc_auc_score(y, y_pred_prob[:,1])
     return roc_auc
 
-def get_aucs_on_test_set(best_estimators, datasets, use_test_set, only_healthy_controls, diag_cols):
+def get_aucs_on_test_set(best_estimators, datasets, use_test_set, diag_cols):
     aucs = {}
     
     for diag in diag_cols:
@@ -63,19 +63,25 @@ def get_aucs_on_test_set(best_estimators, datasets, use_test_set, only_healthy_c
         estimator = best_estimators[diag]
     
         if use_test_set == 1:
-            X, y = datasets[diag]["X_test"], datasets[diag]["y_test"]
+            X, y = datasets[diag]["X_test"], datasets[diag]["y_test"] 
+            X_hc, y_hc = datasets[diag]["X_test_only_healthy_controls"], datasets[diag]["y_test_only_healthy_controls"]
         else:
             X, y = datasets[diag]["X_val"], datasets[diag]["y_val"]
-
-        # If test only on healthy controls, remove people with comoorbidities from negative cases
-        X, y = data.get_only_healthy_controls(X, y, diag_cols) if only_healthy_controls else X, y
+            X_hc, y_hc = datasets[diag]["X_val_only_healthy_controls"], datasets[diag]["y_val_only_healthy_controls"]
 
         roc_auc = get_roc_auc(X, y, estimator)
-        aucs[diag] = roc_auc
 
-    # Example of aucs: {'Diag1': 0.5, 'Diag2': 0.6, 'Diag3': 0.7}
+        # Only calculate ROC AUC on healthy controls if more than 20 positive cases, and if diag is not Diag.No Diagnosis Given
+        if y_hc.sum() > 20 and diag != "Diag.No Diagnosis Given":
+            roc_auc_hc = get_roc_auc(X_hc, y_hc, estimator) 
+        else:
+            roc_auc_hc = np.nan
+        
+        aucs[diag] = [roc_auc, roc_auc_hc]
+
+    # Example of aucs: {'Diag1': [0.5, 0.4], 'Diag2': [0.6, 0.5], 'Diag3': [0.7, 0.6]}
     # Convert to a dataframe
-    results = pd.DataFrame.from_dict(aucs, columns=["ROC AUC"], orient="index").sort_values("ROC AUC", ascending=False).reset_index().rename(columns={'index': 'Diag'})
+    results = pd.DataFrame.from_dict(aucs, columns=["ROC AUC", "ROC AUC Healthy Controls"], orient="index").sort_values("ROC AUC", ascending=False).reset_index().rename(columns={'index': 'Diag'})
     print(results)
     results = add_number_of_positive_examples(results, datasets)
 
@@ -87,15 +93,14 @@ def get_aucs_cv_from_grid_search(reports_dir, diag_cols):
     auc_cv_from_grid_search.columns = ["Diag", "ROC AUC Mean CV", "ROC AUC SD CV", "ROC AUC Mean CV - SD"]
     return auc_cv_from_grid_search
 
-def get_roc_aucs(best_estimators, datasets, use_test_set, only_healthy_controls, diag_cols, input_reports_dir):
+def get_roc_aucs(best_estimators, datasets, use_test_set, diag_cols, input_reports_dir):
     roc_aucs_cv_from_grid_search = get_aucs_cv_from_grid_search(input_reports_dir, diag_cols)
-    roc_aucs_on_test_set = get_aucs_on_test_set(best_estimators, datasets, use_test_set=use_test_set, only_healthy_controls=only_healthy_controls, diag_cols=diag_cols)
+    roc_aucs_on_test_set = get_aucs_on_test_set(best_estimators, datasets, use_test_set=use_test_set, diag_cols=diag_cols)
     roc_aucs = roc_aucs_cv_from_grid_search.merge(roc_aucs_on_test_set, on="Diag").sort_values(by="ROC AUC Mean CV - SD", ascending=False)
     return roc_aucs
 
-def main(use_test_set=1, only_healthy_controls=0):
+def main(use_test_set=1):
     use_test_set = int(use_test_set)
-    only_healthy_controls = int(only_healthy_controls)
 
     dirs = set_up_directories(use_test_set)
 
@@ -107,10 +112,11 @@ def main(use_test_set=1, only_healthy_controls=0):
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
 
     # Print performances of models on validation set
-    roc_aucs = get_roc_aucs(best_estimators, datasets, use_test_set=use_test_set, only_healthy_controls=only_healthy_controls, diag_cols=diag_cols, input_reports_dir=dirs["input_reports_dir"])
-
+    roc_aucs = get_roc_aucs(best_estimators, datasets, use_test_set=use_test_set, 
+                            diag_cols=diag_cols, input_reports_dir=dirs["input_reports_dir"])
+    
     if use_test_set == 1:
         roc_aucs.to_csv(dirs["output_reports_dir"]+"performance_table_all_features.csv", index=False)    
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1])
