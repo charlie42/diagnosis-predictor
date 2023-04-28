@@ -62,7 +62,7 @@ def customize_input_cols_per_diag(input_cols, diag):
                       
     return input_cols
 
-def get_input_and_output_cols_for_diag(full_dataset, diag, use_other_diags_as_input):
+def get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input):
     
     if use_other_diags_as_input == 1:
         input_cols = [x for x in full_dataset.columns if 
@@ -76,21 +76,44 @@ def get_input_and_output_cols_for_diag(full_dataset, diag, use_other_diags_as_in
     
     input_cols = customize_input_cols_per_diag(input_cols, diag)
     
-    output_col = diag
+    return input_cols
+
+def keep_only_healthy_controls(X, y):
+    # Remove people where y=0 and Diag.No Diagnosis Given is 0 (they have other diagnoses)
     
-    return input_cols, output_col
+    # Get indices to remove
+    indices_to_remove = X[(y == 0) & (X["Diag.No Diagnosis Given"] == 0)].index
+
+    # Remove rows
+    X_new = X.drop(indices_to_remove)
+    y_new = y.drop(indices_to_remove)
+
+    return X_new, y_new
 
 def split_datasets_per_diag(full_dataset, diag_cols, split_percentage, use_other_diags_as_input):
     datasets = {}
     for diag in diag_cols:
         
-        input_cols, output_col = get_input_and_output_cols_for_diag(full_dataset, diag, use_other_diags_as_input)
+        output_col = diag
         
         # Split train, validation, and test sets
-        X_train, X_test, y_train, y_test = train_test_split(full_dataset[input_cols], full_dataset[output_col], 
-                                                            test_size=split_percentage, stratify=full_dataset[output_col], random_state=1)
+        X_train, X_test, y_train, y_test = train_test_split(full_dataset, full_dataset[output_col], 
+                                                            test_size=split_percentage, stratify=full_dataset[output_col], 
+                                                            random_state=1)
         X_train_train, X_val, y_train_train, y_val = train_test_split(X_train, y_train, test_size=split_percentage, 
                                                                       stratify=y_train, random_state=1)
+        
+        X_test_only_healthy_controls, y_test_only_healthy_controls = keep_only_healthy_controls(X_test, y_test)
+        X_val_only_healthy_controls, y_val_only_healthy_controls = keep_only_healthy_controls(X_val, y_val)
+
+        # Drop columns from input that we don't want there
+        input_cols = get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input)
+        X_train = X_train[input_cols]
+        X_test = X_test[input_cols]
+        X_train_train = X_train_train[input_cols]
+        X_val = X_val[input_cols]
+        X_test_only_healthy_controls = X_test_only_healthy_controls[input_cols]
+        X_val_only_healthy_controls = X_val_only_healthy_controls[input_cols]
     
         datasets[diag] = { "X_train": X_train,
                         "X_test": X_test,
@@ -99,7 +122,12 @@ def split_datasets_per_diag(full_dataset, diag_cols, split_percentage, use_other
                         "X_train_train": X_train_train,
                         "X_val": X_val,
                         "y_train_train": y_train_train,
-                        "y_val": y_val}
+                        "y_val": y_val,
+                        "X_test_only_healthy_controls": X_test_only_healthy_controls,
+                        "y_test_only_healthy_controls": y_test_only_healthy_controls,
+                        "X_val_only_healthy_controls": X_val_only_healthy_controls,
+                        "y_val_only_healthy_controls": y_val_only_healthy_controls}
+        
     return datasets
 
 def find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set):

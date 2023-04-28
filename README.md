@@ -16,9 +16,9 @@ Arguments: performance_margin = 0.02, models_from_file = 1
 
 ## 3 step:
 
-`python -W ignore src/models/evaluate_original_models.py 1 0`
+`python -W ignore src/models/evaluate_original_models.py 1`
 
-Arguments: use_test_set=1, only_healthy_controls=0
+Arguments: use_test_set=1
 
 ## 4 step:
 
