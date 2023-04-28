@@ -55,9 +55,6 @@ def get_roc_auc(X, y, estimator):
 
 def get_aucs_on_test_set(best_estimators, datasets, use_test_set, only_healthy_controls, diag_cols):
     aucs = {}
-
-    # If test only on healthy controls, remove people with comoorbidities from negative cases
-    data = data.get_only_healthy_controls(datasets, diag_cols) if only_healthy_controls else datasets
     
     for diag in diag_cols:
         print(diag)
@@ -65,9 +62,12 @@ def get_aucs_on_test_set(best_estimators, datasets, use_test_set, only_healthy_c
         estimator = best_estimators[diag]
     
         if use_test_set == 1:
-            X, y = data["X_test"], data["y_test"]
+            X, y = datasets[diag]["X_test"], datasets[diag]["y_test"]
         else:
-            X, y = data["X_val"], data["y_val"]
+            X, y = datasets[diag]["X_val"], datasets[diag]["y_val"]
+
+        # If test only on healthy controls, remove people with comoorbidities from negative cases
+        X, y = data.get_only_healthy_controls(X, y, diag_cols) if only_healthy_controls else X, y
 
         roc_auc = get_roc_auc(X, y, estimator)
         aucs[diag] = roc_auc
@@ -76,7 +76,7 @@ def get_aucs_on_test_set(best_estimators, datasets, use_test_set, only_healthy_c
     # Convert to a dataframe
     results = pd.DataFrame.from_dict(aucs, columns=["ROC AUC"], orient="index").sort_values("ROC AUC", ascending=False).reset_index().rename(columns={'index': 'Diag'})
     print(results)
-    results = add_number_of_positive_examples(results, data)
+    results = add_number_of_positive_examples(results, datasets)
 
     return results.sort_values(by="ROC AUC", ascending=False)
 
