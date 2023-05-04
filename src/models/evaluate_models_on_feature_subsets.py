@@ -202,19 +202,18 @@ def make_and_save_saturation_plot(performances_on_feature_subsets, optimal_thres
     import matplotlib.pyplot as plt
 
     auc_table, _, _ = make_performance_tables_opt_threshold(performances_on_feature_subsets, optimal_thresholds)
-    
+
     # Plot a line of AUROCs at each number of features, one line per diagnosis. x axis is number of features (row index of auc_table), y axis is AUROC value
     fig, ax = plt.subplots()
     for diag in auc_table.columns:
-        ax.plot(auc_table[diag], label=diag)
+        ax.plot(auc_table[diag], label=diag.split(".")[1])
     ax.set_xlabel("Number of features")
     ax.set_ylabel("AUROC")
     ax.set_ylim([0.5, 1.0])
     # Print legend under the plot
-    ax.legend(bbox_to_anchor=(0., -0.2, 1., .102), loc='lower left',
-           ncol=3, mode="expand", borderaxespad=0.)
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize='x-small')
 
-    fig.savefig(dir+'saturation-plot.png')
+    fig.savefig(dir+'saturation-plot.png', bbox_inches='tight', dpi=800)
     
 
 def main(models_from_file = 1):
