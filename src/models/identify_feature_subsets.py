@@ -7,6 +7,7 @@ sys.excepthook = ultratb.FormattedTB(color_scheme='Neutral', call_pdb=False)
 
 from joblib import load, dump
 import pandas as pd
+import warnings
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -87,7 +88,8 @@ def make_sign_dict(feature_list, estimator):
     # If model doesn't have coeffieicents, make values empty
     if util.get_base_model_name_from_pipeline(estimator) not in ["logisticregression", "svc"]:
         for item in feature_list:
-            sign_dict[item] = "?"
+            sign_dict[item] = ""
+            warnings.warn("Model doesn't have coefficients, can't prepend coefficient sign to item names")
         return sign_dict
 
     if util.get_base_model_name_from_pipeline(estimator) == "logisticregression":
@@ -122,7 +124,13 @@ def append_names_and_sign_to_feature_subsets(feature_subsets, estimators_on_subs
     feature_subsets_with_names_and_signs = {}
     for diag in feature_subsets.keys():
         feature_subsets_with_names_and_signs[diag] = {}
-        for subset in feature_subsets_with_names_and_signs[diag].keys():
+
+        if diag not in list(estimators_on_subsets.keys()):
+            feature_subsets_with_names_and_signs[diag] = feature_subsets[diag]
+            warnings.warn(f"Estimators on subsets for {diag} not found, skipping appending names and signs")
+            continue
+
+        for subset in feature_subsets[diag].keys():
 
             sign_dict = make_sign_dict(feature_subsets[diag][subset], estimators_on_subsets[diag][subset])
             name_dict = make_name_dict(feature_subsets[diag][subset])
@@ -135,8 +143,6 @@ def write_feature_subsets_with_names_and_signs(feature_subsets, estimators_on_su
     path = output_reports_dir+"feature-subsets/"
 
     feature_subsets_with_names_and_sign = append_names_and_sign_to_feature_subsets(feature_subsets, estimators_on_subsets)
-
-    print(feature_subsets_with_names_and_sign)
 
     util.write_two_lvl_dict_to_file(feature_subsets_with_names_and_sign, path)
     
@@ -158,7 +164,7 @@ def main(number_of_features_to_check = 126, importances_from_file = 0):
         dump(estimators_on_subsets, dirs["output_models_dir"]+'estimators-on-subsets.joblib')
     else:
         feature_subsets = get_feature_subsets(best_estimators, datasets, number_of_features_to_check, dirs)
-        estimators_on_subsets = models.re_train_models_on_feature_subsets(feature_subsets, datasets, best_estimators)    
+        estimators_on_subsets = models.re_train_models_on_feature_subsets(feature_subsets, datasets, best_estimators) 
                 
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
         dump(estimators_on_subsets, dirs["output_models_dir"]+'estimators-on-subsets.joblib')
