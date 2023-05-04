@@ -78,33 +78,28 @@ def fix_data_dict(names_df):
     names_df.index = names_df.index.str.replace(r"ICU_(?!(SR))", "ICU_P_")
     return names_df
 
-def make_sign_dict(feature_list, estimator):
-    # Re-train models on feature subsets (train_train set), get signs of coefficients
-    #   If sign is positive, item is positively correlated with diagnosis
-    #   If sign is negative, item is negatively correlated with diagnosis
-
-    sign_dict = {}
+def make_coef_dict(feature_list, estimator):
+    # Re-train models on feature subsets (train_train set), get coefficients
+    
+    coef_dict = {}
 
     # If model doesn't have coeffieicents, make values empty
     if util.get_base_model_name_from_pipeline(estimator) not in ["logisticregression", "svc"]:
         for item in feature_list:
-            sign_dict[item] = ""
-            warnings.warn("Model doesn't have coefficients, can't prepend coefficient sign to item names")
-        return sign_dict
+            coef_dict[item] = ""
+            warnings.warn("Model doesn't have coefficients, can't prepend coefficients to item names")
+        return coef_dict
 
     if util.get_base_model_name_from_pipeline(estimator) == "logisticregression":
         coef = estimator.named_steps["logisticregression"].coef_[0]
     else:
         coef = estimator.named_steps["svc"].coef_[0]
     
-    # Get signs of coefficients
-    for i, item in enumerate(feature_list):
-        if coef[i] > 0:
-            sign_dict[item] = "+"
-        else:
-            sign_dict[item] = "-"
+    # Make dict with coefficients
+    for item, coef_value in zip(feature_list, coef):
+        coef_dict[item] = coef_value
 
-    return sign_dict
+    return coef_dict
 
 def make_name_dict(feature_list):
     # Append item name to each item ID 
@@ -120,31 +115,31 @@ def make_name_dict(feature_list):
             name_dict[item] = names_df.loc[item.split(",")[1]]["questions"]
     return name_dict
 
-def append_names_and_sign_to_feature_subsets(feature_subsets, estimators_on_subsets):
-    feature_subsets_with_names_and_signs = {}
+def append_names_and_coef_to_feature_subsets(feature_subsets, estimators_on_subsets):
+    feature_subsets_with_names_and_coefs = {}
     for diag in feature_subsets.keys():
-        feature_subsets_with_names_and_signs[diag] = {}
+        feature_subsets_with_names_and_coefs[diag] = {}
 
         if diag not in list(estimators_on_subsets.keys()):
-            feature_subsets_with_names_and_signs[diag] = feature_subsets[diag]
-            warnings.warn(f"Estimators on subsets for {diag} not found, skipping appending names and signs")
+            feature_subsets_with_names_and_coefs[diag] = feature_subsets[diag]
+            warnings.warn(f"Estimators on subsets for {diag} not found, skipping appending names and coefs")
             continue
 
         for subset in feature_subsets[diag].keys():
 
-            sign_dict = make_sign_dict(feature_subsets[diag][subset], estimators_on_subsets[diag][subset])
+            coef_dict = make_coef_dict(feature_subsets[diag][subset], estimators_on_subsets[diag][subset])
             name_dict = make_name_dict(feature_subsets[diag][subset])
 
-            feature_subsets_with_names_and_signs[diag][subset] = [f'{sign_dict[x]} {x} ({name_dict[x]})' 
+            feature_subsets_with_names_and_coefs[diag][subset] = [f'({coef_dict[x]:.2f}*){x} ({name_dict[x]})' 
                                                                   for x in feature_subsets[diag][subset]]
-    return feature_subsets_with_names_and_signs
+    return feature_subsets_with_names_and_coefs
 
-def write_feature_subsets_with_names_and_signs(feature_subsets, estimators_on_subsets, output_reports_dir):
+def write_feature_subsets_with_names_and_coefs(feature_subsets, estimators_on_subsets, output_reports_dir):
     path = output_reports_dir+"feature-subsets/"
 
-    feature_subsets_with_names_and_sign = append_names_and_sign_to_feature_subsets(feature_subsets, estimators_on_subsets)
+    feature_subsets_with_names_and_coef = append_names_and_coef_to_feature_subsets(feature_subsets, estimators_on_subsets)
 
-    util.write_two_lvl_dict_to_file(feature_subsets_with_names_and_sign, path)
+    util.write_two_lvl_dict_to_file(feature_subsets_with_names_and_coef, path)
     
 def main(number_of_features_to_check = 126, importances_from_file = 0):
     number_of_features_to_check = int(number_of_features_to_check)
@@ -169,7 +164,7 @@ def main(number_of_features_to_check = 126, importances_from_file = 0):
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
         dump(estimators_on_subsets, dirs["output_models_dir"]+'estimators-on-subsets.joblib')
 
-    write_feature_subsets_with_names_and_signs(feature_subsets, estimators_on_subsets, dirs["output_reports_dir"])
+    write_feature_subsets_with_names_and_coefs(feature_subsets, estimators_on_subsets, dirs["output_reports_dir"])
     
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
