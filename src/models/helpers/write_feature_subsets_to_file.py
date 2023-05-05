@@ -79,10 +79,6 @@ def add_performances_to_subsets(feature_subsets_with_names_and_coef, performance
             result[diag][subset] = [f'AUROC: {auroc:.2}', feature_subsets_with_names_and_coef[diag][subset]]
     return result
 
-#def write_subsets_with_performances_to_file(result, path):
- #   for diag in result:
-  #      util.write_two_lvl_dict_to_file(result[diag], path+diag+"/")
-
 def write_feature_subsets_to_file(feature_subsets, estimators_on_subsets, output_reports_dir, performances = None):
     path = output_reports_dir+"feature-subsets/"
 
