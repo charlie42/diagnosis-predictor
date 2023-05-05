@@ -7,7 +7,6 @@ sys.excepthook = ultratb.FormattedTB(color_scheme='Neutral', call_pdb=False)
 
 from joblib import load, dump
 import pandas as pd
-import warnings
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -72,74 +71,6 @@ def get_feature_subsets(best_estimators, datasets, number_of_features_to_check, 
             feature_subsets[diag] = models.get_feature_subsets_from_sfs(diag, best_estimators, datasets, number_of_features_to_check)
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
     return feature_subsets
-
-def fix_data_dict(names_df):
-    # Replace ICU_X with ICU_P_X where X is item number (except ICU_SR lines)
-    names_df.index = names_df.index.str.replace(r"ICU_(?!(SR))", "ICU_P_")
-    return names_df
-
-def make_coef_dict(feature_list, estimator):
-    # Re-train models on feature subsets (train_train set), get coefficients
-    
-    coef_dict = {}
-
-    # If model doesn't have coeffieicents, make values empty
-    if util.get_base_model_name_from_pipeline(estimator) not in ["logisticregression", "svc"]:
-        for item in feature_list:
-            coef_dict[item] = ""
-            warnings.warn("Model doesn't have coefficients, can't prepend coefficients to item names")
-        return coef_dict
-
-    if util.get_base_model_name_from_pipeline(estimator) == "logisticregression":
-        coef = estimator.named_steps["logisticregression"].coef_[0]
-    else:
-        coef = estimator.named_steps["svc"].coef_[0]
-    
-    # Make dict with coefficients
-    for item, coef_value in zip(feature_list, coef):
-        coef_dict[item] = coef_value
-
-    return coef_dict
-
-def make_name_dict(feature_list):
-    # Append item name to each item ID 
-    #   Remove name from assessment from feauture name, only keep item name (already contains assessment name)
-    #   Don't append name to basic demographics, self explanatory item IDs
-    names_df = fix_data_dict(pd.read_csv("references/item-names.csv", index_col=1, encoding = "ISO-8859-1", names=["questions", "keys"], sep=","))
-    name_dict = {}
-    missing_names = ("WAS_MISSING", "financialsupport", "Panic_A01A", "Panic_A02A", "Panic_A01B", "Panic_A02B") 
-    for item in feature_list:
-        if item.startswith("Basic_Demos") or item.endswith(missing_names):
-            name_dict[item] = ""
-        else:
-            name_dict[item] = names_df.loc[item.split(",")[1]]["questions"]
-    return name_dict
-
-def append_names_and_coef_to_feature_subsets(feature_subsets, estimators_on_subsets):
-    feature_subsets_with_names_and_coefs = {}
-    for diag in feature_subsets.keys():
-        feature_subsets_with_names_and_coefs[diag] = {}
-
-        if diag not in list(estimators_on_subsets.keys()):
-            feature_subsets_with_names_and_coefs[diag] = feature_subsets[diag]
-            warnings.warn(f"Estimators on subsets for {diag} not found, skipping appending names and coefs")
-            continue
-
-        for subset in feature_subsets[diag].keys():
-
-            coef_dict = make_coef_dict(feature_subsets[diag][subset], estimators_on_subsets[diag][subset])
-            name_dict = make_name_dict(feature_subsets[diag][subset])
-
-            feature_subsets_with_names_and_coefs[diag][subset] = [f'({coef_dict[x]:.2f}*){x} ({name_dict[x]})' 
-                                                                  for x in feature_subsets[diag][subset]]
-    return feature_subsets_with_names_and_coefs
-
-def write_feature_subsets_with_names_and_coefs(feature_subsets, estimators_on_subsets, output_reports_dir):
-    path = output_reports_dir+"feature-subsets/"
-
-    feature_subsets_with_names_and_coef = append_names_and_coef_to_feature_subsets(feature_subsets, estimators_on_subsets)
-
-    util.write_two_lvl_dict_to_file(feature_subsets_with_names_and_coef, path)
     
 def main(number_of_features_to_check = 126, importances_from_file = 0):
     number_of_features_to_check = int(number_of_features_to_check)
@@ -164,7 +95,7 @@ def main(number_of_features_to_check = 126, importances_from_file = 0):
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
         dump(estimators_on_subsets, dirs["output_models_dir"]+'estimators-on-subsets.joblib')
 
-    write_feature_subsets_with_names_and_coefs(feature_subsets, estimators_on_subsets, dirs["output_reports_dir"])
+    models.write_feature_subsets_to_file(feature_subsets, estimators_on_subsets, dirs["output_reports_dir"])
     
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
