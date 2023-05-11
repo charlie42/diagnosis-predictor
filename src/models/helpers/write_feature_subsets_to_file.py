@@ -40,7 +40,7 @@ def make_name_dict(feature_list):
     # Append item name to each item ID 
     #   Remove name from assessment from feauture name, only keep item name (already contains assessment name)
     #   Don't append name to basic demographics, self explanatory item IDs
-    names_df = fix_data_dict(pd.read_csv("references/item-names.csv", index_col=1, encoding = "ISO-8859-1", names=["questions", "keys"], sep=","))
+    names_df = fix_data_dict(pd.read_csv("references/item-names.csv", index_col=1, encoding = "ISO-8859-1", names=["questions","keys","datadic","value","valueLabels"], sep=","))
     name_dict = {}
     missing_names = ("WAS_MISSING", "financialsupport", "Panic_A01A", "Panic_A02A", "Panic_A01B", "Panic_A02B") 
     for item in feature_list:
