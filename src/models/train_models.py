@@ -207,16 +207,15 @@ def find_best_estimators_and_scores(datasets, diag_cols, performance_margin):
             
     return best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators
 
-def build_df_of_best_estimators_and_their_score_sds(best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators, full_dataset):
+def build_df_of_best_estimators_and_their_score_sds(best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators):
     best_estimators_and_score_sds = []
     for diag in best_estimators.keys():
         best_estimator = best_estimators[diag]
         score_of_best_estimator = scores_of_best_estimators[diag]
         sd_of_score_of_best_estimator = sds_of_scores_of_best_estimators[diag]
         model_type = util.get_base_model_name_from_pipeline(best_estimator)
-        number_of_positive_examples = full_dataset[diag].sum()
-        best_estimators_and_score_sds.append([diag, model_type, best_estimator, score_of_best_estimator, sd_of_score_of_best_estimator, number_of_positive_examples])
-    best_estimators_and_score_sds = pd.DataFrame(best_estimators_and_score_sds, columns = ["Diag", "Model type", "Best estimator", "Best score", "SD of best score", "Number of positive examples"])
+        best_estimators_and_score_sds.append([diag, model_type, best_estimator, score_of_best_estimator, sd_of_score_of_best_estimator])
+    best_estimators_and_score_sds = pd.DataFrame(best_estimators_and_score_sds, columns = ["Diag", "Model type", "Best estimator", "Best score", "SD of best score"])
     best_estimators_and_score_sds["Score - SD"] = best_estimators_and_score_sds['Best score'] - best_estimators_and_score_sds['SD of best score'] 
     return best_estimators_and_score_sds
 
@@ -240,13 +239,12 @@ def main(performance_margin = 0.02, models_from_file = 1):
     dirs = set_up_directories()
     load_dirs = set_up_load_directories()
 
-    full_dataset = pd.read_csv(load_dirs["load_data_dir"] + "item_lvl.csv")
     datasets = load(load_dirs["load_data_dir"]+'datasets.joblib')
     diag_cols = list(datasets.keys())
     print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
 
     if DEBUG_MODE:
-        diag_cols = diag_cols[0:2]
+        #diag_cols = diag_cols[0:2]
         pass
 
     if models_from_file == 1:
@@ -264,7 +262,7 @@ def main(performance_margin = 0.02, models_from_file = 1):
         dump_estimators_and_performances(dirs, best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators)
        
     # Build and save dataframe of best estimators and their scores
-    df_of_best_estimators_and_their_score_sds = build_df_of_best_estimators_and_their_score_sds(best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators, full_dataset)
+    df_of_best_estimators_and_their_score_sds = build_df_of_best_estimators_and_their_score_sds(best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators)
     df_of_best_estimators_and_their_score_sds.to_csv(dirs["reports_dir"] + "df_of_best_estimators_and_their_scores.csv")
     print(df_of_best_estimators_and_their_score_sds)
 
