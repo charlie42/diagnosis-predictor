@@ -9,7 +9,7 @@ import sys, os, inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-import util, data
+import util, data, features
 
 def build_output_dir_name(first_assessment_to_drop, use_other_diags_as_input):
     # Part with the datetime
@@ -130,13 +130,18 @@ def split_datasets_per_diag(full_dataset, diag_cols, split_percentage, use_other
         
     return datasets
 
-def find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set):
+def get_positive_examples_in_ds(full_dataset, diags):
+    positive_ex_in_ds = {}
+    for diag in diags:
+        positive_ex_in_ds[diag] = full_dataset[full_dataset[diag] == 1].shape[0]
+    return positive_ex_in_ds
+    
+def find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, all_diags, split_percentage, min_pos_examples_val_set):
     diags_w_enough_positive_examples_in_val_set = []
     for diag in all_diags:
-        positive_examples_full_ds = full_dataset[full_dataset[diag] == 1].shape[0]
         # First get # of positive examples in the train set, then from those, get # of positive examples in the validation set 
         # (first we split the dataset into train and test set, then we split the train set into train and validation set)
-        positive_examples_val_set = positive_examples_full_ds * (1-split_percentage) * split_percentage 
+        positive_examples_val_set = positive_examples_in_ds[diag] * (1-split_percentage) * split_percentage 
         if positive_examples_val_set >= min_pos_examples_val_set:
             diags_w_enough_positive_examples_in_val_set.append(diag)
     return diags_w_enough_positive_examples_in_val_set
@@ -146,22 +151,31 @@ def main(only_assessment_distribution, first_assessment_to_drop, use_other_diags
 
     data.make_full_dataset(only_assessment_distribution, first_assessment_to_drop, dirs)
     full_dataset = pd.read_csv(dirs["data_output_dir"] + "item_lvl.csv")
+    full_dataset = features.make_new_diag_cols(full_dataset)
 
     # Print dataset shape
-    print("Full dataset shape: ", full_dataset.shape)
+    print("Full dataset shape: Number of rows: ", full_dataset.shape[0], "Number of columns: ", full_dataset.shape[1])
 
     # Get list of column names with "Diag." prefix, where number of 
     # positive examples is > threshold
     min_pos_examples_val_set = 20
     split_percentage = 0.2
     all_diags = [x for x in full_dataset.columns if x.startswith("Diag.")]
-    diag_cols = find_diags_w_enough_positive_examples_in_val_set(full_dataset, all_diags, split_percentage, min_pos_examples_val_set)
+    positive_examples_in_ds = get_positive_examples_in_ds(full_dataset, all_diags)
+    
+    diag_cols = find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, all_diags, split_percentage, min_pos_examples_val_set)
 
     # Create datasets for each diagnosis (different input and output columns)
     datasets = split_datasets_per_diag(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
-    print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
+    print("Train set shape: Number of rows: ", datasets[diag_cols[0]]["X_train_train"].shape[0], "Number of columns: ", datasets[diag_cols[0]]["X_train_train"].shape[1])
 
+    # Print number of positive examples for each diagnosis 
+    print("Number of positive examples for each diagnosis: ", get_positive_examples_in_ds(full_dataset, diag_cols))
+          
     dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)
+
+    # Save number of positive examples for each diagnosis to csv (convert dict to df)
+    pd.DataFrame(positive_examples_in_ds.items(), columns=["Diag", f"Positive examples out of {full_dataset.shape[0]}"]).sort_values("Positive examples", ascending=False).to_csv(dirs["data_statistics_dir"]+"number-of-positive-examples.csv")
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], sys.argv[3])
