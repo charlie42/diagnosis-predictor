@@ -141,7 +141,7 @@ def make_performance_tables_opt_nb_features(performances_on_feature_subsets, opt
                    performances_on_feature_subsets[diag][optimal_nb_features][threshold][1], 
                    performances_on_feature_subsets[diag][optimal_nb_features][threshold][2],
                    performances_on_feature_subsets[diag][optimal_nb_features][threshold][3],
-                     performances_on_feature_subsets[diag][optimal_nb_features][threshold][4]]
+                   performances_on_feature_subsets[diag][optimal_nb_features][threshold][4]]
             sens_spec_table_diag = sens_spec_table_diag + [row]
 
         sens_spec_tables[diag] = pd.DataFrame(sens_spec_table_diag, columns=["Threshold", "Sensitivity", "Specificity", "PPV", "NPV"])
@@ -161,7 +161,8 @@ def get_and_write_optimal_nbs_features(auc_table, dir):
     optimal_nbs_features = {}
 
     for diag in auc_table.columns:
-        max_score = auc_table[diag].max()
+        # Get max score at number of features in the longest subcsale among those that perform best for each diag (from HBN-scripts repo)
+        max_score = auc_table[diag].iloc[0:27].max() 
         optimal_score = max_score - 0.01
         # Get index of the first row with a score >= optimal_score
         optimal_nbs_features[diag] = auc_table[diag][auc_table[diag] >= optimal_score].index[0]
