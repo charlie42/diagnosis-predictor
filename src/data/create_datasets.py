@@ -11,24 +11,25 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util, data, features
 
-def build_output_dir_name(first_assessment_to_drop, use_other_diags_as_input):
+def build_output_dir_name(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments):
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
     # Part with the params
-    params = {"first_assessment_to_drop": first_assessment_to_drop, "use_other_diags_as_input": use_other_diags_as_input}
+    params = {"first_assessment_to_drop": first_assessment_to_drop, "use_other_diags_as_input": use_other_diags_as_input, 
+              "only_free_assessments": only_free_assessments}
     params_part = util.build_param_string_for_dir_name(params)
     
     return datetime_part + "___" + params_part
 
-def set_up_directories(first_assessment_to_drop, use_other_diags_as_input):
+def set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments):
 
     # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
     data_dir = "../diagnosis_predictor_data/"
     util.create_dir_if_not_exists(data_dir)
 
     # Create directory inside the output directory with the run timestamp and first_assessment_to_drop param
-    current_output_dir_name = build_output_dir_name(first_assessment_to_drop, use_other_diags_as_input)
+    current_output_dir_name = build_output_dir_name(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments)
 
     data_statistics_dir = data_dir + "reports/create_datasets/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(data_statistics_dir)
@@ -75,6 +76,7 @@ def get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input):
                             and not x.startswith("Diag.")]
     
     input_cols = customize_input_cols_per_diag(input_cols, diag)
+    print("Input assessemnts used: ", list(set([x.split(",")[0] for x in input_cols])))
     
     return input_cols
 
@@ -146,10 +148,14 @@ def find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, al
             diags_w_enough_positive_examples_in_val_set.append(diag)
     return diags_w_enough_positive_examples_in_val_set
 
-def main(only_assessment_distribution, first_assessment_to_drop, use_other_diags_as_input):
-    dirs = set_up_directories(first_assessment_to_drop, use_other_diags_as_input)
+def main(only_assessment_distribution, first_assessment_to_drop, use_other_diags_as_input, only_free_assessments):
+    only_assessment_distribution = int(only_assessment_distribution)
+    use_other_diags_as_input = int(use_other_diags_as_input)
+    only_free_assessments = int(only_free_assessments)
 
-    data.make_full_dataset(only_assessment_distribution, first_assessment_to_drop, dirs)
+    dirs = set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments)
+
+    data.make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs)
     full_dataset = pd.read_csv(dirs["data_output_dir"] + "item_lvl.csv")
     full_dataset = features.make_new_diag_cols(full_dataset)
 
@@ -178,4 +184,4 @@ def main(only_assessment_distribution, first_assessment_to_drop, use_other_diags
     pd.DataFrame(positive_examples_in_ds.items(), columns=["Diag", f"Positive examples out of {full_dataset.shape[0]}"]).sort_values("Positive examples", ascending=False).to_csv(dirs["data_statistics_dir"]+"number-of-positive-examples.csv")
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
