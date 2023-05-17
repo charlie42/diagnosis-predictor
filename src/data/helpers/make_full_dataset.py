@@ -15,6 +15,11 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util
+
+def remove_proprietary_assessments(relevant_assessment_list):
+    proprietary_assessments = ["ASR", "CBCL", "CBCL_Pre", "C3SR", "PCIAT", "RBS", "SCQ", "SRS", "SRS_Pre", "YSR", "Barratt", "PSI"]
+
+    return [x for x in relevant_assessment_list if x not in proprietary_assessments]
     
 def remove_admin_cols(full):
     # Remove uninteresting columns
@@ -75,17 +80,12 @@ def get_assessment_answer_count(full_wo_underscore, EID_cols):
     assessment_answer_counts.columns = ["N of Participants", "% of Participants Filled"]
     return assessment_answer_counts
 
-def get_relevant_id_cols_by_popularity(assessment_answer_counts):
+def get_relevant_id_cols_by_popularity(assessment_answer_counts, relevant_assessment_list):
+
+    relevant_EID_list = [x+",EID" for x in relevant_assessment_list]
+
     # Get list of assessments sorted by popularity
     EID_columns_by_popularity = assessment_answer_counts.index
-
-    # Get relevant assessments: 
-    #   relevant cognitive tests, Questionnaire Measures of Emotional and Cognitive Status, and 
-    #   Questionnaire Measures of Family Structure, Stress, and Trauma (from Assessment_List_Jan2019.xlsx)
-    relevant_EID_list = [x+",EID" for x in ["Basic_Demos", "PreInt_EduHx", "PreInt_DevHx", "SympChck", "SCQ", "Barratt", 
-        "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "APQ_P", "PCIAT", "IAT", "DTS", "ESWAN", "MFQ_P", "APQ_SR", 
-        "WHODAS_P", "CIS_P", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_P", "SCARED_SR", 
-        "C3SR", "CCSC", "CPIC", "YSR", "PhenX_SchoolRisk", "CBCL_Pre", "SRS_Pre", "ASR"]]
 
     # Get relevant ID columns sorted by popularity    
     EID_columns_by_popularity = [x for x in EID_columns_by_popularity if x in relevant_EID_list]
@@ -282,8 +282,18 @@ def export_datasets(data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores
     data_up_to_dropped_subscale_scores.to_csv(data_output_dir + "subscale_scores.csv", index=False)
     data_up_to_dropped_total_scores.to_csv(data_output_dir + "total_scores.csv", index=False)
 
-def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, dirs):
-    only_assessment_distribution = int(only_assessment_distribution)
+def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs):
+
+    # Get relevant assessments: 
+    #   relevant cognitive tests, Questionnaire Measures of Emotional and Cognitive Status, and 
+    #   Questionnaire Measures of Family Structure, Stress, and Trauma (from Assessment_List_Jan2019.xlsx)
+    relevent_assessments_list = ["Basic_Demos", "PreInt_EduHx", "PreInt_DevHx", "SympChck", "SCQ", "Barratt", 
+        "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "APQ_P", "PCIAT", "IAT", "DTS", "ESWAN", "MFQ_P", "APQ_SR", 
+        "WHODAS_P", "CIS_P", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_P", "SCARED_SR", 
+        "C3SR", "CCSC", "CPIC", "YSR", "PhenX_SchoolRisk", "CBCL_Pre", "SRS_Pre", "ASR"]
+    
+    if only_free_assessments == 1:
+        relevent_assessments_list = remove_proprietary_assessments(relevent_assessments_list)
 
     # LORIS saved query (all data)
     full = pd.read_csv("data/raw/LORIS-release-10.csv", dtype=object)
@@ -322,7 +332,7 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, di
     assessment_answer_counts.to_csv(dirs["data_statistics_dir"] + "assessment-filled-distrib.csv")
 
     # Get relevant ID columns sorted by popularity
-    EID_columns_by_popularity = get_relevant_id_cols_by_popularity(assessment_answer_counts)    
+    EID_columns_by_popularity = get_relevant_id_cols_by_popularity(assessment_answer_counts, relevent_assessments_list)    
 
     # Get cumulative distribution of assessments: number of people who took all top 1, top 2, top 3, etc. popular assessments 
     cumul_number_of_examples_df = get_cumul_number_of_examples_df(full_wo_underscore, EID_columns_by_popularity)
