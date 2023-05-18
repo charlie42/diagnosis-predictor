@@ -69,7 +69,7 @@ def append_names_and_coef_to_feature_subsets(feature_subsets, estimators_on_subs
             coef_dict = make_coef_dict(feature_subsets[diag][subset], estimators_on_subsets[diag][subset])
             name_and_value_dict = make_name_and_value_dict(feature_subsets[diag][subset])
 
-            feature_subsets_with_names_and_coefs[diag][subset] = [f'({coef_dict[x]:.2f}*){x}: {name_and_value_dict[x][0]} -- {name_and_value_dict[x][1]}' 
+            feature_subsets_with_names_and_coefs[diag][subset] = [f'({coef_dict[x]:.2f}*) {x}: {name_and_value_dict[x][0]} - {name_and_value_dict[x][1]}' 
                                                                   for x in feature_subsets[diag][subset]]
     return feature_subsets_with_names_and_coefs
 

@@ -58,7 +58,7 @@ def make_and_write_cv_auc_table(auc_on_subsets, dir):
     auc_on_subsets.index = range(1, len(auc_on_subsets)+1)
     auc_on_subsets = auc_on_subsets.rename(columns={"index": "Diagnosis"})
 
-    auc_on_subsets.to_csv(dir+'cv-auc-on-subsets.csv')
+    auc_on_subsets.to_csv(dir+'cv-auc-on-subsets.csv', float_format='%.3f')
 
     return auc_on_subsets
 
@@ -176,16 +176,16 @@ def make_and_write_test_set_performance_tables(performances_on_feature_subsets, 
 
     # Make AUC, Sens, Spec tables for optimal thresholds
     [auc_test_set_table_optimal_threshold, sens_test_set_table_optimal_threshold, spec_test_set_table_optimal_threshold] = make_performance_tables_opt_threshold(performances_on_feature_subsets, optimal_thresholds)
-    auc_test_set_table_optimal_threshold.to_csv(dir+'auc-on-subsets-test-set-optimal-threshold.csv')
-    sens_test_set_table_optimal_threshold.to_csv(dir+'sens-on-subsets-test-set-optimal-threshold.csv')
-    spec_test_set_table_optimal_threshold.to_csv(dir+'spec-on-subsets-test-set-optimal-threshold.csv')
+    auc_test_set_table_optimal_threshold.to_csv(dir+'auc-on-subsets-test-set-optimal-threshold.csv', float_format='%.3f')
+    sens_test_set_table_optimal_threshold.to_csv(dir+'sens-on-subsets-test-set-optimal-threshold.csv', float_format='%.3f')
+    spec_test_set_table_optimal_threshold.to_csv(dir+'spec-on-subsets-test-set-optimal-threshold.csv', float_format='%.3f')
 
     # Make AUC, Sens, Spec tables for all thresholds on optimal number of features
     sens_spec_test_set_tables_optimal_nb_features = make_performance_tables_opt_nb_features(performances_on_feature_subsets, optimal_nbs_features)
     path = dir + "sens-spec-on-subsets-test-set-optimal-nb-features/"
     util.create_dir_if_not_exists(path)
     for diag in sens_spec_test_set_tables_optimal_nb_features:
-        sens_spec_test_set_tables_optimal_nb_features[diag].to_csv(path+diag+'.csv')
+        sens_spec_test_set_tables_optimal_nb_features[diag].to_csv(path+diag+'.csv', float_format='%.3f')
 
     # Make a table with AUC, Sens, Spec for optimal threhsolds on optimal number of features for each diagnosis
     auc_sens_spec_test_set_opt_thres_opt_nb_features = []
@@ -197,7 +197,7 @@ def make_and_write_test_set_performance_tables(performances_on_feature_subsets, 
         auc_sens_spec_test_set_opt_thres_opt_nb_features.append([diag, optimal_nbs_features[diag], auc_test_set_optimal_threshold, sens_test_set_optimal_threshold, spec_test_set_optimal_threshold])
     
     auc_sens_spec_test_set_opt_thres_opt_nb_features = pd.DataFrame(auc_sens_spec_test_set_opt_thres_opt_nb_features, columns=["Diagnosis", "Number of features", "AUC", "Sensitivity", "Specificity"])
-    auc_sens_spec_test_set_opt_thres_opt_nb_features.to_csv(dir+'auc-sens-spec-on-subsets-test-set-optimal-threshold-optimal-nb-features.csv')
+    auc_sens_spec_test_set_opt_thres_opt_nb_features.to_csv(dir+'auc-sens-spec-on-subsets-test-set-optimal-threshold-optimal-nb-features.csv', float_format='%.3f')
 
 def make_and_save_saturation_plot(performances_on_feature_subsets, optimal_thresholds, dir):
     import matplotlib.pyplot as plt

@@ -108,6 +108,12 @@ def plot_comul_number_of_examples(cumul_number_of_examples_df, data_statistics_d
     plt.figure(figsize=(16,8))
     plt.xticks(cumul_number_of_examples_df["N of Assessments"])
     plt.scatter(cumul_number_of_examples_df["N of Assessments"], cumul_number_of_examples_df["Respondents"])
+    # Add vertical lines for each point
+    for i in range(0, len(cumul_number_of_examples_df)):
+        plt.axvline(x=cumul_number_of_examples_df["N of Assessments"][i], color='gray', linestyle='--')
+    plt.xlabel("Number of Assessments")
+    plt.ylabel("Number of Respondents")
+    plt.title("Cumulative Number of Respondents with Complete Data")
     plt.savefig(data_statistics_dir+'figures/cumul_assessment_distrib.png')  
 
 def get_columns_until_dropped(full_wo_underscore, EID_columns_until_dropped):
@@ -336,7 +342,7 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
     # Get cumulative distribution of assessments: number of people who took all top 1, top 2, top 3, etc. popular assessments 
     cumul_number_of_examples_df = get_cumul_number_of_examples_df(full_wo_underscore, EID_columns_by_popularity)
-    cumul_number_of_examples_df.to_csv(dirs["data_statistics_dir"] + "assessment-filled-distrib-cumul.csv")
+    cumul_number_of_examples_df.to_csv(dirs["data_statistics_dir"] + "assessment-filled-distrib-cumul.csv", float_format='%.3f')
 
     # Plot cumulative distribution of assessments
     plot_comul_number_of_examples(cumul_number_of_examples_df, dirs["data_statistics_dir"])
@@ -369,7 +375,7 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
         # Save report of missing values
         missing_values_df = get_missing_values_df(data_up_to_dropped)
-        missing_values_df.to_csv(dirs["data_statistics_dir"] + "missing-values-report.csv")
+        missing_values_df.to_csv(dirs["data_statistics_dir"] + "missing-values-report.csv", float_format='%.3f')
 
         # Remove columns with more than 40% missing data
         data_up_to_dropped = remove_cols_w_missing_over_n(data_up_to_dropped, 40, missing_values_df)

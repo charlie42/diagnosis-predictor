@@ -113,7 +113,7 @@ def main(use_test_set=1):
                             diag_cols=diag_cols, input_reports_dir=dirs["input_reports_dir"])
     
     if use_test_set == 1:
-        roc_aucs.to_csv(dirs["output_reports_dir"]+"performance_table_all_features.csv", index=False)    
+        roc_aucs.to_csv(dirs["output_reports_dir"]+"performance_table_all_features.csv", float_format='%.3f', index=False)    
 
 if __name__ == "__main__":
     main(sys.argv[1])

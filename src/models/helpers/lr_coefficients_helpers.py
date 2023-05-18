@@ -40,4 +40,4 @@ def save_coefficients_from_lr(diag, pipeline, data, output_dir):
     coef_dir = output_dir + "coefficients/"
     util.create_dir_if_not_exists(coef_dir)
     ## Save to file
-    df.to_csv(coef_dir + f'{diag}_coefficients.csv', index=False)
+    df.to_csv(coef_dir + f'{diag}_coefficients.csv', float_format='%.3f', index=False)
