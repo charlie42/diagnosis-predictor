@@ -263,7 +263,7 @@ def main(performance_margin = 0.02, models_from_file = 1):
        
     # Build and save dataframe of best estimators and their scores
     df_of_best_estimators_and_their_score_sds = build_df_of_best_estimators_and_their_score_sds(best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators)
-    df_of_best_estimators_and_their_score_sds.to_csv(dirs["reports_dir"] + "df_of_best_estimators_and_their_scores.csv")
+    df_of_best_estimators_and_their_score_sds.to_csv(dirs["reports_dir"] + "df_of_best_estimators_and_their_scores.csv", float_format='%.3f')
     print(df_of_best_estimators_and_their_score_sds)
 
     # Save feature coefficients for logistic regression models

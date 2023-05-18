@@ -181,7 +181,8 @@ def main(only_assessment_distribution, first_assessment_to_drop, use_other_diags
     dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)
 
     # Save number of positive examples for each diagnosis to csv (convert dict to df)
-    pd.DataFrame(positive_examples_in_ds.items(), columns=["Diag", f"Positive examples out of {full_dataset.shape[0]}"]).sort_values("Positive examples", ascending=False).to_csv(dirs["data_statistics_dir"]+"number-of-positive-examples.csv")
+    pos_examples_col_name = f"Positive examples out of {full_dataset.shape[0]}"
+    pd.DataFrame(positive_examples_in_ds.items(), columns=["Diag", pos_examples_col_name]).sort_values(pos_examples_col_name, ascending=False).to_csv(dirs["data_statistics_dir"]+"number-of-positive-examples.csv")
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
