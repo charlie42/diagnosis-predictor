@@ -78,9 +78,9 @@ def get_metrics(estimator, threshold, X, y):
 def get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_estimators):
     cv_scores_on_feature_subsets = {}
     
-    for diag in feature_subsets.keys():
+    for i, diag in enumerate(feature_subsets):
         if diag in datasets.keys():
-            print("Getting CV scores on feature subsets for " + diag)
+            print("Getting CV scores on feature subsets for " + diag + " (" + str(i+1) + "/" + str(len(feature_subsets)) + ")")
             cv_scores_on_feature_subsets[diag] = []
             for nb_features in feature_subsets[diag].keys():
                 X_train, y_train = datasets[diag]["X_train"], datasets[diag]["y_train"]
@@ -112,8 +112,9 @@ def calculate_thresholds_for_feature_subsets_per_output(diag, feature_subsets, e
 
 def calculate_thresholds_for_feature_subsets(feature_subsets, estimators_on_feature_subsets, datasets):
     thresholds_on_feature_subsets = {}
-    for diag in feature_subsets.keys():
+    for i, diag in enumerate(feature_subsets):
         if diag in datasets.keys():
+            print("Calculating thresholds for feature subsets for " + diag + " (" + str(i+1) + "/" + str(len(feature_subsets)) + ")")
             thresholds_on_feature_subsets[diag] = calculate_thresholds_for_feature_subsets_per_output(diag, feature_subsets, estimators_on_feature_subsets, datasets)
     return thresholds_on_feature_subsets
 
@@ -155,8 +156,9 @@ def get_performances_on_feature_subsets(feature_subsets, datasets, best_estimato
     performances_on_subsets = {}
     optimal_thresholds = {}
     
-    for diag in feature_subsets.keys():
+    for i, diag in enumerate(feature_subsets):
         if diag in datasets.keys():
+            print("Getting performances on feature subsets for " + diag + " (" + str(i+1) + "/" + str(len(feature_subsets)) + ")")
             performances_on_subsets[diag], optimal_thresholds[diag] = get_performances_on_feature_subsets_per_output(diag, feature_subsets, estimators_on_feature_subsets, thresholds_on_feature_subsets, datasets, use_test_set)
 
     return performances_on_subsets, cv_scores_on_feature_subsets, optimal_thresholds

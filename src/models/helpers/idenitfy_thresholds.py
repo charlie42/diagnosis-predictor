@@ -27,7 +27,8 @@ def calculate_thresholds(estimator, X_train_train, y_train_train, X_val, y_val):
 # Find best thresholds
 def find_best_thresholds(best_estimators, datasets):
     best_thresholds = {}
-    for diag in datasets.keys():
+    for i, diag in enumerate(datasets):
+        print("Finding best threshold for " + diag + " (" + str(i+1) + "/" + str(len(datasets)) + ")" )
         best_estimator_for_diag = best_estimators[diag]
         X_train_train, y_train_train, X_val, y_val = \
             datasets[diag]["X_train_train"], \

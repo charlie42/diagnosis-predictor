@@ -44,6 +44,8 @@ def set_up_directories():
     output_models_dir = data_dir + "models/" + "identify_feature_subsets/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(output_models_dir)
 
+    print("DEBUG", params_from_previous_script, current_output_dir_name, output_reports_dir, output_models_dir)
+
     return {"input_data_dir": input_data_dir,  "models_dir": models_dir, "input_reports_dir": input_reports_dir, 
             "output_reports_dir": output_reports_dir, "output_models_dir": output_models_dir}
 
@@ -57,10 +59,10 @@ def set_up_load_directories():
 
 def get_feature_subsets(best_estimators, datasets, number_of_features_to_check, dirs):
     feature_subsets = {}
-    for diag in best_estimators.keys():
+    for i, diag in enumerate(best_estimators):
         base_model_type = util.get_base_model_name_from_pipeline(best_estimators[diag])
         base_model = util.get_estimator_from_pipeline(best_estimators[diag])
-        print(diag, base_model_type)
+        print(diag, base_model_type, f'{i+1}/{len(best_estimators)}')
         if DEBUG_MODE and base_model_type != "logisticregression": # Don't do RF models in debug mode, takes long
             continue
         # If base model is exposes feature importances, use RFE to get first 50 feature, then use SFS to get the rest.
