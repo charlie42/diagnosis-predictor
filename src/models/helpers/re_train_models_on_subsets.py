@@ -32,9 +32,9 @@ def re_train_models_on_feature_subsets_per_output(diag, feature_subsets, dataset
 
 def re_train_models_on_feature_subsets(feature_subsets, datasets, best_estimators):
     estimators_on_feature_subsets = {}
-    for diag in feature_subsets.keys():
+    for i, diag in enumerate(feature_subsets):
         if diag in datasets.keys():
-            print("Re-training models on feature subsets for output: " + diag)
+            print("Re-training models on feature subsets for output: " + diag + " (" + str(i+1) + "/" + str(len(feature_subsets)) + ")")
             estimators_on_feature_subsets[diag] = re_train_models_on_feature_subsets_per_output(diag, feature_subsets, datasets, best_estimators)
             
     return estimators_on_feature_subsets

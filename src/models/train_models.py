@@ -190,8 +190,8 @@ def find_best_estimators_and_scores(datasets, diag_cols, performance_margin):
     best_estimators = {}
     scores_of_best_estimators = {}
     sds_of_scores_of_best_estimators = {}
-    for diag in diag_cols:
-        print(diag)
+    for i, diag in enumerate(diag_cols):
+        print(diag, f'{i+1}/{len(diag_cols)}')
 
         X_train = datasets[diag]["X_train_train"]
         y_train = datasets[diag]["y_train_train"]
