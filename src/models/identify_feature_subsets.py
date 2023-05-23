@@ -67,7 +67,8 @@ def get_feature_subsets(best_estimators, datasets, number_of_features_to_check, 
             continue
         # If base model is exposes feature importances, use RFE to get first 50 feature, then use SFS to get the rest.
         if not (base_model_type == "svc" and base_model.kernel != "linear"):
-            feature_subsets[diag] = models.get_feature_subsets_from_rfe_then_sfs(diag, best_estimators, datasets, number_of_features_to_check)
+            #feature_subsets[diag] = models.get_feature_subsets_from_rfe_then_sfs(diag, best_estimators, datasets, number_of_features_to_check)
+            feature_subsets[diag] = models.get_feature_subsets_from_rfe(diag, best_estimators, datasets, number_of_features_to_check)
         # If base model doesn't expose feature importances, use SFS to get feature subsets directly (will take very long)
         else:
             feature_subsets[diag] = models.get_feature_subsets_from_sfs(diag, best_estimators, datasets, number_of_features_to_check)

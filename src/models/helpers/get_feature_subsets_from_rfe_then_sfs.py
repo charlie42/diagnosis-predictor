@@ -52,3 +52,14 @@ def get_feature_subsets_from_rfe_then_sfs(diag, best_estimators, datasets, numbe
     # Use SFS to sort first n features
     feature_subsets = models.get_feature_subsets_from_sfs(diag, best_estimators, number_of_features_to_check, X_train_top_n_features, y_train)
     return feature_subsets
+
+def get_feature_subsets_from_rfe(diag, best_estimators, datasets, number_of_features_to_check):
+    # Get first n features from RFE
+    best_n_features_from_rfe = get_first_n_features_from_rfe(diag, best_estimators, datasets, number_of_features_to_check)
+
+    # Create feature subsets
+    feature_subsets = {}
+    for i in range(1, number_of_features_to_check + 1):
+        feature_subsets[i] = best_n_features_from_rfe[:i]
+        
+    return feature_subsets
