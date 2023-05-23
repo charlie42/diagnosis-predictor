@@ -254,7 +254,7 @@ def main(models_from_file = 1):
                                                                                                                                        best_estimators, # Need to pass best_estimators because estimators_on_feature_subsets are trained on the train_train set,
                                                                                                                                                         # but we will need to fit them on val set to get thresholds, and on train set to get cv scores
                                                                                                                                        estimators_on_feature_subsets, 
-                                                                                                                                       use_test_set = 1)
+                                                                                                                                       use_test_set = 0)
 
         dump(estimators_on_feature_subsets, dirs["output_models_dir"]+'estimators-on-feature-subsets.joblib')
         dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
