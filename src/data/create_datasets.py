@@ -148,6 +148,20 @@ def find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, al
             diags_w_enough_positive_examples_in_val_set.append(diag)
     return diags_w_enough_positive_examples_in_val_set
 
+def save_dataset_stats(datasets, diag_cols, full_dataset, dir):
+    stats = {}
+    stats["n_rows_full_ds"] = full_dataset.shape[0]
+    stats["n_rows_train_ds"] = datasets[diag_cols[0]]["X_train_train"].shape[0]
+    stats["n_rows_val_ds"] = datasets[diag_cols[0]]["X_val"].shape[0]
+    stats["n_rows_test_ds"] = datasets[diag_cols[0]]["X_test"].shape[0]
+    stats["n_rows_test_ds_only_healthy_controls"] = datasets[diag_cols[0]]["X_test_only_healthy_controls"].shape[0]
+    stats["n_rows_val_ds_only_healthy_controls"] = datasets[diag_cols[0]]["X_val_only_healthy_controls"].shape[0]
+    stats["n_input_cols"] = datasets[diag_cols[0]]["X_train_train"].shape[1] - len(diag_cols)
+    # To df
+    stats_df = pd.DataFrame.from_dict(stats, orient="index")
+    stats_df.columns = ["Value"]
+    stats_df.to_csv(dir + "dataset_stats.csv")
+
 def main(only_assessment_distribution, first_assessment_to_drop, use_other_diags_as_input, only_free_assessments):
     only_assessment_distribution = int(only_assessment_distribution)
     use_other_diags_as_input = int(use_other_diags_as_input)
@@ -173,10 +187,8 @@ def main(only_assessment_distribution, first_assessment_to_drop, use_other_diags
 
     # Create datasets for each diagnosis (different input and output columns)
     datasets = split_datasets_per_diag(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
-    print("Train set shape: Number of rows: ", datasets[diag_cols[0]]["X_train_train"].shape[0], "Number of columns: ", datasets[diag_cols[0]]["X_train_train"].shape[1])
 
-    # Print number of positive examples for each diagnosis 
-    print("Number of positive examples for each diagnosis: ", get_positive_examples_in_ds(full_dataset, diag_cols))
+    save_dataset_stats(datasets, diag_cols, full_dataset, dirs["data_statistics_dir"])
           
     dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)
 
