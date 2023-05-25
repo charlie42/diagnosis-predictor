@@ -55,16 +55,13 @@ def set_up_directories():
     params_from_create_datasets = models.get_params_from_current_data_dir_name(input_data_dir)
     current_output_dir_name = build_output_dir_name(params_from_create_datasets)
 
-    output_data_dir = data_dir + "data/create_datasets/" + current_output_dir_name + "/"
-    util.create_dir_if_not_exists(output_data_dir)
-
     models_dir = data_dir + "models/" + "train_models/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(models_dir)
 
     reports_dir = data_dir + "reports/" + "train_models/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(reports_dir) 
 
-    return {"input_data_dir": input_data_dir, "output_data_dir": output_data_dir, "models_dir": models_dir, "reports_dir": reports_dir}
+    return {"input_data_dir": input_data_dir, "models_dir": models_dir, "reports_dir": reports_dir}
 
 def set_up_load_directories():
     # When loading existing models, can't take the newest directory, we just created it, it will be empty. 
