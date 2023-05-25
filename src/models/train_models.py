@@ -29,19 +29,13 @@ import util, data, models, util
 
 DEBUG_MODE = True
 
-def build_params_dict_for_dir_name(other_diags_as_input):
-
-    params_dict = {}
-    params_dict["other_diag_as_input"] = other_diags_as_input
-    params_dict["debug_mode"] = DEBUG_MODE
-    return params_dict
-
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
     # Part with the params
-    params_part = util.build_param_string_for_dir_name(params_from_create_datasets)
+    params_part = util.build_param_string_for_dir_name(params_from_create_datasets) + "___" +\
+                  util.build_param_string_for_dir_name({"debug_mode": DEBUG_MODE})
     
     return datetime_part + "___" + params_part
 
