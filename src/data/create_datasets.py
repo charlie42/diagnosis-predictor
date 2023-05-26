@@ -170,31 +170,33 @@ def main(only_assessment_distribution, first_assessment_to_drop, use_other_diags
     dirs = set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments)
 
     data.make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs)
-    full_dataset = pd.read_csv(dirs["data_output_dir"] + "item_lvl.csv")
-    full_dataset = features.make_new_diag_cols(full_dataset)
 
-    # Print dataset shape
-    print("Full dataset shape: Number of rows: ", full_dataset.shape[0], "Number of columns: ", full_dataset.shape[1])
+    if only_assessment_distribution == 0:
+        full_dataset = pd.read_csv(dirs["data_output_dir"] + "item_lvl.csv")
+        full_dataset = features.make_new_diag_cols(full_dataset)
 
-    # Get list of column names with "Diag." prefix, where number of 
-    # positive examples is > threshold
-    min_pos_examples_val_set = 20
-    split_percentage = 0.2
-    all_diags = [x for x in full_dataset.columns if x.startswith("Diag.")]
-    positive_examples_in_ds = get_positive_examples_in_ds(full_dataset, all_diags)
-    
-    diag_cols = find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, all_diags, split_percentage, min_pos_examples_val_set)
+        # Print dataset shape
+        print("Full dataset shape: Number of rows: ", full_dataset.shape[0], "Number of columns: ", full_dataset.shape[1])
 
-    # Create datasets for each diagnosis (different input and output columns)
-    datasets = split_datasets_per_diag(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
+        # Get list of column names with "Diag." prefix, where number of 
+        # positive examples is > threshold
+        min_pos_examples_val_set = 20
+        split_percentage = 0.2
+        all_diags = [x for x in full_dataset.columns if x.startswith("Diag.")]
+        positive_examples_in_ds = get_positive_examples_in_ds(full_dataset, all_diags)
+        
+        diag_cols = find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, all_diags, split_percentage, min_pos_examples_val_set)
 
-    save_dataset_stats(datasets, diag_cols, full_dataset, dirs["data_statistics_dir"])
-          
-    dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)
+        # Create datasets for each diagnosis (different input and output columns)
+        datasets = split_datasets_per_diag(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
 
-    # Save number of positive examples for each diagnosis to csv (convert dict to df)
-    pos_examples_col_name = f"Positive examples out of {full_dataset.shape[0]}"
-    pd.DataFrame(positive_examples_in_ds.items(), columns=["Diag", pos_examples_col_name]).sort_values(pos_examples_col_name, ascending=False).to_csv(dirs["data_statistics_dir"]+"number-of-positive-examples.csv")
+        save_dataset_stats(datasets, diag_cols, full_dataset, dirs["data_statistics_dir"])
+            
+        dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)
+
+        # Save number of positive examples for each diagnosis to csv (convert dict to df)
+        pos_examples_col_name = f"Positive examples out of {full_dataset.shape[0]}"
+        pd.DataFrame(positive_examples_in_ds.items(), columns=["Diag", pos_examples_col_name]).sort_values(pos_examples_col_name, ascending=False).to_csv(dirs["data_statistics_dir"]+"number-of-positive-examples.csv")
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
