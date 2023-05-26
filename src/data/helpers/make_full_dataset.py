@@ -191,6 +191,7 @@ def transform_devhx_eduhx_cols(data_up_to_dropped):
     return data_up_to_dropped
 
 def separate_item_lvl_from_scale_scores(data_up_to_dropped, columns_until_dropped):
+
     total_score_cols_w_raw = ["SCQ,SCQ_Total", 
                         "Barratt,Barratt_Total", 
                         "ASSQ,ASSQ_Total",
@@ -201,6 +202,7 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped, columns_until_droppe
                         "CBCL,CBCL_Total",
                         "CBCL,CBCL_Total_T",
                         "ICU_P,ICU_P_Total",
+                        "ICU_SR,ICU_SR_Total",
                         "APQ_P,APQ_P_Total",
                         "PCIAT,PCIAT_Total",
                         "DTS,DTS_Total",
@@ -233,6 +235,8 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped, columns_until_droppe
                         "SRS,SRS_AWR_T", "SRS,SRS_AWR", "SRS,SRS_COG_T", "SRS,SRS_COG", "SRS,SRS_COM_T", "SRS,SRS_COM", "SRS,SRS_DSMRRB_T", "SRS,SRS_DSMRRB", "SRS,SRS_MOT_T", "SRS,SRS_MOT", "SRS,SRS_RRB_T", "SRS,SRS_RRB", "SRS,SRS_SCI_T", "SRS,SRS_SCI",
                         "CBCL,CBCL_AB_T", "CBCL,CBCL_AB", "CBCL,CBCL_AD_T", "CBCL,CBCL_AD", "CBCL,CBCL_AP_T", "CBCL,CBCL_AP", "CBCL,CBCL_Ext_T", "CBCL,CBCL_Ext", "CBCL,CBCL_Int_T", "CBCL,CBCL_Int", "CBCL,CBCL_RBB_T", "CBCL,CBCL_RBB", "CBCL,CBCL_SC_T", "CBCL,CBCL_SC", "CBCL,CBCL_SP_T", "CBCL,CBCL_SP", "CBCL,CBCL_TP_T", "CBCL,CBCL_TP", "CBCL,CBCL_WD_T", "CBCL,CBCL_WD", "CBCL,CBCL_C", "CBCL,CBCL_OP",
                         "ICU_P,ICU_P_Callous", "ICU_P,ICU_P_Uncaring", "ICU_P,ICU_P_Unemotional",
+                        "ICU_SR,ICU_SR_Callous", "ICU_SR,ICU_SR_Uncaring", "ICU_SR,ICU_SR_Unemotional",
+                        "PANAS_PositiveAffect", "PANAS_NegativeAffect",
                         "APQ_P,APQ_P_CP", "APQ_P,APQ_P_ID", "APQ_P,APQ_P_INV", "APQ_P,APQ_P_OPD", "APQ_P,APQ_P_PM", "APQ_P,APQ_P_PP",
                         "DTS,DTS_absorption", "DTS,DTS_appraisal", "DTS,DTS_regulation", "DTS,DTS_tolerance",
                         "APQ_SR,APQ_SR_CP", "APQ_SR,APQ_SR_ID", "APQ_SR,APQ_SR_INV_D", "APQ_SR,APQ_SR_INV_M", "APQ_SR,APQ_SR_OPD", "APQ_SR,APQ_SR_PM", "APQ_SR,APQ_SR_PP",
@@ -245,7 +249,7 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped, columns_until_droppe
                         "CPIC,CPIC_Frequency_Total", "CPIC,CPIC_Intensity_Total", "CPIC,CPIC_Resolution_Total", "CPIC,CPIC_Content_Total", "CPIC,CPIC_Perceived_Threat_Total", "CPIC,CPIC_Self_Blame_Total", "CPIC,CPIC_Triangulation_Total", "CPIC,CPIC_Stability_Total",
                         "YSR,YSR_AB", "YSR,YSR_AB_T", "YSR,YSR_AD", "YSR,YSR_AD_T", "YSR,YSR_AP", "YSR,YSR_AP_T", "YSR,YSR_WD", "YSR,YSR_WD_T", "YSR,YSR_RBB", "YSR,YSR_RBB_T", "YSR,YSR_SC", "YSR,YSR_SC_T", "YSR,YSR_SP", "YSR,YSR_SP_T", "YSR,YSR_TP", "YSR,YSR_TP_T", "YSR,YSR_Ext", "YSR,YSR_Ext_T", "YSR,YSR_Int", "YSR,YSR_Int_T", "YSR,YSR_OP", "YSR,YSR_C", "YSR,YSR_Total", "YSR,YSR_Total_T",
                         "CBCL_Pre,CBCL_Pre_AB", "CBCL_Pre,CBCL_Pre_AB_T", "CBCL_Pre,CBCL_Pre_AD", "CBCL_Pre,CBCL_Pre_AD_T", "CBCL_Pre,CBCL_Pre_AP", "CBCL_Pre,CBCL_Pre_AP_T", "CBCL_Pre,CBCL_Pre_SC", "CBCL_Pre,CBCL_Pre_SC_T", "CBCL_Pre,CBCL_Pre_SP", "CBCL_Pre,CBCL_Pre_SP_T", "CBCL_Pre,CBCL_Pre_WD", "CBCL_Pre,CBCL_Pre_WD_T", "CBCL_Pre,CBCL_Pre_Ext", "CBCL_Pre,CBCL_Pre_Ext_T", "CBCL_Pre,CBCL_Pre_Int", "CBCL_Pre,CBCL_Pre_Int_T", "CBCL_Pre,CBCL_Pre_DSM_ADHP", "CBCL_Pre,CBCL_Pre_DSM_ADHP_T", "CBCL_Pre,CBCL_Pre_DSM_AnxP", "CBCL_Pre,CBCL_Pre_DSM_AnxP_T", "CBCL_Pre,CBCL_Pre_DSM_AP", "CBCL_Pre,CBCL_Pre_DSM_AP_T", "CBCL_Pre,CBCL_Pre_DSM_ODP", "CBCL_Pre,CBCL_Pre_DSM_ODP_T", "CBCL_Pre,CBCL_Pre_DSM_PDP", "CBCL_Pre,CBCL_Pre_DSM_PDP_T", "CBCL_Pre,CBCL_Pre_OP", "CBCL_Pre,CBCL_Pre_Total", "CBCL_Pre,CBCL_Pre_Total_T",
-                        # SRS_Pre subscales have the same names as SRS subscales, rename them if you want to use them!,
+                        "SRS_Pre,SRS_Pre_AWR_T", "SRS_Pre,SRS_Pre_AWR", "SRS_Pre,SRS_Pre_COG_T", "SRS_Pre,SRS_Pre_COG", "SRS_Pre,SRS_Pre_COM_T", "SRS_Pre,SRS_Pre_COM", "SRS_Pre,SRS_Pre_DSMRRB_T", "SRS_Pre,SRS_Pre_DSMRRB", "SRS_Pre,SRS_Pre_MOT_T", "SRS_Pre,SRS_Pre_MOT", "SRS_Pre,SRS_Pre_RRB_T", "SRS_Pre,SRS_Pre_RRB", "SRS_Pre,SRS_Pre_SCI_T", "SRS,SRS_Pre_SCI",
                         "ASR,ASR_AD", "ASR,ASR_AD_T", "ASR,ASR_WD", "ASR,ASR_WD_T", "ASR,ASR_SC", "ASR,ASR_SC_T", "ASR,ASR_TP", "ASR,ASR_TP_T", "ASR,ASR_AP", "ASR,ASR_AP_T", "ASR,ASR_RBB", "ASR,ASR_RBB_T", "ASR,ASR_AB", "ASR,ASR_AB_T", "ASR,ASR_OP", "ASR,ASR_Int", "ASR,ASR_Int_T", "ASR,ASR_Ext", "ASR,ASR_Ext_T", "ASR,ASR_Intrusive", "ASR,ASR_Intrusive_T", "ASR,ASR_C", 
                         ]
     subscale_score_raw_cols = [x.strip("_T") for x in subscale_score_cols_w_raw if x.endswith("_T")]
@@ -294,8 +298,8 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
     #   relevant cognitive tests, Questionnaire Measures of Emotional and Cognitive Status, and 
     #   Questionnaire Measures of Family Structure, Stress, and Trauma (from Assessment_List_Jan2019.xlsx)
     relevent_assessments_list = ["Basic_Demos", "PreInt_EduHx", "PreInt_DevHx", "SympChck", "SCQ", "Barratt", 
-        "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "APQ_P", "PCIAT", "IAT", "DTS", "ESWAN", "MFQ_P", "APQ_SR", 
-        "WHODAS_P", "CIS_P", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_P", "SCARED_SR", 
+        "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "ICU_SR", "PANAS", "APQ_P", "PCIAT", "DTS", "ESWAN", "MFQ_P", "APQ_SR", 
+        "WHODAS_P", "CIS_P", "SAS", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_P", "SCARED_SR", 
         "C3SR", "CCSC", "CPIC", "YSR", "PhenX_SchoolRisk", "CBCL_Pre", "SRS_Pre", "ASR"]
     
     if only_free_assessments == 1:
