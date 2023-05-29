@@ -35,7 +35,7 @@ def set_up_directories():
     print("Reading reports from: " + input_reports_dir)
 
     # Output dirs
-    params_from_previous_script = models.get_params_from_current_data_dir_name(input_data_dir)
+    params_from_previous_script = models.get_params_from_current_data_dir_name(models_dir)
     current_output_dir_name = build_output_dir_name(params_from_previous_script)
 
     output_reports_dir = data_dir + "reports/" + "identify_feature_subsets/" + current_output_dir_name + "/"
@@ -82,6 +82,10 @@ def main(number_of_features_to_check = 126, importances_from_file = 0):
 
     best_estimators = load(dirs["models_dir"]+'best-estimators.joblib')
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
+
+    if DEBUG_MODE:
+        # Only use the first diagnosis
+        best_estimators = {list(best_estimators.keys())[0]: best_estimators[list(best_estimators.keys())[0]]}
 
     if importances_from_file == 1:
         load_dirs = set_up_load_directories()

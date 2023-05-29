@@ -36,7 +36,7 @@ def set_up_directories():
     print("Reading reports from: " + input_reports_dir)
     
     # Output dirs
-    params_from_previous_script = models.get_params_from_current_data_dir_name(input_data_dir)
+    params_from_previous_script = models.get_params_from_current_data_dir_name(input_models_dir)
     current_output_dir_name = build_output_dir_name(params_from_previous_script)
     
     output_models_dir = data_dir + "models/" + "evaluate_models_on_feature_subsets/" + current_output_dir_name + "/"
