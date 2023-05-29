@@ -34,7 +34,7 @@ def set_up_directories(use_test_set):
     # Create directory inside the output directory with the run timestamp and params:
     #    - [params from train_models.py]
     #    - use test set
-    params_from_train_models = models.get_params_from_current_data_dir_name(input_data_dir)
+    params_from_train_models = models.get_params_from_current_data_dir_name(models_dir)
     params_from_current_file = {"use_test_set": use_test_set}
     current_output_dir_name = build_output_dir_name(params_from_train_models, params_from_current_file)
 
