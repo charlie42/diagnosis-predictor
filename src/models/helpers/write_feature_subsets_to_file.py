@@ -83,7 +83,7 @@ def add_performances_to_subsets(feature_subsets_with_names_and_coef, performance
             result[diag][subset] = [f'AUROC: {auroc:.2}', feature_subsets_with_names_and_coef[diag][subset]]
     return result
 
-def write_feature_subsets_to_file(feature_subsets, estimators_on_subsets, output_reports_dir, performances = None):
+def write_feature_subsets_to_file(feature_subsets, estimators_on_subsets, output_reports_dir, performances = None, optimal_nbs_features = None):
     path = output_reports_dir+"feature-subsets/"
 
     feature_subsets_with_names_and_coef = append_names_and_coef_to_feature_subsets(feature_subsets, estimators_on_subsets)
@@ -93,4 +93,15 @@ def write_feature_subsets_to_file(feature_subsets, estimators_on_subsets, output
     else:
         result = feature_subsets_with_names_and_coef
 
+    if optimal_nbs_features:
+        # Drop subsets over the optimal number of features:
+        #  drop keys that are over the optimal number of features
+
+        for diag in result.keys():
+            result[diag] = {n_subset: result[diag][n_subset] for n_subset in result[diag] if int(n_subset) <= optimal_nbs_features[diag]}
+        
+        
+
+
+        
     util.write_two_lvl_dict_to_file(result, path)

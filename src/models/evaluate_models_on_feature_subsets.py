@@ -216,8 +216,8 @@ def make_and_save_saturation_plot(performances_on_feature_subsets, optimal_thres
 
     fig.savefig(dir+'saturation-plot.png', bbox_inches='tight', dpi=800)
 
-def re_write_subsets_w_auroc(feature_subsets, estimators_on_subsets, output_dir, performance_table):
-    models.write_feature_subsets_to_file(feature_subsets, estimators_on_subsets, output_dir, performance_table)
+def re_write_subsets_w_auroc(feature_subsets, estimators_on_subsets, output_dir, performance_table, optimal_nbs_features):
+    models.write_feature_subsets_to_file(feature_subsets, estimators_on_subsets, output_dir, performance_table, optimal_nbs_features)
 
 def main(models_from_file = 1):
     models_from_file = int(models_from_file)
@@ -265,7 +265,7 @@ def main(models_from_file = 1):
     optimal_nbs_features = get_and_write_optimal_nbs_features(cv_auc_table, dirs["output_reports_dir"])
     make_and_write_test_set_performance_tables(performances_on_feature_subsets, dirs["output_reports_dir"], optimal_thresholds, optimal_nbs_features)
     make_and_save_saturation_plot(performances_on_feature_subsets, optimal_thresholds, dirs["output_reports_dir"])
-    re_write_subsets_w_auroc(feature_subsets, estimators_on_feature_subsets, dirs["output_reports_dir"], performances_on_feature_subsets)
+    re_write_subsets_w_auroc(feature_subsets, estimators_on_feature_subsets, dirs["output_reports_dir"], performances_on_feature_subsets, optimal_nbs_features)
 
 if __name__ == "__main__":
     main(sys.argv[1])
