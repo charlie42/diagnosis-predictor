@@ -80,15 +80,18 @@ def get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input):
     
     return input_cols
 
-def keep_only_healthy_controls(X, y):
-    # Remove people where y=0 and Diag.No Diagnosis Given is 0 (they have other diagnoses)
-    
-    # Get indices to remove
-    indices_to_remove = X[(y == 0) & (X["Diag.No Diagnosis Given"] == 0)].index
+def keep_only_healthy_controls(X, y, diag):
+    # Simulate exclusion criteria: remove people who have diagnoses other than diag (cols starting with Diag.)
+
+    # Get indices of people with other diagnoses
+    other_diags = [x for x in X.columns if x.startswith("Diag.") and not x == diag]
+    indices_to_remove = X[X[other_diags].sum(axis=1) > 0].index
 
     # Remove rows
     X_new = X.drop(indices_to_remove)
     y_new = y.drop(indices_to_remove)
+
+    print(f"{X_new.shape[0]} rows left after removing people with other diagnoses than {diag}.")
 
     return X_new, y_new
 
@@ -105,8 +108,8 @@ def split_datasets_per_diag(full_dataset, diag_cols, split_percentage, use_other
         X_train_train, X_val, y_train_train, y_val = train_test_split(X_train, y_train, test_size=split_percentage, 
                                                                       stratify=y_train, random_state=1)
         
-        X_test_only_healthy_controls, y_test_only_healthy_controls = keep_only_healthy_controls(X_test, y_test)
-        X_val_only_healthy_controls, y_val_only_healthy_controls = keep_only_healthy_controls(X_val, y_val)
+        X_test_only_healthy_controls, y_test_only_healthy_controls = keep_only_healthy_controls(X_test, y_test, diag)
+        X_val_only_healthy_controls, y_val_only_healthy_controls = keep_only_healthy_controls(X_val, y_val, diag)
 
         # Drop columns from input that we don't want there
         input_cols = get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input)
