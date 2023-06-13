@@ -85,7 +85,8 @@ def main(number_of_features_to_check = 126, importances_from_file = 0):
 
     if DEBUG_MODE:
         # Only use the first diagnosis
-        best_estimators = {list(best_estimators.keys())[0]: best_estimators[list(best_estimators.keys())[0]]}
+        #best_estimators = {list(best_estimators.keys())[0]: best_estimators[list(best_estimators.keys())[0]]}
+        pass
 
     if importances_from_file == 1:
         load_dirs = set_up_load_directories()
