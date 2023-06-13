@@ -4,7 +4,7 @@ File structure: http://drivendata.github.io/cookiecutter-data-science/#directory
 
 ## 1 step:
 
-`python -W ignore src/data/create_datasets.py 0 ICU_P 0 1`
+`python -W ignore src/data/create_datasets.py 0 ICU_P 0 0`
 
 Arguments: only_assessment_distribution, first_assessment_to_drop, use_other_diags_as_input = 0, only_free_assessments = 0
 
@@ -22,7 +22,7 @@ Arguments: use_test_set=1
 
 ## 4 step:
 
-`python -W ignore src/models/identify_feature_subsets.py 126 0`
+`python -W ignore src/models/identify_feature_subsets.py 41 0`
 
 Arguments: number_of_features_to_check = 126, importances_from_file = 0
 
