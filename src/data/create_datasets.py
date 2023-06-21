@@ -148,6 +148,34 @@ def find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, al
             diags_w_enough_positive_examples_in_val_set.append(diag)
     return diags_w_enough_positive_examples_in_val_set
 
+def make_corr_df(full_dataset):
+    # Make table with correlation between all columns, sort by highest correlations
+    corr_df = full_dataset.corr()
+    corr_df_unstacked = corr_df.unstack().sort_values(kind="quicksort", ascending=False).reset_index()
+    corr_df_unstacked.rename(columns={"level_0": "Feature 1", "level_1": "Feature 2", 0: "Correlation Coefficient"}, inplace=True)
+    corr_df_unstacked.drop(corr_df_unstacked.iloc[corr_df_unstacked[corr_df_unstacked["Feature 1"] == corr_df_unstacked["Feature 2"]].index].index, inplace=True)
+    corr_df_unstacked.drop_duplicates(subset=["Correlation Coefficient"], inplace=True)
+    corr_df_unstacked.reset_index(drop=True, inplace=True)
+
+    # Percentage of columns with >0.3 or <-0.3 correlation with another column, except _WAS_MISSING ones
+    n_cols_over_03 = 0
+    for col in corr_df:
+        if "_WAS_MISSING" in col:
+            continue
+        # Get max_corr and column with highest correlation except if 1.0 (correlation with itself)
+        # Drop rows with correlation 1.0 (correlation with itself)
+        new_corr_col = corr_df[col].drop(corr_df[col].loc[corr_df[col] == 1.0].index)
+        max_corr = new_corr_col.abs().max()
+
+        if max_corr > 0.3:
+            n_cols_over_03 += 1
+
+    percentage = n_cols_over_03 / corr_df.shape[0]
+    print(f"Percentage of columns with >0.3 or <-0.3 correlation with another column: {percentage}")
+
+
+    return corr_df_unstacked
+
 def save_dataset_stats(datasets, diag_cols, full_dataset, dir):
     stats = {}
     stats["n_rows_full_ds"] = full_dataset.shape[0]
@@ -161,6 +189,9 @@ def save_dataset_stats(datasets, diag_cols, full_dataset, dir):
     stats_df = pd.DataFrame.from_dict(stats, orient="index")
     stats_df.columns = ["Value"]
     stats_df.to_csv(dir + "dataset_stats.csv")
+
+    corr_df = make_corr_df(full_dataset)
+    corr_df.to_csv(dir + "corr_df.csv")
 
 def main(only_assessment_distribution, first_assessment_to_drop, use_other_diags_as_input, only_free_assessments):
     only_assessment_distribution = int(only_assessment_distribution)

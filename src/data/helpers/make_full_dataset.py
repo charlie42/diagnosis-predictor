@@ -115,7 +115,7 @@ def plot_comul_number_of_examples(cumul_number_of_examples_df, data_statistics_d
     plt.xlabel("Number of Assessments")
     plt.ylabel("Number of Respondents")
     plt.title("Cumulative Number of Respondents with Complete Data")
-    plt.savefig(data_statistics_dir+'figures/cumul_assessment_distrib.png')  
+    plt.savefig(data_statistics_dir+'figures/cumul_assessment_distrib.png', dpi=600)  
 
 def get_columns_until_dropped(full_wo_underscore, EID_columns_until_dropped):
     columns_until_dropped = []
@@ -145,6 +145,7 @@ def get_missing_values_df(data_up_to_dropped):
     missing_report_up_to_dropped["Persentage missing"] = missing_report_up_to_dropped["Amount missing"]/data_up_to_dropped["ID"].nunique() * 100
     missing_report_up_to_dropped = missing_report_up_to_dropped[~missing_report_up_to_dropped.index.str.contains("Diagnosis_ClinicianConsensus")] # remove dx because it's expected to be missing
     missing_report_up_to_dropped = missing_report_up_to_dropped[missing_report_up_to_dropped["Persentage missing"] > 0]
+
     return missing_report_up_to_dropped[missing_report_up_to_dropped["Persentage missing"] > 0].sort_values(ascending=False, by="Amount missing")
 
 def remove_cols_w_missing_over_n(data_up_to_dropped, n, missing_values_df):
@@ -299,7 +300,7 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
     #   relevant cognitive tests, Questionnaire Measures of Emotional and Cognitive Status, and 
     #   Questionnaire Measures of Family Structure, Stress, and Trauma (from Assessment_List_Jan2019.xlsx)
     relevent_assessments_list = ["Basic_Demos", "PreInt_EduHx", "PreInt_DevHx", "SympChck", "SCQ", "Barratt", 
-        "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "ICU_SR", "PANAS", "APQ_P", "PCIAT", "DTS", "ESWAN", "MFQ_P", "APQ_SR", 
+        "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "ICU_SR", "PANAS", "APQ_P", "PCIAT", "DTS", "ESWAN", "MFQ_P", "MFQ_SR", "APQ_SR", 
         "WHODAS_P", "CIS_P", "SAS", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_P", "SCARED_SR", 
         "C3SR", "CCSC", "CPIC", "YSR", "PhenX_SchoolRisk", "CBCL_Pre", "SRS_Pre", "ASR"]
     
