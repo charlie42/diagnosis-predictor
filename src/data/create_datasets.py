@@ -43,6 +43,7 @@ def set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_
 def customize_input_cols_per_diag(input_cols, diag):
     # Remove "Diag.Intellectual Disability-Mild" when predicting "Diag.Borderline Intellectual Functioning"
     #   and vice versa because they are highly correlated, same for other diagnoses
+    #   (only useful when use_other_diags_as_input = 1)
     
     if diag == "Diag.Intellectual Disability-Mild":
         input_cols = [x for x in input_cols if x != "Diag.Borderline Intellectual Functioning"]
@@ -60,21 +61,23 @@ def customize_input_cols_per_diag(input_cols, diag):
                                                          "Diag.ADHD-Hyperactive/Impulsive Type",
                                                          "Diag.Other Specified Attention-Deficit/Hyperactivity Disorder",
                                                          "Diag.Unspecified Attention-Deficit/Hyperactivity Disorder"]]
+        
+    # Remove NIH scores for NVLD (used for diagnosis)
+    if diag == "Diag.NVLD":
+        input_cols = [x for x in input_cols if not x.startswith("NIH")]
                       
     return input_cols
 
 def get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input):
     
-    if use_other_diags_as_input == 1:
-        input_cols = [x for x in full_dataset.columns if 
-                            not x in ["WHODAS_P,WHODAS_P_Total", "CIS_P,CIS_P_Score", "WHODAS_SR,WHODAS_SR_Score", "CIS_SR,CIS_SR_Total"]
-                            and not x == diag
-                            and not x == "Diag.No Diagnosis Given"]
-    else:
-        input_cols = [x for x in full_dataset.columns if 
-                            not x in ["WHODAS_P,WHODAS_P_Total", "CIS_P,CIS_P_Score", "WHODAS_SR,WHODAS_SR_Score", "CIS_SR,CIS_SR_Total"]
-                            and not x.startswith("Diag.")]
+    input_cols = [x for x in full_dataset.columns if 
+                            not x == "Diag.No Diagnosis Given"  # Will be negatively correlated with any diagnosis
+                            and not x == diag] # Output
     
+    if use_other_diags_as_input == 0: # Drop all diag cols
+        input_cols = [x for x in input_cols if 
+                            not x.startswith("Diag.")]
+
     input_cols = customize_input_cols_per_diag(input_cols, diag)
     print("Input assessemnts used: ", list(set([x.split(",")[0] for x in input_cols])))
     
