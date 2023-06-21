@@ -124,8 +124,9 @@ def get_base_models_and_param_grids():
         (lr_pipe, lr_param_grid),
     ]
     if DEBUG_MODE:
-        base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
+        #base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
         #base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[0]] # Only do LR and RF in debug mode
+        pass
     
     return base_models_and_param_grids
 
