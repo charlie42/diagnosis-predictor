@@ -48,10 +48,14 @@ def make_name_and_value_dict(feature_list):
             name_and_value_dict[item] = ["", ""]
         else:
             id = item.split(",")[1]
-            name_and_value_dict[item] = [
-                name_and_value_df.loc[id]["questions"],
-                name_and_value_df.loc[id]["valueLabels"]
-                ]
+            if id not in name_and_value_df.index:
+                warnings.warn(f"Item {id} not found in item-names.csv, skipping appending name and value")
+                name_and_value_dict[item] = ["", ""]
+            else:
+                name_and_value_dict[item] = [
+                    name_and_value_df.loc[id]["questions"],
+                    name_and_value_df.loc[id]["valueLabels"]
+                    ]
     return name_and_value_dict
 
 def append_names_and_coef_to_feature_subsets(feature_subsets, estimators_on_subsets):

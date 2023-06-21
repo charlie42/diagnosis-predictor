@@ -2,9 +2,18 @@
 
 File structure: http://drivendata.github.io/cookiecutter-data-science/#directory-structure 
 
+Predicting HBN consensus diagnoses, and test-based disagnoses for:
+- Specific Learning Disorder with Impairment in Reading
+- Specific Learning Disorder with Impairment in Mathematics
+- Specific Learning Disorder with Impairment in Written Expression
+- Intellectual Disability-Mild
+- Borderline Intellectual Functioning
+- Processing Speed Deficit 
+- NVLD
+
 ## 1 step:
 
-`python -W ignore src/data/create_datasets.py 0 ICU_P 0 0`
+`python -W ignore src/data/create_datasets.py 0 ICU_P 0 0` (CCSC if want to include Conners)
 
 Arguments: only_assessment_distribution, first_assessment_to_drop, use_other_diags_as_input = 0, only_free_assessments = 0
 
