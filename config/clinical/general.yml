@@ -1,0 +1,63 @@
+relevant assessments:
+  - "Basic_Demos"
+  - "PreInt_EduHx"
+  - "PreInt_DevHx"
+  - "SympChck"
+  - "SCQ"
+  - "Barratt"
+  - "ASSQ"
+  - "ARI_P"
+  - "SDQ"
+  - "SWAN"
+  - "SRS"
+  - "CBCL"
+  - "ICU_P"
+  - "ICU_SR"
+  - "PANAS"
+  - "APQ_P"
+  - "PCIAT"
+  - "DTS"
+  - "ESWAN"
+  - "MFQ_P"
+  - "MFQ_SR"
+  - "APQ_SR"
+  - "WHODAS_P"
+  - "CIS_P"
+  - "SAS"
+  - "PSI"
+  - "RBS"
+  - "PhenX_Neighborhood"
+  - "WHODAS_SR"
+  - "CIS_SR"
+  - "SCARED_P"
+  - "SCARED_SR"
+  - "C3SR"
+  - "CCSC"
+  - "CPIC"
+  - "YSR"
+  - "PhenX_SchoolRisk"
+  - "CBCL_Pre"
+  - "SRS_Pre"
+  - "ASR"
+proprietary assessments:
+  - "ASR"
+  - "CBCL"
+  - "CBCL_Pre"
+  - "C3SR"
+  - "PCIAT"
+  - "RBS"
+  - "SCQ"
+  - "SRS"
+  - "SRS_Pre"
+  - "YSR"
+  - "Barratt"
+  - "PSI"
+cog batteries:
+  - WISC
+  - WIAT
+  - WASI
+  - WAIS
+  - NIH_Scores
+  - Pegboard
+first assessment to drop: ICU_P
+predict test-based diags: False

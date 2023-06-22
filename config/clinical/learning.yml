@@ -1,0 +1,9 @@
+first assessment to drop: CCSC
+predict test-based diags: True
+add cols to input: 
+  - NIH_Scores,NIH7_Card_P
+  - NIH_Scores,NIH7_Cog_P
+  - NIH_Scores,NIH7_Flanker_P
+  - NIH_Scores,NIH7_List_P
+  - NIH_Scores,NIH7_Pattern_P
+  - NIH_Scores,NIH7_Picture_P

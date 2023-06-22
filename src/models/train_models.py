@@ -124,7 +124,7 @@ def get_base_models_and_param_grids():
         (lr_pipe, lr_param_grid),
     ]
     if DEBUG_MODE:
-        #base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
+        base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
         #base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[0]] # Only do LR and RF in debug mode
         pass
     
@@ -236,7 +236,8 @@ def main(performance_margin = 0.02, models_from_file = 1):
     print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
 
     if DEBUG_MODE:
-        #diag_cols = diag_cols[0:2]
+        #diag_cols = diag_cols[0:1]
+        #diag_cols = ["Diag.Processing Speed Deficit (test)"]
         pass
 
     if models_from_file == 1:

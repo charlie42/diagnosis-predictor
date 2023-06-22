@@ -1,6 +1,6 @@
 import pandas as pd
-
 from sklearn.model_selection import train_test_split
+import yaml
 
 from joblib import dump
 import sys, os, inspect
@@ -68,7 +68,7 @@ def customize_input_cols_per_diag(input_cols, diag):
                       
     return input_cols
 
-def get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input):
+def get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input, learning):
     
     input_cols = [x for x in full_dataset.columns if 
                             not x == "Diag.No Diagnosis Given"  # Will be negatively correlated with any diagnosis
@@ -77,9 +77,15 @@ def get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input):
     if use_other_diags_as_input == 0: # Drop all diag cols
         input_cols = [x for x in input_cols if 
                             not x.startswith("Diag.")]
+        
+    # If learning, use NIH T scores in input
+    if learning:
+        input_cols += [x for x in input_cols if 
+                            not x.startswith("NIH") and x.endswith("_P")]
+
 
     input_cols = customize_input_cols_per_diag(input_cols, diag)
-    print("Input assessemnts used: ", list(set([x.split(",")[0] for x in input_cols])))
+    print(f"Input assessemnts used for {diag}: ", list(set([x.split(",")[0] for x in input_cols])))
     
     return input_cols
 
@@ -95,15 +101,15 @@ def keep_only_healthy_controls(X, y):
 
     return X_new, y_new
 
-def split_datasets_per_diag(full_dataset, diag_cols, split_percentage, use_other_diags_as_input):
+def split_datasets_per_diag(data, diag_cols, split_percentage, use_other_diags_as_input, clinical_config, learning):
     datasets = {}
     for diag in diag_cols:
         
         output_col = diag
         
         # Split train, validation, and test sets
-        X_train, X_test, y_train, y_test = train_test_split(full_dataset, full_dataset[output_col], 
-                                                            test_size=split_percentage, stratify=full_dataset[output_col], 
+        X_train, X_test, y_train, y_test = train_test_split(data, data[output_col], 
+                                                            test_size=split_percentage, stratify=data[output_col], 
                                                             random_state=1)
         X_train_train, X_val, y_train_train, y_val = train_test_split(X_train, y_train, test_size=split_percentage, 
                                                                       stratify=y_train, random_state=1)
@@ -112,7 +118,7 @@ def split_datasets_per_diag(full_dataset, diag_cols, split_percentage, use_other
         X_val_only_healthy_controls, y_val_only_healthy_controls = keep_only_healthy_controls(X_val, y_val)
 
         # Drop columns from input that we don't want there
-        input_cols = get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input)
+        input_cols = get_input_cols_per_diag(data, diag, use_other_diags_as_input, learning)
         X_train = X_train[input_cols]
         X_test = X_test[input_cols]
         X_train_train = X_train_train[input_cols]
@@ -179,9 +185,9 @@ def make_corr_df(full_dataset):
 
     return corr_df_unstacked
 
-def save_dataset_stats(datasets, diag_cols, full_dataset, dir):
+def save_dataset_stats(datasets, diag_cols, item_level_ds, dir):
     stats = {}
-    stats["n_rows_full_ds"] = full_dataset.shape[0]
+    stats["n_rows_full_ds"] = item_level_ds.shape[0]
     stats["n_rows_train_ds"] = datasets[diag_cols[0]]["X_train_train"].shape[0]
     stats["n_rows_val_ds"] = datasets[diag_cols[0]]["X_val"].shape[0]
     stats["n_rows_test_ds"] = datasets[diag_cols[0]]["X_test"].shape[0]
@@ -193,43 +199,68 @@ def save_dataset_stats(datasets, diag_cols, full_dataset, dir):
     stats_df.columns = ["Value"]
     stats_df.to_csv(dir + "dataset_stats.csv")
 
-    corr_df = make_corr_df(full_dataset)
+    corr_df = make_corr_df(item_level_ds)
     corr_df.to_csv(dir + "corr_df.csv")
 
-def main(only_assessment_distribution, first_assessment_to_drop, use_other_diags_as_input, only_free_assessments):
+    item_level_ds.describe(include = 'all').T.to_csv(dir + "column_stats.csv")
+
+def add_extra_cols_to_input(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config):
+    if clinical_config["add cols to input"]:
+        cols_to_add = clinical_config["add cols to input"]
+        cog_cols_to_add = [x for x in cols_to_add if x in cog_tasks_ds.columns]
+        subscales_cols_to_add = [x for x in cols_to_add if x in subscales_ds.columns]
+
+        item_level_ds = item_level_ds.merge(cog_tasks_ds[cog_cols_to_add], left_index=True, right_index=True)
+        item_level_ds = item_level_ds.merge(subscales_ds[subscales_cols_to_add], left_index=True, right_index=True)
+        
+    return item_level_ds
+
+def main(only_assessment_distribution, use_other_diags_as_input, only_free_assessments, learning):
     only_assessment_distribution = int(only_assessment_distribution)
     use_other_diags_as_input = int(use_other_diags_as_input)
     only_free_assessments = int(only_free_assessments)
+    learning = int(learning)
+
+    clinical_config = data.read_config(learning)
+    
+    first_assessment_to_drop = clinical_config["first assessment to drop"]
 
     dirs = set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments)
 
-    data.make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs)
+    data.make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs, learning)
 
     if only_assessment_distribution == 0:
-        full_dataset = pd.read_csv(dirs["data_output_dir"] + "item_lvl.csv")
-        full_dataset = features.make_new_diag_cols(full_dataset)
+        item_level_ds = pd.read_csv(dirs["data_output_dir"] + "item_lvl.csv")
+        cog_tasks_ds = pd.read_csv(dirs["data_output_dir"] + "cog_tasks.csv") 
+        subscales_ds = pd.read_csv(dirs["data_output_dir"] + "subscale_scores.csv")
+
+        item_level_ds = features.make_new_diag_cols(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config)
+        item_level_ds = add_extra_cols_to_input(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config)
+
+        # Drop ID
+        item_level_ds.drop("ID", axis=1, inplace=True)
 
         # Print dataset shape
-        print("Full dataset shape: Number of rows: ", full_dataset.shape[0], "Number of columns: ", full_dataset.shape[1])
+        print("Full dataset shape: Number of rows: ", item_level_ds.shape[0], "Number of columns: ", item_level_ds.shape[1])
 
         # Get list of column names with "Diag." prefix, where number of 
         # positive examples is > threshold
         min_pos_examples_val_set = 20
         split_percentage = 0.2
-        all_diags = [x for x in full_dataset.columns if x.startswith("Diag.")]
-        positive_examples_in_ds = get_positive_examples_in_ds(full_dataset, all_diags)
+        all_diags = [x for x in item_level_ds.columns if x.startswith("Diag.")]
+        positive_examples_in_ds = get_positive_examples_in_ds(item_level_ds, all_diags)
         
         diag_cols = find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, all_diags, split_percentage, min_pos_examples_val_set)
 
         # Create datasets for each diagnosis (different input and output columns)
-        datasets = split_datasets_per_diag(full_dataset, diag_cols, split_percentage, use_other_diags_as_input)
+        datasets = split_datasets_per_diag(item_level_ds, diag_cols, split_percentage, use_other_diags_as_input, clinical_config, learning)
 
-        save_dataset_stats(datasets, diag_cols, full_dataset, dirs["data_statistics_dir"])
+        save_dataset_stats(datasets, diag_cols, item_level_ds, dirs["data_statistics_dir"])
             
         dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)
 
         # Save number of positive examples for each diagnosis to csv (convert dict to df)
-        pos_examples_col_name = f"Positive examples out of {full_dataset.shape[0]}"
+        pos_examples_col_name = f"Positive examples out of {item_level_ds.shape[0]}"
         pd.DataFrame(positive_examples_in_ds.items(), columns=["Diag", pos_examples_col_name]).sort_values(pos_examples_col_name, ascending=False).to_csv(dirs["data_statistics_dir"]+"number-of-positive-examples.csv")
 
 if __name__ == "__main__":

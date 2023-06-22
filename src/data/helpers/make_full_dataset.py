@@ -4,7 +4,6 @@
 
 import pandas as pd
 import numpy as np
-from collections import Counter
 from re import M
 import os, inspect
 import matplotlib.pyplot as plt
@@ -14,11 +13,9 @@ import sys
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-import util
+import util, data
 
-def remove_proprietary_assessments(relevant_assessment_list):
-    proprietary_assessments = ["ASR", "CBCL", "CBCL_Pre", "C3SR", "PCIAT", "RBS", "SCQ", "SRS", "SRS_Pre", "YSR", "Barratt", "PSI"]
-
+def remove_proprietary_assessments(relevant_assessment_list, proprietary_assessments):
     return [x for x in relevant_assessment_list if x not in proprietary_assessments]
     
 def remove_admin_cols(full):
@@ -192,7 +189,20 @@ def transform_devhx_eduhx_cols(data_up_to_dropped):
 
     return data_up_to_dropped
 
-def separate_item_lvl_from_scale_scores(data_up_to_dropped):
+def get_t_score_otherwise_raw(cols):
+    scales = set([x.strip("_T") for x in cols])
+    scales_plus_t = [x+"_T" for x in scales]
+
+    result = []
+    for scale in scales:
+        if scale+"_T" in cols:
+            result.append(scale+"_T")
+        else:
+            result.append(scale)
+
+    return result
+
+def separate_item_lvl_from_scale_scores(data_up_to_dropped, clinical_config):
 
     all_cols = data_up_to_dropped.columns
 
@@ -234,9 +244,7 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped):
                         "ASR,ASR_Total_T",
                     ]
     # Get T scores if present, otherwise get raw scores
-    total_score_t_score_cols = [x for x in total_score_cols if x.endswith("_T")]
-    total_score_raw_score_cols = [x for x in total_score_cols if not x.endswith("_T")]
-    
+    total_scores_t_otherwise_raw = get_t_score_otherwise_raw(total_score_cols)
 
     subscale_score_cols = ["Barratt,Barratt_Total_Edu", "Barratt,Barratt_Total_Occ",
                         "SWAN,SWAN_HY", "SWAN,SWAN_IN",
@@ -260,84 +268,76 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped):
                         "SRS_Pre,SRS_Pre_AWR_T", "SRS_Pre,SRS_Pre_AWR", "SRS_Pre,SRS_Pre_COG_T", "SRS_Pre,SRS_Pre_COG", "SRS_Pre,SRS_Pre_COM_T", "SRS_Pre,SRS_Pre_COM", "SRS_Pre,SRS_Pre_DSMRRB_T", "SRS_Pre,SRS_Pre_DSMRRB", "SRS_Pre,SRS_Pre_MOT_T", "SRS_Pre,SRS_Pre_MOT", "SRS_Pre,SRS_Pre_RRB_T", "SRS_Pre,SRS_Pre_RRB", "SRS_Pre,SRS_Pre_SCI_T", "SRS,SRS_Pre_SCI",
                         "ASR,ASR_AD", "ASR,ASR_AD_T", "ASR,ASR_WD", "ASR,ASR_WD_T", "ASR,ASR_SC", "ASR,ASR_SC_T", "ASR,ASR_TP", "ASR,ASR_TP_T", "ASR,ASR_AP", "ASR,ASR_AP_T", "ASR,ASR_RBB", "ASR,ASR_RBB_T", "ASR,ASR_AB", "ASR,ASR_AB_T", "ASR,ASR_OP", "ASR,ASR_Int", "ASR,ASR_Int_T", "ASR,ASR_Ext", "ASR,ASR_Ext_T", "ASR,ASR_Intrusive", "ASR,ASR_Intrusive_T", "ASR,ASR_C", 
                         ]
-    subscale_score_t_score_cols = [x for x in subscale_score_cols if x.endswith("_T")]
+    subscale_scores_t_otherwise_raw = get_t_score_otherwise_raw(subscale_score_cols)
 
-    cog_task_cols = [x for x in all_cols if x.startswith(tuple(cog_task_cols.keys()))]
-    print("DEBUG", cog_task_cols)
+    cog_task_cols = get_cog_task_cols(data_up_to_dropped, clinical_config)
+
+    diag_cols = [x for x in all_cols if x.startswith("Diag.")]
 
     # Item level columns = all columns except those of total, subscale scores, and cog task cols (includes diag cols for output)
     item_level_cols = [x for x in all_cols if (x not in total_score_cols) and (x not in subscale_score_cols) and (x not in cog_task_cols)]
     data_up_to_dropped_item_lvl = data_up_to_dropped[item_level_cols]
 
     # Total columns 
-    data_up_to_dropped_total_scores = data_up_to_dropped[total_score_t_score_cols]
+    total_scores_present = [x for x in total_scores_t_otherwise_raw+diag_cols if x in data_up_to_dropped.columns]
+    data_up_to_dropped_total_scores = data_up_to_dropped[total_scores_present + ["ID"]]
 
     # Subscale columns
-    data_up_to_dropped_subscale_scores = data_up_to_dropped[subscale_score_t_score_cols]
+    subscale_scores_present = [x for x in subscale_scores_t_otherwise_raw+diag_cols if x in data_up_to_dropped.columns]
+    data_up_to_dropped_subscale_scores = data_up_to_dropped[subscale_scores_present + ["ID"]]
 
     # Cog task columns
-    data_up_to_dropped_cog_tasks = data_up_to_dropped[cog_task_cols]
+    cog_tasks_present = [x for x in cog_task_cols+diag_cols if x in data_up_to_dropped.columns]
+    data_up_to_dropped_cog_task_scores = data_up_to_dropped[cog_tasks_present + ["ID"]]
 
+    # Set ID as index in all dataframes
+    data_up_to_dropped_item_lvl = data_up_to_dropped_item_lvl.set_index("ID")
+    data_up_to_dropped_total_scores = data_up_to_dropped_total_scores.set_index("ID")
+    data_up_to_dropped_subscale_scores = data_up_to_dropped_subscale_scores.set_index("ID")
+    data_up_to_dropped_cog_task_scores = data_up_to_dropped_cog_task_scores.set_index("ID")
 
-    return data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_up_to_dropped_cog_tasks
+    return data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_up_to_dropped_cog_task_scores
 
-def remove_irrelavent_missing_markers(data_up_to_dropped, data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores):
+def remove_irrelavent_missing_markers(data_up_to_dropped, data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_up_to_dropped_cog_task_scores):
     was_missing_cols = [x for x in data_up_to_dropped.columns if "_WAS_MISSING" in x]
     was_missing_col_originals = [x.split("_WAS_MISSING")[0] for x in was_missing_cols]
 
     for col in was_missing_col_originals:
         if col not in data_up_to_dropped_item_lvl.columns and col +"_WAS_MISSING" in data_up_to_dropped_item_lvl.columns:
             data_up_to_dropped_item_lvl = data_up_to_dropped_item_lvl.drop(col+"_WAS_MISSING", axis=1)
-        
-    for col in was_missing_col_originals:
+
         if col not in data_up_to_dropped_total_scores.columns and col +"_WAS_MISSING" in data_up_to_dropped_total_scores.columns:
             data_up_to_dropped_total_scores = data_up_to_dropped_total_scores.drop(col+"_WAS_MISSING", axis=1)
         
-    for col in was_missing_col_originals:
         if col not in data_up_to_dropped_subscale_scores.columns and col +"_WAS_MISSING" in data_up_to_dropped_subscale_scores.columns:
             data_up_to_dropped_subscale_scores = data_up_to_dropped_subscale_scores.drop(col+"_WAS_MISSING", axis=1)
+        
+        if col in data_up_to_dropped_cog_task_scores.columns and col +"_WAS_MISSING" in data_up_to_dropped_cog_task_scores.columns:
+            data_up_to_dropped_cog_task_scores = data_up_to_dropped_cog_task_scores.drop(col+"_WAS_MISSING", axis=1)    
 
-    return data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores
 
-def export_datasets(data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_output_dir):
-    data_up_to_dropped_item_lvl.to_csv(data_output_dir + "item_lvl.csv", index=False)
-    data_up_to_dropped_subscale_scores.to_csv(data_output_dir + "subscale_scores.csv", index=False)
-    data_up_to_dropped_total_scores.to_csv(data_output_dir + "total_scores.csv", index=False)
+    return data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_up_to_dropped_cog_task_scores
 
-def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs):
+def export_datasets(data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_up_to_dropped_cog_task_scores, data_output_dir):
+    data_up_to_dropped_item_lvl.to_csv(data_output_dir + "item_lvl.csv")
+    data_up_to_dropped_subscale_scores.to_csv(data_output_dir + "subscale_scores.csv")
+    data_up_to_dropped_total_scores.to_csv(data_output_dir + "total_scores.csv")
+    data_up_to_dropped_cog_task_scores.to_csv(data_output_dir + "cog_tasks.csv")
 
-    # Get relevant assessments: 
-    #   relevant cognitive tests, Questionnaire Measures of Emotional and Cognitive Status, and 
-    #   Questionnaire Measures of Family Structure, Stress, and Trauma (from Assessment_List_Jan2019.xlsx)
-    relevent_assessments_list = ["Basic_Demos", "PreInt_EduHx", "PreInt_DevHx", "SympChck", "SCQ", "Barratt", 
-        "ASSQ", "ARI_P", "SDQ", "SWAN", "SRS", "CBCL", "ICU_P", "ICU_SR", "PANAS", "APQ_P", "PCIAT", "DTS", "ESWAN", "MFQ_P", "MFQ_SR", "APQ_SR", 
-        "WHODAS_P", "CIS_P", "SAS", "PSI", "RBS", "PhenX_Neighborhood", "WHODAS_SR", "CIS_SR", "SCARED_P", "SCARED_SR", 
-        "C3SR", "CCSC", "CPIC", "YSR", "PhenX_SchoolRisk", "CBCL_Pre", "SRS_Pre", "ASR"]
-    
-    cog_task_cols = {"WISC": ["WISC,WISC_FSIQ", 
-                              "WISC,WISC_PSI", 
-                              "WISC,WISC_VCI", 
-                              "WISC,WISC_VSI",
-                              "WISC,WISC_FRI",
-                              "WISC,WISC_MR_Scaled",
-                              "WISC,WISC_BD_Scaled",], 
-                     "WIAT": ["WIAT,WIAT_Num_Stnd", 
-                              "WIAT,WIAT_Word_Stnd", 
-                              "WIAT,WIAT_Spell_Stnd", 
-                              "WIAT,WIAT_Num_P", 
-                              "WIAT,WIAT_Word_P"],
-                     "WASI": ["WASI,WASI_BD_T",
-                              "WASI,WASI_Matrix_T",
-                              "WASI,WASI_VCI_Comp",
-                              "WASI,WASI_Pri_Comp",],
-                     "WAIS": ["WAIS,WAIS_BD_PERC",
-                              "WAIS,WAIS_MR_PERC",
-                              "WAIS,WAIS_VCI_COMP",
-                              "WAIS,WAIS_PRI_COMP",]
-                              }
-    
+def get_cog_task_cols(data, clinical_config):
+    cog_task_cols = [x for x in data.columns if x.startswith(tuple(clinical_config["cog batteries"]))]
+    print("DEBUG", cog_task_cols)
+    return cog_task_cols
+
+def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs, learning):
+
+    clinical_config = data.read_config(learning)
+
+    relevant_assessments_list = clinical_config["relevant assessments"]
+    proprietary_assessments = clinical_config["proprietary assessments"]
+
     if only_free_assessments == 1:
-        relevent_assessments_list = remove_proprietary_assessments(relevent_assessments_list)
+        relevant_assessments_list = remove_proprietary_assessments(relevant_assessments_list, proprietary_assessments)
 
     # LORIS saved query (all data)
     full = pd.read_csv("data/raw/LORIS-release-10.csv", dtype=object)
@@ -376,7 +376,7 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
     assessment_answer_counts.to_csv(dirs["data_statistics_dir"] + "assessment-filled-distrib.csv")
 
     # Get relevant ID columns sorted by popularity
-    EID_columns_by_popularity = get_relevant_id_cols_by_popularity(assessment_answer_counts, relevent_assessments_list)    
+    EID_columns_by_popularity = get_relevant_id_cols_by_popularity(assessment_answer_counts, relevant_assessments_list)    
 
     # Get cumulative distribution of assessments: number of people who took all top 1, top 2, top 3, etc. popular assessments 
     cumul_number_of_examples_df = get_cumul_number_of_examples_df(full_wo_underscore, EID_columns_by_popularity)
@@ -428,20 +428,18 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
         # Transform diagnosis columns
         data_up_to_dropped = transform_dx_cols(data_up_to_dropped)
 
-        # Remove ID column - not needed anymore
-        data_up_to_dropped = data_up_to_dropped.drop("ID", axis=1)
-
         # Convert new boolean columns to numeric
         data_up_to_dropped = data_up_to_dropped.replace({True: 1, False: 0})
 
         # Separate subscale and total scores
-        data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores = separate_item_lvl_from_scale_scores(data_up_to_dropped)
+        data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_up_to_dropped_cog_task_scores = separate_item_lvl_from_scale_scores(data_up_to_dropped, clinical_config)
 
         # Remove _WAS_MISSING columns that are not linked to any columns from each dataset
-        data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores = remove_irrelavent_missing_markers(data_up_to_dropped, 
+        data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_up_to_dropped_cog_task_scores = remove_irrelavent_missing_markers(data_up_to_dropped, 
             data_up_to_dropped_item_lvl, 
             data_up_to_dropped_total_scores, 
-            data_up_to_dropped_subscale_scores)
+            data_up_to_dropped_subscale_scores,
+            data_up_to_dropped_cog_task_scores)
 
         # Export final datasets
-        export_datasets(data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, dirs["data_output_dir"])
+        export_datasets(data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_up_to_dropped_cog_task_scores, dirs["data_output_dir"])
