@@ -126,7 +126,8 @@ def get_data_up_to_dropped(full_wo_underscore, EID_columns_until_dropped, column
     diag_colunms = ["Diagnosis_ClinicianConsensus,DX_01", "Diagnosis_ClinicianConsensus,DX_02", "Diagnosis_ClinicianConsensus,DX_03", 
         "Diagnosis_ClinicianConsensus,DX_04", "Diagnosis_ClinicianConsensus,DX_05", "Diagnosis_ClinicianConsensus,DX_06", 
         "Diagnosis_ClinicianConsensus,DX_07", "Diagnosis_ClinicianConsensus,DX_08", "Diagnosis_ClinicianConsensus,DX_09", 
-        "Diagnosis_ClinicianConsensus,DX_10"]
+        "Diagnosis_ClinicianConsensus,DX_10"] + [x for x in full_wo_underscore.columns if x.endswith(tuple(["_ByHx", "_Confirmed", "_Presum", "_RC"]))]
+    print("DEBUG", [x for x in full_wo_underscore.columns if x.startswith("Diagnosis_ClinicianConsensus,DX_01_")])
     data_up_to_dropped = full_wo_underscore.loc[full_wo_underscore[EID_columns_until_dropped].dropna(how="any").index][columns_until_dropped+["ID"]+diag_colunms]
 
     return data_up_to_dropped
@@ -157,7 +158,10 @@ def add_missingness_markers(data_up_to_dropped, n, missing_values_df):
     return data_up_to_dropped
 
 def transform_dx_cols(data_up_to_dropped):
-    og_diag_cols = [x for x in data_up_to_dropped.columns if "DX_" in x]
+    og_diag_cols = [x for x in data_up_to_dropped.columns if "DX_" in x and not x.endswith(tuple(["_ByHx", "_Confirmed", "_Presum", "_RC"]))]
+
+    # DX_01_ByHx == 0
+        # DX_01_Confirmed or DX_01_Presum or DX_01_RC == 1 :TODO
 
     # Get list of diagnoses
     diags = []
@@ -166,12 +170,21 @@ def transform_dx_cols(data_up_to_dropped):
     diags = list(set(diags))
     diags.remove(' ')
 
+    # For each diag, only keep the value if the corresponding _ByHx column is 0, and either the _Confirmed, _Presum, or _RC column is 1, otherwise set to NaN, always keep No Diagnosis Given
+    for og_diag_col in og_diag_cols:
+        col_root = og_diag_col.split("_ByHx")[0]
+        byhx_col = col_root+"_ByHx"
+        confirmed_col = col_root+"_Confirmed"
+        presum_col = col_root+"_Presum"
+        rc_col = col_root+"_RC"
+        data_up_to_dropped[og_diag_col] = np.where((data_up_to_dropped[col_root] == "No Diagnosis Given") | (data_up_to_dropped[byhx_col].astype(float) == 0) & ((data_up_to_dropped[confirmed_col].astype(float) == 1) | (data_up_to_dropped[presum_col].astype(float) == 1) | (data_up_to_dropped[rc_col].astype(float) == 1)), data_up_to_dropped[og_diag_col], np.nan)
+
     # Make new columns
     for diag in diags:
         data_up_to_dropped["Diag." + util.remove_chars_forbidden_in_file_names(diag)] = (data_up_to_dropped[og_diag_cols] == diag).any(axis=1)
         
     # Drop original diag columns
-    data_up_to_dropped = data_up_to_dropped.drop(og_diag_cols, axis=1)
+    data_up_to_dropped = data_up_to_dropped.drop(og_diag_cols + [x for x in data_up_to_dropped.columns if x.endswith(tuple(["_ByHx", "_Confirmed", "_Presum", "_RC"]))], axis=1)
 
     return data_up_to_dropped
 
@@ -179,13 +192,17 @@ def transform_devhx_eduhx_cols(data_up_to_dropped):
 
     list_of_preg_symp_cols = [x for x in data_up_to_dropped.columns if "preg_symp" in x]
     
-    # If any of the preg_symp columns are 1, then the preg_symp column is 1
-    data_up_to_dropped["preg_symp"] = (data_up_to_dropped[list_of_preg_symp_cols] == 1).any(axis=1)
+    if list_of_preg_symp_cols:
+        # If any of the preg_symp columns are 1, then the preg_symp column is 1, otherwise 0
+        data_up_to_dropped["preg_symp"] = (data_up_to_dropped[list_of_preg_symp_cols] == 1).any(axis=1)
 
-    # Drop original preg_symp columns
-    data_up_to_dropped = data_up_to_dropped.drop(list_of_preg_symp_cols, axis=1) 
+        print(data_up_to_dropped[[x for x in data_up_to_dropped.columns if "preg_symp" in x]])
 
-    data_up_to_dropped = data_up_to_dropped.drop(["PreInt_EduHx,NeuroPsych", "PreInt_EduHx,IEP", "PreInt_EduHx,learning_disability", "PreInt_EduHx,EI", "PreInt_EduHx,CPSE"], axis=1)
+        # Drop original preg_symp columns
+        data_up_to_dropped = data_up_to_dropped.drop(list_of_preg_symp_cols, axis=1) 
+
+    if "PreInt_EduHx,NeuroPsych" in data_up_to_dropped.columns:
+        data_up_to_dropped = data_up_to_dropped.drop(["PreInt_EduHx,NeuroPsych", "PreInt_EduHx,IEP", "PreInt_EduHx,learning_disability", "PreInt_EduHx,EI", "PreInt_EduHx,CPSE"], axis=1)
 
     return data_up_to_dropped
 
@@ -210,6 +227,7 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped, clinical_config):
                         "Barratt,Barratt_Total", 
                         "ASSQ,ASSQ_Total",
                         "ARI_P,ARI_P_Total_Score", 
+                        "ARI_S,ARI_S_Total_Score", 
                         "SWAN,SWAN_Total",
                         "SRS,SRS_Total", 
                         "SRS,SRS_Total_T", 
@@ -326,7 +344,6 @@ def export_datasets(data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores
 
 def get_cog_task_cols(data, clinical_config):
     cog_task_cols = [x for x in data.columns if x.startswith(tuple(clinical_config["cog batteries"]))]
-    print("DEBUG", cog_task_cols)
     return cog_task_cols
 
 def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs, learning):
@@ -335,6 +352,12 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
     relevant_assessments_list = clinical_config["relevant assessments"]
     proprietary_assessments = clinical_config["proprietary assessments"]
+    res_only_assessments = clinical_config["research only assessments"]
+    report_assessments = clinical_config["report assessments"]
+
+    if clinical_config["use only research only assessments"]:
+        #relevant_assessments_list = [x for x in relevant_assessments_list if x in res_only_assessments]
+        relevant_assessments_list = [x for x in relevant_assessments_list if x not in report_assessments]
 
     if only_free_assessments == 1:
         relevant_assessments_list = remove_proprietary_assessments(relevant_assessments_list, proprietary_assessments)
@@ -355,6 +378,7 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
     # Get ID columns (contain quetsionnaire names, e.g. 'ACE,EID', will be used to check if an assessment is filled)
     EID_cols = [x for x in full.columns if ",EID" in x]
+    print("EID_cols", EID_cols)
 
     # Get ID col from EID cols
     full = get_ID_from_EID(full, EID_cols)

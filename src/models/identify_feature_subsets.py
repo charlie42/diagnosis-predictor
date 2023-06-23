@@ -44,8 +44,6 @@ def set_up_directories():
     output_models_dir = data_dir + "models/" + "identify_feature_subsets/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(output_models_dir)
 
-    print("DEBUG", params_from_previous_script, current_output_dir_name, output_reports_dir, output_models_dir)
-
     return {"input_data_dir": input_data_dir,  "models_dir": models_dir, "input_reports_dir": input_reports_dir, 
             "output_reports_dir": output_reports_dir, "output_models_dir": output_models_dir}
 
