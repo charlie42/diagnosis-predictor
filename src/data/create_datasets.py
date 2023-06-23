@@ -205,7 +205,7 @@ def save_dataset_stats(datasets, diag_cols, item_level_ds, dir):
     item_level_ds.describe(include = 'all').T.to_csv(dir + "column_stats.csv")
 
 def add_extra_cols_to_input(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config):
-    if clinical_config["add cols to input"]:
+    if "add cols to input" in clinical_config and clinical_config["add cols to input"]:
         cols_to_add = clinical_config["add cols to input"]
         cog_cols_to_add = [x for x in cols_to_add if x in cog_tasks_ds.columns]
         subscales_cols_to_add = [x for x in cols_to_add if x in subscales_ds.columns]
@@ -234,6 +234,8 @@ def main(only_assessment_distribution, use_other_diags_as_input, only_free_asses
         cog_tasks_ds = pd.read_csv(dirs["data_output_dir"] + "cog_tasks.csv") 
         subscales_ds = pd.read_csv(dirs["data_output_dir"] + "subscale_scores.csv")
 
+        consensus_diags = [x for x in item_level_ds.columns if x.startswith("Diag.")]
+
         item_level_ds = features.make_new_diag_cols(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config)
         item_level_ds = add_extra_cols_to_input(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config)
 
@@ -248,6 +250,8 @@ def main(only_assessment_distribution, use_other_diags_as_input, only_free_asses
         min_pos_examples_val_set = 20
         split_percentage = 0.2
         all_diags = [x for x in item_level_ds.columns if x.startswith("Diag.")]
+        if clinical_config["predict consensus diags"] == False: # Remove consensus diags, only keep new diags
+            all_diags = [x for x in all_diags if x not in consensus_diags]
         positive_examples_in_ds = get_positive_examples_in_ds(item_level_ds, all_diags)
         
         diag_cols = find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, all_diags, split_percentage, min_pos_examples_val_set)

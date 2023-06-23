@@ -7,6 +7,7 @@ relevant assessments:
   - "Barratt"
   - "ASSQ"
   - "ARI_P"
+  - "ARI_S"
   - "SDQ"
   - "SWAN"
   - "SRS"
@@ -52,6 +53,74 @@ proprietary assessments:
   - "YSR"
   - "Barratt"
   - "PSI"
+research only assessments:
+  - AMAS
+  - ACE
+  - ARI_S
+  - ARI_P
+  - APQ_P
+  - APQ_SR
+  - AUDIT
+  - Barratt
+  - CFS
+  - CCSC
+  - Basic_Demos
+  - DTS
+  - EHQ
+  - Education
+  - FTND
+  - GSE
+  - GRIT
+  - IUQ
+  - ICU_SR
+  - ICU_P
+  - mAMAS
+  - FTQA
+  - MEIM
+  - PMHS
+  - PCIAT
+  - PSI
+  - PPS
+  - PhenX_Neighborhood
+  - PhenX_School
+  - PAQ_A
+  - PAQ_C
+  - PANAS
+  - PBS
+  - SDS
+  - SAS
+  - SDQ
+  - CIS_P
+  - CIS_SR
+  - WHODAS_P
+  - WHODAS_SR
+  - YFAS
+report assessments:
+  - YSR
+  - ASR
+  - CBCL
+  - CBCL_Pre
+  - TRF
+  - C3SR
+  - ESWAN
+  - GARS
+  - MFQ_P
+  - MFQ_SR
+  - SCARED_P 
+  - SCARED_SR
+  - SCQ
+  - SRS
+  - SRS_Pre
+  - ASSQ
+  - NIH_Scores
+  - SWAN
+  - PreInt_Demos_Fam
+  - PreInt_Demos_Home
+  - PreInt_DevHx 
+  - PreInt_EduHx
+  - PreInt_Lang
+  - PreInt_TxHx
+use only research only assessments: True
 cog batteries:
   - WISC
   - WIAT
@@ -59,5 +128,14 @@ cog batteries:
   - WAIS
   - NIH_Scores
   - Pegboard
-first assessment to drop: ICU_P
+first assessment to drop: WHODAS_P
 predict test-based diags: False
+predict consensus diags: True
+include non-standard assessments: True # True increses performance, False increases generalizability (e.g. other studies don't use the same pre-interview assessments)
+non-standard assessments:
+  - PreInt_Demos_Fam
+  - PreInt_Demos_Home
+  - PreInt_DevHx 
+  - PreInt_EduHx
+  - PreInt_Lang
+  - PreInt_TxHx
