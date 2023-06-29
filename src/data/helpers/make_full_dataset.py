@@ -127,7 +127,6 @@ def get_data_up_to_dropped(full_wo_underscore, EID_columns_until_dropped, column
         "Diagnosis_ClinicianConsensus,DX_04", "Diagnosis_ClinicianConsensus,DX_05", "Diagnosis_ClinicianConsensus,DX_06", 
         "Diagnosis_ClinicianConsensus,DX_07", "Diagnosis_ClinicianConsensus,DX_08", "Diagnosis_ClinicianConsensus,DX_09", 
         "Diagnosis_ClinicianConsensus,DX_10"] + [x for x in full_wo_underscore.columns if x.endswith(tuple(["_ByHx", "_Confirmed", "_Presum", "_RC"]))]
-    print("DEBUG", [x for x in full_wo_underscore.columns if x.startswith("Diagnosis_ClinicianConsensus,DX_01_")])
     data_up_to_dropped = full_wo_underscore.loc[full_wo_underscore[EID_columns_until_dropped].dropna(how="any").index][columns_until_dropped+["ID"]+diag_colunms]
 
     return data_up_to_dropped
@@ -159,9 +158,6 @@ def add_missingness_markers(data_up_to_dropped, n, missing_values_df):
 
 def transform_dx_cols(data_up_to_dropped):
     og_diag_cols = [x for x in data_up_to_dropped.columns if "DX_" in x and not x.endswith(tuple(["_ByHx", "_Confirmed", "_Presum", "_RC"]))]
-
-    # DX_01_ByHx == 0
-        # DX_01_Confirmed or DX_01_Presum or DX_01_RC == 1 :TODO
 
     # Get list of diagnoses
     diags = []
@@ -236,10 +232,12 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped, clinical_config):
                         "ICU_P,ICU_P_Total",
                         "ICU_SR,ICU_SR_Total",
                         "APQ_P,APQ_P_Total",
+                        "APQ_P,APQ_SR_OPD",
                         "PCIAT,PCIAT_Total",
                         "DTS,DTS_Total",
                         "MFQ_P,MFQ_P_Total",
                         "APQ_SR,APQ_SR_Total",
+                        "APQ_SR,APQ_SR_OPD",
                         "WHODAS_P,WHODAS_P_Total", 
                         "CIS_P,CIS_P_Score", 
                         "PSI,PSI_Total",
@@ -271,9 +269,9 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped, clinical_config):
                         "ICU_P,ICU_P_Callous", "ICU_P,ICU_P_Uncaring", "ICU_P,ICU_P_Unemotional",
                         "ICU_SR,ICU_SR_Callous", "ICU_SR,ICU_SR_Uncaring", "ICU_SR,ICU_SR_Unemotional",
                         "PANAS_PositiveAffect", "PANAS_NegativeAffect",
-                        "APQ_P,APQ_P_CP", "APQ_P,APQ_P_ID", "APQ_P,APQ_P_INV", "APQ_P,APQ_P_OPD", "APQ_P,APQ_P_PM", "APQ_P,APQ_P_PP",
+                        "APQ_P,APQ_P_CP", "APQ_P,APQ_P_ID", "APQ_P,APQ_P_INV", "APQ_P,APQ_P_PM", "APQ_P,APQ_P_PP",
                         "DTS,DTS_absorption", "DTS,DTS_appraisal", "DTS,DTS_regulation", "DTS,DTS_tolerance",
-                        "APQ_SR,APQ_SR_CP", "APQ_SR,APQ_SR_ID", "APQ_SR,APQ_SR_INV_D", "APQ_SR,APQ_SR_INV_M", "APQ_SR,APQ_SR_OPD", "APQ_SR,APQ_SR_PM", "APQ_SR,APQ_SR_PP",
+                        "APQ_SR,APQ_SR_CP", "APQ_SR,APQ_SR_ID", "APQ_SR,APQ_SR_INV_D", "APQ_SR,APQ_SR_INV_M", "APQ_SR,APQ_SR_PM", "APQ_SR,APQ_SR_PP",
                         "PSI,PSI_DC_T", "PSI,PSI_DC", "PSI,PSI_PCDI_T", "PSI,PSI_PCDI", "PSI,PSI_PD_T", "PSI,PSI_PD",
                         "RBS,RBS_Score_01", "RBS,RBS_Score_02", "RBS,RBS_Score_03", "RBS,RBS_Score_04", "RBS,RBS_Score_05",  
                         "SCARED_P,SCARED_P_GD", "SCARED_P,SCARED_P_PN", "SCARED_P,SCARED_P_SC", "SCARED_P,SCARED_P_SH", "SCARED_P,SCARED_P_SP",
@@ -285,6 +283,7 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped, clinical_config):
                         "CBCL_Pre,CBCL_Pre_AB", "CBCL_Pre,CBCL_Pre_AB_T", "CBCL_Pre,CBCL_Pre_AD", "CBCL_Pre,CBCL_Pre_AD_T", "CBCL_Pre,CBCL_Pre_AP", "CBCL_Pre,CBCL_Pre_AP_T", "CBCL_Pre,CBCL_Pre_SC", "CBCL_Pre,CBCL_Pre_SC_T", "CBCL_Pre,CBCL_Pre_SP", "CBCL_Pre,CBCL_Pre_SP_T", "CBCL_Pre,CBCL_Pre_WD", "CBCL_Pre,CBCL_Pre_WD_T", "CBCL_Pre,CBCL_Pre_Ext", "CBCL_Pre,CBCL_Pre_Ext_T", "CBCL_Pre,CBCL_Pre_Int", "CBCL_Pre,CBCL_Pre_Int_T", "CBCL_Pre,CBCL_Pre_DSM_ADHP", "CBCL_Pre,CBCL_Pre_DSM_ADHP_T", "CBCL_Pre,CBCL_Pre_DSM_AnxP", "CBCL_Pre,CBCL_Pre_DSM_AnxP_T", "CBCL_Pre,CBCL_Pre_DSM_AP", "CBCL_Pre,CBCL_Pre_DSM_AP_T", "CBCL_Pre,CBCL_Pre_DSM_ODP", "CBCL_Pre,CBCL_Pre_DSM_ODP_T", "CBCL_Pre,CBCL_Pre_DSM_PDP", "CBCL_Pre,CBCL_Pre_DSM_PDP_T", "CBCL_Pre,CBCL_Pre_OP", "CBCL_Pre,CBCL_Pre_OP_T", "CBCL_Pre,CBCL_Pre_Total", "CBCL_Pre,CBCL_Pre_Total_T",
                         "SRS_Pre,SRS_Pre_AWR_T", "SRS_Pre,SRS_Pre_AWR", "SRS_Pre,SRS_Pre_COG_T", "SRS_Pre,SRS_Pre_COG", "SRS_Pre,SRS_Pre_COM_T", "SRS_Pre,SRS_Pre_COM", "SRS_Pre,SRS_Pre_DSMRRB_T", "SRS_Pre,SRS_Pre_DSMRRB", "SRS_Pre,SRS_Pre_MOT_T", "SRS_Pre,SRS_Pre_MOT", "SRS_Pre,SRS_Pre_RRB_T", "SRS_Pre,SRS_Pre_RRB", "SRS_Pre,SRS_Pre_SCI_T", "SRS,SRS_Pre_SCI",
                         "ASR,ASR_AD", "ASR,ASR_AD_T", "ASR,ASR_WD", "ASR,ASR_WD_T", "ASR,ASR_SC", "ASR,ASR_SC_T", "ASR,ASR_TP", "ASR,ASR_TP_T", "ASR,ASR_AP", "ASR,ASR_AP_T", "ASR,ASR_RBB", "ASR,ASR_RBB_T", "ASR,ASR_AB", "ASR,ASR_AB_T", "ASR,ASR_OP", "ASR,ASR_Int", "ASR,ASR_Int_T", "ASR,ASR_Ext", "ASR,ASR_Ext_T", "ASR,ASR_Intrusive", "ASR,ASR_Intrusive_T", "ASR,ASR_C", 
+                        "SDQ,Conduct_Problems_Total", "SDQ,Difficulties_Total", "SDQ,Emotional_Problems_Total", "SDQ,Externalising_Total", "SDQ,Generating_Impact_Total", "SDQ,Hyperactivity_Total", "SDQ,Internalising_Total", "SDQ,Peer_Problems_Total", "SDQ,Prosocial_Total",
                         ]
     subscale_scores_t_otherwise_raw = get_t_score_otherwise_raw(subscale_score_cols)
 
@@ -346,9 +345,25 @@ def get_cog_task_cols(data, clinical_config):
     cog_task_cols = [x for x in data.columns if x.startswith(tuple(clinical_config["cog batteries"]))]
     return cog_task_cols
 
+def generate_assessment_reports(full_wo_underscore, EID_columns_by_popularity, assessment_answer_counts, dir):
+    
+    # Remove EID from assessment names
+    assessment_answer_counts.index = [x.split(",")[0] for x in assessment_answer_counts.index]
+    assessment_answer_counts.to_csv(dir + "assessment-filled-distrib.csv")
+
+    relevant_assessments_by_popularity = [x.split(",")[0] for x in EID_columns_by_popularity]
+    assessment_answer_counts.loc[relevant_assessments_by_popularity].to_csv(dir + "relevant-assessment-filled-distrib.csv")
+
+    # Get cumulative distribution of assessments: number of people who took all top 1, top 2, top 3, etc. popular assessments 
+    cumul_number_of_examples_df = get_cumul_number_of_examples_df(full_wo_underscore, EID_columns_by_popularity)
+    cumul_number_of_examples_df.to_csv(dir + "assessment-filled-distrib-cumul.csv", float_format='%.3f')
+
+    # Plot cumulative distribution of assessments
+    plot_comul_number_of_examples(cumul_number_of_examples_df, dir)
+
 def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs, learning):
 
-    clinical_config = data.read_config(learning)
+    clinical_config = util.read_config(learning)
 
     relevant_assessments_list = clinical_config["relevant assessments"]
     proprietary_assessments = clinical_config["proprietary assessments"]
@@ -394,23 +409,13 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
     # Get list of assessments in data
     assessment_list = set([x.split(",")[0] for x in EID_cols])
-
+    
     # Check how many people filled each assessments
     assessment_answer_counts = get_assessment_answer_count(full_wo_underscore, EID_cols)
-    assessment_answer_counts.to_csv(dirs["data_statistics_dir"] + "assessment-filled-distrib.csv")
-
     # Get relevant ID columns sorted by popularity
     EID_columns_by_popularity = get_relevant_id_cols_by_popularity(assessment_answer_counts, relevant_assessments_list)    
 
-    # Get cumulative distribution of assessments: number of people who took all top 1, top 2, top 3, etc. popular assessments 
-    cumul_number_of_examples_df = get_cumul_number_of_examples_df(full_wo_underscore, EID_columns_by_popularity)
-    cumul_number_of_examples_df.to_csv(dirs["data_statistics_dir"] + "assessment-filled-distrib-cumul.csv", float_format='%.3f')
-
-    # Plot cumulative distribution of assessments
-    plot_comul_number_of_examples(cumul_number_of_examples_df, dirs["data_statistics_dir"])
-
-    ### => The first drop-off in number of respondents is at ICU_P, 
-    # then SCARED_SR (the biggest drop off, and it's the first assessment with an age restriction). Last drop off is at CPIC.
+    generate_assessment_reports(full_wo_underscore, EID_columns_by_popularity, assessment_answer_counts, dir = dirs["data_statistics_dir"])
 
     if only_assessment_distribution != 1:
     

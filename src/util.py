@@ -77,3 +77,20 @@ def get_string_with_current_datetime():
     date_time_str = now.strftime('%Y-%m-%d %H.%M.%S')
 
     return date_time_str
+
+
+# Config utils
+import yaml
+def read_config(learning = 0):
+    clinical_config = yaml.safe_load(open("config/clinical/general.yml", "r"))
+    if learning:
+        learning_config = yaml.safe_load(open("config/clinical/learning.yml", "r"))
+        
+        # Append cognitive batteries needed for test-based digas to relevant assessments 
+        cog_batteries = clinical_config["cog batteries"]
+        clinical_config["relevant assessments"] += list(cog_batteries)
+
+        # Rewrite all keys in clnical with values in learning
+        clinical_config.update(learning_config)
+
+    return clinical_config

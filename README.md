@@ -31,9 +31,9 @@ Arguments: use_test_set=1
 
 ## 4 step:
 
-`python -W ignore src/models/identify_feature_subsets.py 41 0`
+`python -W ignore src/models/identify_feature_subsets.py 0`
 
-Arguments: number_of_features_to_check = 126, importances_from_file = 0
+Arguments: importances_from_file = 0
 
 ## 5 step
 

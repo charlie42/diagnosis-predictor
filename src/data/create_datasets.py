@@ -11,25 +11,25 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util, data, features
 
-def build_output_dir_name(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments):
+def build_output_dir_name(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning):
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
     # Part with the params
     params = {"first_assessment_to_drop": first_assessment_to_drop, "use_other_diags_as_input": use_other_diags_as_input, 
-              "only_free_assessments": only_free_assessments}
+              "only_free_assessments": only_free_assessments, "learning?": learning}
     params_part = util.build_param_string_for_dir_name(params)
     
     return datetime_part + "___" + params_part
 
-def set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments):
+def set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning):
 
     # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
     data_dir = "../diagnosis_predictor_data/"
     util.create_dir_if_not_exists(data_dir)
 
     # Create directory inside the output directory with the run timestamp and first_assessment_to_drop param
-    current_output_dir_name = build_output_dir_name(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments)
+    current_output_dir_name = build_output_dir_name(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning)
 
     data_statistics_dir = data_dir + "reports/create_datasets/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(data_statistics_dir)
@@ -63,7 +63,7 @@ def customize_input_cols_per_diag(input_cols, diag):
                                                          "Diag.Unspecified Attention-Deficit/Hyperactivity Disorder"]]
         
     # Remove NIH scores for NVLD (used for diagnosis)
-    if diag == "Diag.NVLD":
+    if "NVLD" in diag:
         input_cols = [x for x in input_cols if not x.startswith("NIH")]
                       
     return input_cols
@@ -204,7 +204,7 @@ def save_dataset_stats(datasets, diag_cols, item_level_ds, dir):
 
     item_level_ds.describe(include = 'all').T.to_csv(dir + "column_stats.csv")
 
-def add_extra_cols_to_input(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config):
+def add_cols_from_total_and_subscale_to_input(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config):
     if "add cols to input" in clinical_config and clinical_config["add cols to input"]:
         cols_to_add = clinical_config["add cols to input"]
         cog_cols_to_add = [x for x in cols_to_add if x in cog_tasks_ds.columns]
@@ -215,17 +215,39 @@ def add_extra_cols_to_input(item_level_ds, cog_tasks_ds, subscales_ds, clinical_
         
     return item_level_ds
 
+def update_datasets_with_new_diags(item_level_ds, cog_tasks_ds, subscales_ds, total_score_ds, consensus_diags, dir):
+    all_diags_in_item_lvl_ds = [x for x in item_level_ds.columns if "Diag." in x]
+    new_diags = [x for x in all_diags_in_item_lvl_ds if x not in consensus_diags]
+    print(f"New diags: {new_diags}")
+
+    print(f"Old shape of cog_tasks_ds: {cog_tasks_ds.shape}")
+
+    # Add new diags to cog_tasks_ds and subscales_ds
+    cog_tasks_ds = cog_tasks_ds.merge(item_level_ds[new_diags], left_index=True, right_index=True)
+    subscales_ds = subscales_ds.merge(item_level_ds[new_diags], left_index=True, right_index=True)
+    total_score_ds = total_score_ds.merge(item_level_ds[new_diags], left_index=True, right_index=True)
+
+    print(f"New shape of cog_tasks_ds: {cog_tasks_ds.shape}")
+
+    # Rewrite csv files
+    cog_tasks_ds.to_csv(dir + "cog_tasks.csv")
+    subscales_ds.to_csv(dir + "subscale_scores.csv")
+    total_score_ds.to_csv(dir + "total_scores.csv")
+
+    return cog_tasks_ds, subscales_ds
+
+
 def main(only_assessment_distribution, use_other_diags_as_input, only_free_assessments, learning):
     only_assessment_distribution = int(only_assessment_distribution)
     use_other_diags_as_input = int(use_other_diags_as_input)
     only_free_assessments = int(only_free_assessments)
     learning = int(learning)
 
-    clinical_config = data.read_config(learning)
+    clinical_config = util.read_config(learning)
     
     first_assessment_to_drop = clinical_config["first assessment to drop"]
 
-    dirs = set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments)
+    dirs = set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning)
 
     data.make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs, learning)
 
@@ -233,11 +255,13 @@ def main(only_assessment_distribution, use_other_diags_as_input, only_free_asses
         item_level_ds = pd.read_csv(dirs["data_output_dir"] + "item_lvl.csv")
         cog_tasks_ds = pd.read_csv(dirs["data_output_dir"] + "cog_tasks.csv") 
         subscales_ds = pd.read_csv(dirs["data_output_dir"] + "subscale_scores.csv")
+        total_scores_ds = pd.read_csv(dirs["data_output_dir"] + "total_scores.csv")
 
         consensus_diags = [x for x in item_level_ds.columns if x.startswith("Diag.")]
 
         item_level_ds = features.make_new_diag_cols(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config)
-        item_level_ds = add_extra_cols_to_input(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config)
+        cog_tasks_ds, subscales_ds = update_datasets_with_new_diags(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, consensus_diags, dir = dirs["data_output_dir"])
+        item_level_ds = add_cols_from_total_and_subscale_to_input(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config)
 
         # Drop ID
         item_level_ds.drop("ID", axis=1, inplace=True)
