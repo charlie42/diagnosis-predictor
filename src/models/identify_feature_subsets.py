@@ -6,7 +6,7 @@ from IPython.core import ultratb
 sys.excepthook = ultratb.FormattedTB(color_scheme='Neutral', call_pdb=False)
 
 from joblib import load, dump
-import pandas as pd
+import yaml
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -72,9 +72,11 @@ def get_feature_subsets(best_estimators, datasets, number_of_features_to_check, 
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
     return feature_subsets
     
-def main(number_of_features_to_check = 126, importances_from_file = 0):
-    number_of_features_to_check = int(number_of_features_to_check)
+def main(importances_from_file = 0):
     importances_from_file = int(importances_from_file)
+
+    clinical_config = util.read_config()
+    number_of_features_to_check = clinical_config["max items in screener"]
 
     dirs = set_up_directories()
 
@@ -103,4 +105,4 @@ def main(number_of_features_to_check = 126, importances_from_file = 0):
     models.write_feature_subsets_to_file(feature_subsets, estimators_on_subsets, dirs["output_reports_dir"])
     
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1])

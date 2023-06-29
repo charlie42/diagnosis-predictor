@@ -1,3 +1,4 @@
+import logging
 # To import from parent directory
 import os, inspect, sys
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -79,7 +80,7 @@ def build_nvld(data, ignore_reading_condition=False):
         EF_condition = (data[flanker_p] < 16) | (data[card_p] < 16)
     else:
         EF_condition = (data[flanker] <= 85) | (data[card] <= 85)
-
+    
     if cbcl in data.columns:
         social_condition = (data[cbcl] >= 70)
     else:
@@ -119,7 +120,7 @@ def make_new_diag_cols(item_level_ds, cog_tasks_ds, subscales_ds, clinical_confi
             "math": "Diag.Specific Learning Disorder with Impairment in Mathematics (test)",
             "write": "Diag.Specific Learning Disorder with Impairment in Written Expression (test)",
             "int-mild": "Diag.Intellectual Disability-Mild (test)",
-            "int-borderline": "Diag.Intellectual Disability-Borderline (test)",
+            "int-borderline": "Diag.Borderline Intellectual Functioning (test)",
             "ps": "Diag.Processing Speed Deficit (test)",
             "nvld": "Diag.NVLD (test)",
             "nvld-no-read": "Diag.NVLD without reading condition (test)",
@@ -132,8 +133,13 @@ def make_new_diag_cols(item_level_ds, cog_tasks_ds, subscales_ds, clinical_confi
         data[test_based_diags["int-mild"]] = (data["WISC,WISC_FSIQ"] < 70) 
         data[test_based_diags["int-borderline"]] = ((data["WISC,WISC_FSIQ"] < 85) & (data["WISC,WISC_FSIQ"] > 70))
         data[test_based_diags["ps"]] = (data["WISC,WISC_PSI"] < 85) 
-        data[test_based_diags["nvld"]] = build_nvld(data)
-        data[test_based_diags["nvld-no-read"]] = build_nvld(data, ignore_reading_condition=True)
+        try:
+            data[test_based_diags["nvld"]] = build_nvld(data)
+            data[test_based_diags["nvld-no-read"]] = build_nvld(data, ignore_reading_condition=True)
+        except Exception as e:
+            print(f"Coulnd't create NVLD diagnosis: {e}")
+            test_based_diags.pop("nvld")
+            test_based_diags.pop("nvld-no-read")
 
         # Drop non-item-lvl columns
         data = only_keep_item_lvl_cols(data, item_level_ds, test_based_diags) # only needed them for building new learning diags

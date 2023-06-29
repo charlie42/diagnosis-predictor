@@ -45,7 +45,7 @@ def set_up_directories(use_test_set):
 
 def add_number_of_positive_examples(results, datasets):
     for diag in datasets:
-        full_dataset_y = datasets[diag]["y_train"].append(datasets[diag]["y_test"]) # Reconstruct full dataset from train and test
+        full_dataset_y = pd.concat([datasets[diag]["y_train"], datasets[diag]["y_test"]]) # Reconstruct full dataset from train and test
         results.loc[results["Diag"] == diag, "# of Positive Examples"] = full_dataset_y.sum()
     return results
 
