@@ -1,0 +1,1 @@
+performance margin: 0.02 # Margin of error for ROC AUC (for prefering logistic regression over other models)

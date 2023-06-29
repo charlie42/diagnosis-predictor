@@ -17,6 +17,8 @@ from sklearn.pipeline import make_pipeline
 
 from sklearn.model_selection import RandomizedSearchCV
 
+from mlxtend.feature_selection import SequentialFeatureSelector as SFS
+
 import sys, inspect
 
 from joblib import load, dump
@@ -74,14 +76,38 @@ def set_up_load_directories():
     load_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "reports/train_models/")
     
     return {"load_data_dir": load_data_dir, "load_models_dir": load_models_dir, "load_reports_dir": load_reports_dir}
-    
-def get_base_models_and_param_grids():
-    
+
+def make_sfs(model, number_of_features_to_check):
+    cv = StratifiedKFold(n_splits=2 if DEBUG_MODE else 8)
+    sfs = SFS(model, 
+        #k_features=number_of_features_to_check,
+        k_features=2,
+        forward=True, 
+        scoring='roc_auc',
+        cv=cv,
+        floating=True, 
+        verbose=1,
+        n_jobs=-1)
+    return sfs
+
+def make_models():
     # Define base models
-    rf = RandomForestClassifier(n_estimators=200 if DEBUG_MODE else 400)
-    svc = svm.SVC()
-    lr = LogisticRegression(solver="saga")
+
+    models = [
+        RandomForestClassifier(n_estimators=200 if DEBUG_MODE else 400),
+        svm.SVC(),
+        LogisticRegression(solver="saga")
+    ]
+
+    return models
+
+def make_pipelines(number_of_features_to_check):
     
+    base_models = make_models()
+    sfss = []
+    for model in base_models:
+        sfss.append(make_sfs(model, number_of_features_to_check))
+
     # Impute missing values
     imputer = SimpleImputer(missing_values=np.nan, strategy='median')
     
@@ -89,10 +115,14 @@ def get_base_models_and_param_grids():
     scaler = StandardScaler()
 
     # Make pipelines
-    rf_pipe = make_pipeline(imputer, scaler, rf)
-    svc_pipe = make_pipeline(imputer, scaler, svc)
-    lr_pipe = make_pipeline(imputer, scaler, lr)
+    pipelines = []
+    for sfs in sfss:
+        pipelines.append(make_pipeline(imputer, scaler, sfs))
+        
+    return pipelines
     
+def make_params():
+ 
     # Define parameter grids to search for each pipe
     from scipy.stats import loguniform, uniform
     rf_param_grid = {
@@ -117,18 +147,24 @@ def get_base_models_and_param_grids():
         'logisticregression__class_weight': ['balanced', None],
         'logisticregression__l1_ratio': uniform(0, 1)
     }
+
+    return [rf_param_grid, svc_param_grid, lr_param_grid]
+
+def make_pipes_and_params(number_of_features_to_check):
+    # Make pipelines
+    pipes = make_pipelines(number_of_features_to_check)
+
+    # Make params
+    params = make_params()
+
+    pipes_and_param_grids = list(zip(pipes, params))
     
-    base_models_and_param_grids = [
-        (rf_pipe, rf_param_grid),
-        (svc_pipe, svc_param_grid),
-        (lr_pipe, lr_param_grid),
-    ]
     if DEBUG_MODE:
-        base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
+        pipes_and_param_grids = [pipes_and_param_grids[-1]] # Only do LR in debug mode
         #base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[0]] # Only do LR and RF in debug mode
         pass
     
-    return base_models_and_param_grids
+    return pipes_and_param_grids
 
 def get_best_estimator(base_model, grid, X_train, y_train):
     cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 8)
@@ -147,13 +183,14 @@ def get_best_estimator(base_model, grid, X_train, y_train):
 
     return (best_estimator, best_score, sd_of_score_of_best_estimator)
 
-def find_best_estimator_for_diag_and_its_score(X_train, y_train, performance_margin):
-    base_models_and_param_grids = get_base_models_and_param_grids()
+def find_best_estimator_for_diag_and_its_score(X_train, y_train, performance_margin, number_of_features_to_check):
+    pipes_and_param_grids = make_pipes_and_params(number_of_features_to_check)
     best_estimators_and_scores = []
     
-    for (base_model, grid) in base_models_and_param_grids:
+    for (base_model, grid) in pipes_and_param_grids:
         best_estimator_for_model, best_score_for_model, sd_of_score_of_best_estimator_for_model = get_best_estimator(base_model, grid, X_train, y_train)
         model_type = list(base_model.named_steps.keys())[-1]
+        print("DEBUG", model_type)
         best_estimators_and_scores.append([model_type, best_estimator_for_model, best_score_for_model, sd_of_score_of_best_estimator_for_model])
     
     best_estimators_and_scores = pd.DataFrame(best_estimators_and_scores, columns = ["Model type", "Best estimator", "Best score", "SD of best score"])
@@ -178,7 +215,7 @@ def find_best_estimator_for_diag_and_its_score(X_train, y_train, performance_mar
     return best_estimator, best_score, sd_of_score_of_best_estimator
 
 # Find best estimator
-def find_best_estimators_and_scores(datasets, diag_cols, performance_margin):
+def find_best_estimators_and_scores(datasets, diag_cols, performance_margin, number_of_features_to_check):
     best_estimators = {}
     scores_of_best_estimators = {}
     sds_of_scores_of_best_estimators = {}
@@ -188,7 +225,7 @@ def find_best_estimators_and_scores(datasets, diag_cols, performance_margin):
         X_train = datasets[diag]["X_train_train"]
         y_train = datasets[diag]["y_train_train"]
         
-        best_estimator_for_diag, best_score_for_diag, sd_of_score_of_best_estimator_for_diag = find_best_estimator_for_diag_and_its_score(X_train, y_train, performance_margin)
+        best_estimator_for_diag, best_score_for_diag, sd_of_score_of_best_estimator_for_diag = find_best_estimator_for_diag_and_its_score(X_train, y_train, performance_margin, number_of_features_to_check)
         best_estimators[diag] = best_estimator_for_diag
         sds_of_scores_of_best_estimators[diag] = sd_of_score_of_best_estimator_for_diag
         scores_of_best_estimators[diag] = best_score_for_diag
@@ -224,9 +261,13 @@ def save_coefficients_of_lr_models(best_estimators, datasets, diag_cols, output_
             X_train = datasets[diag]["X_train_train"]
             models.save_coefficients_from_lr(diag, best_estimator, X_train, output_dir)
 
-def main(performance_margin = 0.02, models_from_file = 1):
+def main(models_from_file = 1):
     models_from_file = int(models_from_file)
-    performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
+
+    clinical_config = util.read_config("clinical")
+    technical_config = util.read_config("technical")
+    number_of_features_to_check = clinical_config["max items in screener"]
+    performance_margin = technical_config["performance margin"] # Margin of error for ROC AUC (for prefering logistic regression over other models)
 
     dirs = set_up_directories()
     load_dirs = set_up_load_directories()
@@ -249,7 +290,7 @@ def main(performance_margin = 0.02, models_from_file = 1):
         dump_estimators_and_performances(dirs, best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators)
     else: 
         # Find best models for each diagnosis
-        best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators = find_best_estimators_and_scores(datasets, diag_cols, performance_margin)
+        best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators = find_best_estimators_and_scores(datasets, diag_cols, performance_margin, number_of_features_to_check)
         
         # Save best estimators and thresholds 
         dump_estimators_and_performances(dirs, best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators)
@@ -263,4 +304,4 @@ def main(performance_margin = 0.02, models_from_file = 1):
     save_coefficients_of_lr_models(best_estimators, datasets, diag_cols, dirs["reports_dir"])
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1])
