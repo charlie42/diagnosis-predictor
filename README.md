@@ -15,13 +15,13 @@ Predicting HBN consensus diagnoses, and test-based disagnoses for:
 
 `python -W ignore src/data/create_datasets.py 0 0 0 0`
 
-Arguments: only_assessment_distribution, use_other_diags_as_input = 0, only_free_assessments = 0, learning = 0
+Arguments: only_assessment_distribution = 0, use_other_diags_as_input = 0, only_free_assessments = 0, learning = 0
 
 ## 2 step:
 
-`python -W ignore src/models/train_models.py 0.02 0 0`
+`python -W ignore src/models/train_models.py 0`
 
-Arguments: performance_margin = 0.02, models_from_file = 1
+Arguments: models_from_file = 1
 
 ## 3 step:
 
