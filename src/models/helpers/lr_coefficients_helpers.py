@@ -11,8 +11,11 @@ def get_coefficients_df_from_lr(pipeline, data):
     # Get the coefficients from estimator 
     estimator = util.get_estimator_from_pipeline(pipeline)
     coef = estimator.coef_[0]
-    # Get the feature names
-    feature_names = data.columns
+
+    # Get the feature names from scaler in pipeline
+    feature_selector = pipeline.named_steps["featureselector"]
+    feature_names = feature_selector.k_feature_names_
+    
     # Create a dataframe of the coefficients and feature names
     df = pd.DataFrame({"coef": coef, "feature": feature_names})
     # Sort the dataframe by the coefficients

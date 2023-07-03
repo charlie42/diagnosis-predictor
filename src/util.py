@@ -51,6 +51,11 @@ def build_param_string_for_dir_name(params):
     param_string = param_string[:-3]
     return param_string
 
+def print_and_save_string(time, dir, file_name):
+    print(file_name, time)
+    with open(dir+file_name, "w") as text_file:
+        text_file.write(str(time))
+
 
 
 # Model Utilities
@@ -58,6 +63,7 @@ def get_base_model_name_from_estimator(estimator):
     return estimator.__class__.__name__.lower()
 
 def get_estimator_from_pipeline(pipeline):
+    print("DEBUG get_estimator_from_pipeline pipeline", pipeline)
     return pipeline.steps[-1][1]
 
 def get_base_model_name_from_pipeline(pipeline):
