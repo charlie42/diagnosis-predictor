@@ -7,14 +7,29 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util
 
+def get_features_from_rfe(pipeline, data):
+    # Get the feature names from scaler in pipeline
+    rfe = pipeline.named_steps["featureselector1"]
+
+    col_names = data.columns
+    ranking = rfe.ranking_
+    
+    # Get names of the top ranked 27 features frol col_names
+    feature_names = []
+    for i in range(len(col_names)):
+        if ranking[i] == 1:
+            feature_names.append(col_names[i])
+
+    return feature_names
+
 def get_coefficients_df_from_lr(pipeline, data):
     # Get the coefficients from estimator 
     estimator = util.get_estimator_from_pipeline(pipeline)
     coef = estimator.coef_[0]
 
     # Get the feature names from scaler in pipeline
-    feature_selector = pipeline.named_steps["featureselector"]
-    feature_names = feature_selector.k_feature_names_
+    feature_selector = pipeline.named_steps["featureselector2"]
+    feature_names = get_features_from_rfe(pipeline, data)
     
     # Create a dataframe of the coefficients and feature names
     df = pd.DataFrame({"coef": coef, "feature": feature_names})
