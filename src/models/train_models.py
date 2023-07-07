@@ -12,8 +12,11 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import RandomizedSearchCV
-
+from sklearn.feature_selection import RFE
 from mlxtend.feature_selection import SequentialFeatureSelector as SFS
+from sklearn.experimental import enable_halving_search_cv
+from sklearn.model_selection import HalvingGridSearchCV
+from sklearn.model_selection import HalvingRandomSearchCV
 
 import sys, inspect
 from joblib import load, dump
@@ -73,17 +76,20 @@ def set_up_load_directories():
     
     return {"load_data_dir": load_data_dir, "load_models_dir": load_models_dir, "load_reports_dir": load_reports_dir}
 
-def make_feature_selector(model, number_of_features_to_check):
+def make_feature_selectors(model, number_of_features_to_check):
     cv = StratifiedKFold(n_splits=2 if DEBUG_MODE else 8)
+    rfe = RFE(model, 
+              n_features_to_select=number_of_features_to_check, 
+              step=1)
     sfs = SFS(model, 
         k_features=number_of_features_to_check, 
         forward=True, 
         scoring='roc_auc',
         cv=cv,
         floating=True, 
-        verbose=1,
+        verbose=0,
         n_jobs=-1)
-    return sfs
+    return [rfe, sfs]
 
 def make_models():
     # Define base models
@@ -96,12 +102,13 @@ def make_models():
 
     return models
 
-def make_pipeline(imputer, scaler, feature_selection, model):
+def make_pipeline(imputer, scaler, feature_selector1, feature_selector2, model):
     # Make pipeline
     pipeline = Pipeline([
         ('imputer', imputer),
         ('scaler', scaler),
-        ('featureselector', feature_selection),
+        ('featureselector1', feature_selector1),
+        ('featureselector2', feature_selector2),
         ('model', model)
     ])
     return pipeline
@@ -109,9 +116,9 @@ def make_pipeline(imputer, scaler, feature_selection, model):
 def make_pipelines(number_of_features_to_check):
     
     base_models = make_models()
-    sfss = []
+    selectors = []
     for model in base_models:
-        sfss.append(make_feature_selector(model, number_of_features_to_check))
+        selectors.append(make_feature_selectors(model, number_of_features_to_check))
 
     # Impute missing values
     imputer = SimpleImputer(missing_values=np.nan, strategy='median')
@@ -121,8 +128,10 @@ def make_pipelines(number_of_features_to_check):
 
     # Make pipelines
     pipelines = []
-    for sfs, model in zip(sfss, base_models):
-        pipelines.append(make_pipeline(imputer, scaler, sfs, model))
+    for selectors_for_model, model in zip(selectors, base_models):
+        pipeline = make_pipeline(imputer, scaler, *selectors_for_model, model)
+        pipelines.append(pipeline)
+        print(pipeline)
         
     return pipelines
     
@@ -216,7 +225,7 @@ def get_fit_param_search_objects_per_diag(X_train, y_train, number_of_features_t
 
         # If chosen model is SVM add a predict_proba parameter (not needed for grid search, and slows it down significantly)
         if 'svm'in base_model:
-            rs = add_extra_param(rs, param= "estimator__featureselector__estimator__probability", value=True)
+            rs = add_extra_param(rs, param= "model__probability", value=True)
 
         fit_param_search_objects[base_model] = rs
 
@@ -316,7 +325,7 @@ def main(models_from_file = 1):
 
     if DEBUG_MODE:
         #diag_cols = diag_cols[0:1]
-        diag_cols = ["Diag.Processing Speed Deficit (test)"]
+        #diag_cols = ["Diag.Processing Speed Deficit (test)"]
         pass
 
     if models_from_file == 1:
