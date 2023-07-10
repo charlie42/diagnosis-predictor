@@ -370,7 +370,7 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
     res_only_assessments = clinical_config["research only assessments"]
     report_assessments = clinical_config["report assessments"]
 
-    if clinical_config["use only research only assessments"]:
+    if clinical_config["use only research only assessments"] == 1:
         #relevant_assessments_list = [x for x in relevant_assessments_list if x in res_only_assessments]
         relevant_assessments_list = [x for x in relevant_assessments_list if x not in report_assessments]
 
