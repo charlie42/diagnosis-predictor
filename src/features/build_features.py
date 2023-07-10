@@ -104,46 +104,52 @@ def join_by_id_and_diag(df1, df2):
     df = df1.merge(df2, on=diag_cols + ["ID"], how="inner")
     return df
 
+def make_learning_diags(item_level_ds, cog_tasks_ds, subscales_ds):
+    data = join_by_id_and_diag(item_level_ds, cog_tasks_ds)
+    print(data.columns)
+    data = join_by_id_and_diag(data, subscales_ds)
+    print(data.columns)
+
+    test_based_diags = {
+        "read": "Diag.Specific Learning Disorder with Impairment in Reading (test)",
+        "math": "Diag.Specific Learning Disorder with Impairment in Mathematics (test)",
+        "write": "Diag.Specific Learning Disorder with Impairment in Written Expression (test)",
+        "int-mild": "Diag.Intellectual Disability-Mild (test)",
+        "int-borderline": "Diag.Borderline Intellectual Functioning (test)",
+        "ps": "Diag.Processing Speed Deficit (test)",
+        "nvld": "Diag.NVLD (test)",
+        "nvld-no-read": "Diag.NVLD without reading condition (test)",
+    }
+
+    # Create new diganosis columns: positive if consensus diagnosis is positive OR if WIAT or WISC score is within range
+    data[test_based_diags["read"]] = (data["WIAT,WIAT_Word_Stnd"] < 85) & (data["WISC,WISC_FSIQ"] > 70)
+    data[test_based_diags["math"]] = (data["WIAT,WIAT_Num_Stnd"] < 85) & (data["WISC,WISC_FSIQ"] > 70)
+    data[test_based_diags["write"]] = (data["WIAT,WIAT_Spell_Stnd"] < 85)  & (data["WISC,WISC_FSIQ"] > 70)
+    data[test_based_diags["int-mild"]] = (data["WISC,WISC_FSIQ"] < 70) 
+    data[test_based_diags["int-borderline"]] = ((data["WISC,WISC_FSIQ"] < 85) & (data["WISC,WISC_FSIQ"] > 70))
+    data[test_based_diags["ps"]] = (data["WISC,WISC_PSI"] < 85) 
+    try:
+        data[test_based_diags["nvld"]] = build_nvld(data)
+        data[test_based_diags["nvld-no-read"]] = build_nvld(data, ignore_reading_condition=True)
+    except Exception as e:
+        print(f"Coulnd't create NVLD diagnosis: {e}")
+        test_based_diags.pop("nvld")
+        test_based_diags.pop("nvld-no-read")
+
+    data["Diag.Any SLD"] = data[[test_based_diags["read"], test_based_diags["math"], test_based_diags["write"]]].any(axis=1)
+
+    # Drop non-item-lvl columns
+    data = only_keep_item_lvl_cols(data, item_level_ds, test_based_diags) # only needed them for building new learning diags
+    print(data.columns)
+
+    return data
+
 def make_new_diag_cols(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config):
 
     data = item_level_ds
 
     if clinical_config["predict test-based diags"]: # Create learning test-based diags
-
-        data = join_by_id_and_diag(item_level_ds, cog_tasks_ds)
-        print(data.columns)
-        data = join_by_id_and_diag(data, subscales_ds)
-        print(data.columns)
-
-        test_based_diags = {
-            "read": "Diag.Specific Learning Disorder with Impairment in Reading (test)",
-            "math": "Diag.Specific Learning Disorder with Impairment in Mathematics (test)",
-            "write": "Diag.Specific Learning Disorder with Impairment in Written Expression (test)",
-            "int-mild": "Diag.Intellectual Disability-Mild (test)",
-            "int-borderline": "Diag.Borderline Intellectual Functioning (test)",
-            "ps": "Diag.Processing Speed Deficit (test)",
-            "nvld": "Diag.NVLD (test)",
-            "nvld-no-read": "Diag.NVLD without reading condition (test)",
-        }
-
-        # Create new diganosis columns: positive if consensus diagnosis is positive OR if WIAT or WISC score is within range
-        data[test_based_diags["read"]] = (data["WIAT,WIAT_Word_Stnd"] < 85) & (data["WISC,WISC_FSIQ"] > 70)
-        data[test_based_diags["math"]] = (data["WIAT,WIAT_Num_Stnd"] < 85) & (data["WISC,WISC_FSIQ"] > 70)
-        data[test_based_diags["write"]] = (data["WIAT,WIAT_Spell_Stnd"] < 85)  & (data["WISC,WISC_FSIQ"] > 70)
-        data[test_based_diags["int-mild"]] = (data["WISC,WISC_FSIQ"] < 70) 
-        data[test_based_diags["int-borderline"]] = ((data["WISC,WISC_FSIQ"] < 85) & (data["WISC,WISC_FSIQ"] > 70))
-        data[test_based_diags["ps"]] = (data["WISC,WISC_PSI"] < 85) 
-        try:
-            data[test_based_diags["nvld"]] = build_nvld(data)
-            data[test_based_diags["nvld-no-read"]] = build_nvld(data, ignore_reading_condition=True)
-        except Exception as e:
-            print(f"Coulnd't create NVLD diagnosis: {e}")
-            test_based_diags.pop("nvld")
-            test_based_diags.pop("nvld-no-read")
-
-        # Drop non-item-lvl columns
-        data = only_keep_item_lvl_cols(data, item_level_ds, test_based_diags) # only needed them for building new learning diags
-        print(data.columns)
+        data = make_learning_diags(item_level_ds, cog_tasks_ds, subscales_ds)
     
     data["Diag.Any Diag"] = data["Diag.No Diagnosis Given"].apply(lambda x: 1 if x == 0 else 0)
         

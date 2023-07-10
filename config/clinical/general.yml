@@ -42,17 +42,29 @@ relevant assessments:
   - "ASR"
 proprietary assessments:
   - "ASR"
+  - "BDI"
+  - "TRF"
+  - "TRF_P"
   - "CBCL"
   - "CBCL_Pre"
+  - "CDI"
+  - "CDI_P"
+  - "CGAS"
   - "C3SR"
+  - "CAARS"
   - "PCIAT"
+  - "PPVT"
+  - "PAQ_A"
+  - "PAQ_C"
   - "RBS"
   - "SCQ"
   - "SRS"
   - "SRS_Pre"
   - "YSR"
+  - "EHQ"
   - "Barratt"
   - "PSI"
+  - "PBQ"
 research only assessments:
   - AMAS
   - ACE
@@ -120,7 +132,6 @@ report assessments:
   - PreInt_EduHx
   - PreInt_Lang
   - PreInt_TxHx
-use only research only assessments: True
 cog batteries:
   - WISC
   - WIAT
@@ -128,10 +139,6 @@ cog batteries:
   - WAIS
   - NIH_Scores
   - Pegboard
-first assessment to drop: WHODAS_P
-predict test-based diags: False
-predict consensus diags: True
-include non-standard assessments: True # True increses performance, False increases generalizability (e.g. other studies don't use the same pre-interview assessments)
 non-standard assessments:
   - PreInt_Demos_Fam
   - PreInt_Demos_Home
@@ -139,4 +146,9 @@ non-standard assessments:
   - PreInt_EduHx
   - PreInt_Lang
   - PreInt_TxHx
+first assessment to drop: ICU_P
+predict test-based diags: False
+predict consensus diags: True
+include non-standard assessments: True # True increses performance, False increases generalizability (other studies don't use the same pre-interview assessments)
 max items in screener: 27
+use only research only assessments: False

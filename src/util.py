@@ -81,16 +81,16 @@ def get_string_with_current_datetime():
 
 # Config utils
 import yaml
-def read_config(learning = 0):
-    clinical_config = yaml.safe_load(open("config/clinical/general.yml", "r"))
-    if learning:
-        learning_config = yaml.safe_load(open("config/clinical/learning.yml", "r"))
-        
-        # Append cognitive batteries needed for test-based digas to relevant assessments 
-        cog_batteries = clinical_config["cog batteries"]
-        clinical_config["relevant assessments"] += list(cog_batteries)
+def read_config(type, learning = 0):
+    config = yaml.safe_load(open(f"config/{type}/general.yml", "r"))
+    if type == "clinical" and learning == 1:
+        learning_config = yaml.safe_load(open(f"config/{type}/learning.yml", "r"))
 
         # Rewrite all keys in clnical with values in learning
-        clinical_config.update(learning_config)
+        config.update(learning_config)
+        
+        # Append cognitive batteries needed for test-based digas to relevant assessments 
+        cog_batteries = config["cog batteries"]
+        config["relevant assessments"] += list(cog_batteries)
 
-    return clinical_config
+    return config
