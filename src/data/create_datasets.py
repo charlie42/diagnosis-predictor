@@ -243,7 +243,7 @@ def main(only_assessment_distribution, use_other_diags_as_input, only_free_asses
     only_free_assessments = int(only_free_assessments)
     learning = int(learning)
 
-    clinical_config = util.read_config(learning)
+    clinical_config = util.read_config("clinical", learning)
     
     first_assessment_to_drop = clinical_config["first assessment to drop"]
 

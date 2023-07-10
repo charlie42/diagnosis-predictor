@@ -363,7 +363,7 @@ def generate_assessment_reports(full_wo_underscore, EID_columns_by_popularity, a
 
 def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs, learning):
 
-    clinical_config = util.read_config(learning)
+    clinical_config = util.read_config("clinical", learning)
 
     relevant_assessments_list = clinical_config["relevant assessments"]
     proprietary_assessments = clinical_config["proprietary assessments"]
