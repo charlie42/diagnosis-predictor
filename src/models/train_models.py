@@ -195,7 +195,8 @@ def find_best_estimators_and_scores(datasets, diag_cols, performance_margin):
 
         if DEBUG_MODE and util.get_base_model_name_from_pipeline(best_estimators[diag]) == "logisticregression":
             # In debug mode print top features from LR
-            models.print_top_features_from_lr(best_estimators[diag], X_train, 10)
+            #models.print_top_features_from_lr(best_estimators[diag], X_train, 10)
+            pass
             
     return best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators
 

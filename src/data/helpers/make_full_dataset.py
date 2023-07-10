@@ -127,7 +127,8 @@ def get_data_up_to_dropped(full_wo_underscore, EID_columns_until_dropped, column
         "Diagnosis_ClinicianConsensus,DX_04", "Diagnosis_ClinicianConsensus,DX_05", "Diagnosis_ClinicianConsensus,DX_06", 
         "Diagnosis_ClinicianConsensus,DX_07", "Diagnosis_ClinicianConsensus,DX_08", "Diagnosis_ClinicianConsensus,DX_09", 
         "Diagnosis_ClinicianConsensus,DX_10"] + [x for x in full_wo_underscore.columns if x.endswith(tuple(["_ByHx", "_Confirmed", "_Presum", "_RC"]))]
-    data_up_to_dropped = full_wo_underscore.loc[full_wo_underscore[EID_columns_until_dropped].dropna(how="any").index][columns_until_dropped+["ID"]+diag_colunms]
+    #data_up_to_dropped = full_wo_underscore.loc[full_wo_underscore[EID_columns_until_dropped].dropna(how="any").index][columns_until_dropped+["ID"]+diag_colunms]
+    data_up_to_dropped = full_wo_underscore[columns_until_dropped+["ID"]+diag_colunms]
 
     return data_up_to_dropped
 
@@ -145,13 +146,37 @@ def get_missing_values_df(data_up_to_dropped):
 
     return missing_report_up_to_dropped[missing_report_up_to_dropped["Persentage missing"] > 0].sort_values(ascending=False, by="Amount missing")
 
-def remove_cols_w_missing_over_n(data_up_to_dropped, n, missing_values_df):
+def remove_cols_w_missing_over_n(data_up_to_dropped, n, missing_values_df, to_keep=[]):
     cols_to_remove = list(missing_values_df[missing_values_df["Persentage missing"] > n].index)
+    cols_to_remove = [x for x in cols_to_remove if not x.startswith(tuple(to_keep))]
+    print("DEBUG cols to remove")
+    [print(x) for x in cols_to_remove]
     data_up_to_dropped = data_up_to_dropped.drop(cols_to_remove, axis=1)
     return data_up_to_dropped
 
-def add_missingness_markers(data_up_to_dropped, n, missing_values_df):
-    missing_cols_to_mark = list(missing_values_df[(missing_values_df["Persentage missing"] <= 40) & (missing_values_df["Persentage missing"] > n)].index)
+def remove_rows_w_missing_over_n(data_up_to_dropped, n):
+    threshold = round(((100-n)/100)*len(data_up_to_dropped.columns))
+    data_up_to_dropped = data_up_to_dropped.dropna(thresh=threshold)
+
+    return data_up_to_dropped
+
+def print_columns_to_impute(data_up_to_dropped, dir):
+    # Print columns that are left with missing values
+    missing_report = data_up_to_dropped.isna().sum().to_frame(name="Amount missing")
+    missing_report["Persentage missing"] = missing_report["Amount missing"]/data_up_to_dropped["ID"].nunique() * 100
+    missing_report = missing_report[missing_report["Persentage missing"] > 0]
+    missing_report.to_csv(dir+"missing_values_report_after_drop.csv")
+
+def remove_cols_wo_variance(data_up_to_dropped):
+    cols_wo_variance = []
+    for col in data_up_to_dropped.columns:
+        if data_up_to_dropped[col].nunique() == 1:
+            cols_wo_variance.append(col)
+    data_up_to_dropped = data_up_to_dropped.drop(cols_wo_variance, axis=1)
+    return data_up_to_dropped
+
+def add_missingness_markers(data_up_to_dropped, n_min, n_max, missing_values_df):
+    missing_cols_to_mark = list(missing_values_df[(missing_values_df["Persentage missing"] <= n_max) & (missing_values_df["Persentage missing"] > n_min)].index)
     for col in missing_cols_to_mark:
         data_up_to_dropped[col+ "_WAS_MISSING"] = data_up_to_dropped[col].isna()
     return data_up_to_dropped
@@ -190,7 +215,7 @@ def transform_devhx_eduhx_cols(data_up_to_dropped):
     
     if list_of_preg_symp_cols:
         # If any of the preg_symp columns are 1, then the preg_symp column is 1, otherwise 0
-        data_up_to_dropped["preg_symp"] = (data_up_to_dropped[list_of_preg_symp_cols] == 1).any(axis=1)
+        data_up_to_dropped["preg_symp"] = (data_up_to_dropped[list_of_preg_symp_cols].astype(str) == "1").any(axis=1)
 
         print(data_up_to_dropped[[x for x in data_up_to_dropped.columns if "preg_symp" in x]])
 
@@ -269,7 +294,7 @@ def separate_item_lvl_from_scale_scores(data_up_to_dropped, clinical_config):
                         "ICU_P,ICU_P_Callous", "ICU_P,ICU_P_Uncaring", "ICU_P,ICU_P_Unemotional",
                         "ICU_SR,ICU_SR_Callous", "ICU_SR,ICU_SR_Uncaring", "ICU_SR,ICU_SR_Unemotional",
                         "PANAS_PositiveAffect", "PANAS_NegativeAffect",
-                        "APQ_P,APQ_P_CP", "APQ_P,APQ_P_ID", "APQ_P,APQ_P_INV", "APQ_P,APQ_P_PM", "APQ_P,APQ_P_PP",
+                        "APQ_P,APQ_P_CP", "APQ_P,APQ_P_ID", "APQ_P,APQ_P_INV", "APQ_P,APQ_P_PM", "APQ_P,APQ_P_PP", "APQ_P,APQ_P_OPD",
                         "DTS,DTS_absorption", "DTS,DTS_appraisal", "DTS,DTS_regulation", "DTS,DTS_tolerance",
                         "APQ_SR,APQ_SR_CP", "APQ_SR,APQ_SR_ID", "APQ_SR,APQ_SR_INV_D", "APQ_SR,APQ_SR_INV_M", "APQ_SR,APQ_SR_PM", "APQ_SR,APQ_SR_PP",
                         "PSI,PSI_DC_T", "PSI,PSI_DC", "PSI,PSI_PCDI_T", "PSI,PSI_PCDI", "PSI,PSI_PD_T", "PSI,PSI_PD",
@@ -363,7 +388,7 @@ def generate_assessment_reports(full_wo_underscore, EID_columns_by_popularity, a
 
 def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs, learning):
 
-    clinical_config = util.read_config(learning)
+    clinical_config = util.read_config("clinical", learning)
 
     relevant_assessments_list = clinical_config["relevant assessments"]
     proprietary_assessments = clinical_config["proprietary assessments"]
@@ -390,6 +415,9 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
     full = full.dropna(how='all', axis=1)
 
     full = remove_admin_cols(full)
+
+    # Drop ConsensusDx columns (diagnoses are in the Diagnosis_ClinicianConsensus column)
+    full = full.drop([x for x in full.columns if "ConsensusDx," in x], axis=1)
 
     # Get ID columns (contain quetsionnaire names, e.g. 'ACE,EID', will be used to check if an assessment is filled)
     EID_cols = [x for x in full.columns if ",EID" in x]
@@ -419,23 +447,31 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
     if only_assessment_distribution != 1:
     
-        # List of most popular assessments until the first one from the drop list 
-        EID_columns_until_dropped = [x for x in EID_columns_by_popularity[:EID_columns_by_popularity.index(first_assessment_to_drop+",EID")]]
+        ## List of most popular assessments until the first one from the drop list 
+        #EID_columns_until_dropped = [x for x in EID_columns_by_popularity[:EID_columns_by_popularity.index(first_assessment_to_drop+",EID")]]
 
-        # Get data up to the dropped assessment
-        # Get only people who took the most popular assessments until the first one from the drop list 
-        columns_until_dropped = get_columns_until_dropped(full_wo_underscore, EID_columns_until_dropped)
-        data_up_to_dropped = get_data_up_to_dropped(full_wo_underscore, EID_columns_until_dropped, columns_until_dropped)
+        # Keep only relevant assessments
+        columns_until_dropped = get_columns_until_dropped(full_wo_underscore, EID_columns_by_popularity)
+        data_up_to_dropped = get_data_up_to_dropped(full_wo_underscore, EID_columns_by_popularity, columns_until_dropped)
+        print(data_up_to_dropped)
 
-        # Remove EID columns: not needed anymore
-        data_up_to_dropped = data_up_to_dropped.drop(EID_columns_until_dropped, axis=1)
+
+        ## Get data up to the dropped assessment
+        ## Get only people who took the most popular assessments until the first one from the drop list 
+        #columns_until_dropped = get_columns_until_dropped(full_wo_underscore, EID_columns_until_dropped)
+        #data_up_to_dropped = get_data_up_to_dropped(full_wo_underscore, EID_columns_until_dropped, columns_until_dropped)
+
+        ## Remove EID columns: not needed anymore
+        #data_up_to_dropped = data_up_to_dropped.drop(EID_columns_until_dropped, axis=1)
 
         # Aggregare demographics input columns: remove PER parent data from Barratt, only keep aggregated scores
         if "Barratt,Barratt_P1_Edu" in data_up_to_dropped.columns:
-            data_up_to_dropped = data_up_to_dropped.drop(["Barratt,Barratt_P1_Edu", "Barratt,Barratt_P1_Occ", "Barratt,Barratt_P2_Edu", "Barratt,Barratt_P2_Occ"], axis=1)
+            data_up_to_dropped = data_up_to_dropped.drop(["Barratt,Barratt_P1_Edu", "Barratt,Barratt_P1_Occ", 
+                                                          "Barratt,Barratt_P2_Edu", "Barratt,Barratt_P2_Occ"], axis=1)
 
         # Transform PreInt_DevHx columns
         data_up_to_dropped = transform_devhx_eduhx_cols(data_up_to_dropped)
+        print(data_up_to_dropped)
 
         # Convert numeric columns to numeric type (all except ID and DX)
         data_up_to_dropped = data_up_to_dropped.apply(lambda col: convert_numeric_col_to_numeric_type(col))
@@ -443,22 +479,31 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
         # Save report of missing values
         missing_values_df = get_missing_values_df(data_up_to_dropped)
         missing_values_df.to_csv(dirs["data_statistics_dir"] + "missing-values-report.csv", float_format='%.3f')
-
-        # Remove columns with more than 40% missing data
-        data_up_to_dropped = remove_cols_w_missing_over_n(data_up_to_dropped, 40, missing_values_df)
-
-        # Special case: replace missing "CBCL,CBCL_56H" with 0 ("Other")
-        if "CBCL,CBCL_56H" in data_up_to_dropped.columns:
-            data_up_to_dropped[["CBCL,CBCL_56H"]] = data_up_to_dropped[["CBCL,CBCL_56H"]].fillna(value=0)
-
-        # Add missingness marker for columns with more than 5% missing data 
-        data_up_to_dropped = add_missingness_markers(data_up_to_dropped, 5, missing_values_df)
+        
+        ## Add missingness marker for columns with more than 5% missing data 
+        #data_up_to_dropped = add_missingness_markers(data_up_to_dropped, 5, 20, missing_values_df)
 
         # Transform diagnosis columns
+        #print("DEBUG", [x for x in data_up_to_dropped.columns if "DX" in x])
         data_up_to_dropped = transform_dx_cols(data_up_to_dropped)
 
         # Convert new boolean columns to numeric
         data_up_to_dropped = data_up_to_dropped.replace({True: 1, False: 0})
+
+        # Remove columns with more than 40% missing data
+        [print(x) for x in data_up_to_dropped.columns]
+        data_up_to_dropped = remove_cols_w_missing_over_n(data_up_to_dropped, 15, missing_values_df, to_keep=["C3SR", "WISC", "WIAT"])
+        
+        # Remove rows with more than 40% of columns missing
+        data_up_to_dropped = remove_rows_w_missing_over_n(data_up_to_dropped, 15)
+
+        print_imputed_columns(data_up_to_dropped)
+
+        # Remove cols with no variance
+        data_up_to_dropped = remove_cols_wo_variance(data_up_to_dropped)
+
+        print("AFTER REMOVING COLUMNS WITH MORE THAN X% MISSING DATA")
+        [print(x) for x in data_up_to_dropped.columns]
 
         # Separate subscale and total scores
         data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_up_to_dropped_cog_task_scores = separate_item_lvl_from_scale_scores(data_up_to_dropped, clinical_config)

@@ -13,6 +13,10 @@ def get_coefficients_df_from_lr(pipeline, data):
     coef = estimator.coef_[0]
     # Get the feature names
     feature_names = data.columns
+
+    print("DEBUG COEF", coef, len(coef), len(feature_names), feature_names)
+    print("DEBUG")
+    [print(x) for x in feature_names]
     # Create a dataframe of the coefficients and feature names
     df = pd.DataFrame({"coef": coef, "feature": feature_names})
     # Sort the dataframe by the coefficients
