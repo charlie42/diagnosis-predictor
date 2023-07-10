@@ -75,7 +75,7 @@ def get_feature_subsets(best_estimators, datasets, number_of_features_to_check, 
 def main(importances_from_file = 0):
     importances_from_file = int(importances_from_file)
 
-    clinical_config = util.read_config()
+    clinical_config = util.read_config("clinical")
     number_of_features_to_check = clinical_config["max items in screener"]
 
     dirs = set_up_directories()
