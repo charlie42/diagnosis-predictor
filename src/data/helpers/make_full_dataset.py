@@ -492,12 +492,10 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
         # Remove columns with more than 40% missing data
         [print(x) for x in data_up_to_dropped.columns]
-        data_up_to_dropped = remove_cols_w_missing_over_n(data_up_to_dropped, 15, missing_values_df, to_keep=["C3SR", "WISC", "WIAT"])
+        data_up_to_dropped = remove_cols_w_missing_over_n(data_up_to_dropped, 40, missing_values_df, to_keep=["C3SR", "WISC", "WIAT"])
         
         # Remove rows with more than 40% of columns missing
-        data_up_to_dropped = remove_rows_w_missing_over_n(data_up_to_dropped, 15)
-
-        print_imputed_columns(data_up_to_dropped)
+        data_up_to_dropped = remove_rows_w_missing_over_n(data_up_to_dropped, 40)
 
         # Remove cols with no variance
         data_up_to_dropped = remove_cols_wo_variance(data_up_to_dropped)

@@ -9,6 +9,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import HistGradientBoostingClassifier
 
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
@@ -81,6 +82,7 @@ def get_base_models_and_param_grids():
     rf = RandomForestClassifier(n_estimators=200 if DEBUG_MODE else 400)
     svc = svm.SVC()
     lr = LogisticRegression(solver="saga")
+    lgbm = HistGradientBoostingClassifier()
     
     # Impute missing values
     imputer = SimpleImputer(missing_values=np.nan, strategy='median')
@@ -92,6 +94,7 @@ def get_base_models_and_param_grids():
     rf_pipe = make_pipeline(imputer, scaler, rf)
     svc_pipe = make_pipeline(imputer, scaler, svc)
     lr_pipe = make_pipeline(imputer, scaler, lr)
+    lgbm_pipe = make_pipeline(scaler, lgbm) # LGBM can handle missing values
     
     # Define parameter grids to search for each pipe
     from scipy.stats import loguniform, uniform
@@ -117,11 +120,19 @@ def get_base_models_and_param_grids():
         'logisticregression__class_weight': ['balanced', None],
         'logisticregression__l1_ratio': uniform(0, 1)
     }
+    lgbm_param_grid = {
+        'histgradientboostingclassifier__learning_rate': np.logspace(-3, 0, num=100),  # Learning rate values from 0.001 to 1
+        'histgradientboostingclassifier__max_depth': [3, 5, 7, None],  # Maximum depth of the trees
+        'histgradientboostingclassifier__max_iter': np.arange(100, 1001, 100),  # Number of boosting iterations
+        'histgradientboostingclassifier__min_samples_leaf': [1, 2, 4],  # Minimum number of samples required to be at a leaf node
+        'histgradientboostingclassifier__l2_regularization': np.logspace(-3, 3, num=100)  # L2 regularization values from 0.001 to 1000
+    }
     
     base_models_and_param_grids = [
         (rf_pipe, rf_param_grid),
         (svc_pipe, svc_param_grid),
         (lr_pipe, lr_param_grid),
+        (lgbm_pipe, lgbm_param_grid)
     ]
     if DEBUG_MODE:
         base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
@@ -132,7 +143,7 @@ def get_base_models_and_param_grids():
 
 def get_best_estimator(base_model, grid, X_train, y_train):
     cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 8)
-    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
+    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1, error_score="raise")
     
     print("Fitting", base_model, "...")
     rs.fit(X_train, y_train) 
@@ -165,12 +176,16 @@ def find_best_estimator_for_diag_and_its_score(X_train, y_train, performance_mar
     # If LogisticRegression is not much worse than the best model, prefer LogisticRegression (much faster than rest)
     best_base_model = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["Model type"].iloc[0]
     if best_base_model != "logisticregression":
-        lr_score = best_estimators_and_scores[best_estimators_and_scores["Model type"] == "logisticregression"]["Best score"].iloc[0]
-        print("lr_score: ", lr_score, "; best_score: ", best_score)
-        if best_score - lr_score <= performance_margin:
-            best_estimator = best_estimators_and_scores[best_estimators_and_scores["Model type"] == "logisticregression"]["Best estimator"].iloc[0]
-            best_score = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["Best score"].iloc[0]
-            sd_of_score_of_best_estimator = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["SD of best score"].iloc[0]
+        # Check that logisticgregression is in best_estimators_and_scores (LR model was not skipped) 
+        if "logisticregression" in best_estimators_and_scores["Model type"].values:
+            lr_score = best_estimators_and_scores[best_estimators_and_scores["Model type"] == "logisticregression"]["Best score"].iloc[0]
+            
+
+            print("lr_score: ", lr_score, "; best_score: ", best_score)
+            if best_score - lr_score <= performance_margin:
+                best_estimator = best_estimators_and_scores[best_estimators_and_scores["Model type"] == "logisticregression"]["Best estimator"].iloc[0]
+                best_score = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["Best score"].iloc[0]
+                sd_of_score_of_best_estimator = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["SD of best score"].iloc[0]
         
     print("best estimator:")
     print(best_estimator)
