@@ -79,7 +79,7 @@ def get_string_with_current_datetime():
     return date_time_str
 
 
-# Config utils
+# Config Utilities
 import yaml
 def read_config(type, learning = 0):
     config = yaml.safe_load(open(f"config/{type}/general.yml", "r"))
@@ -94,3 +94,8 @@ def read_config(type, learning = 0):
         config["relevant assessments"] += list(cog_batteries)
 
     return config
+
+
+# Data Utilities
+def get_number_bigger_than_and_closest_to(number, list):
+    return min([x for x in list if x > number], key=lambda x:abs(x-number))

@@ -62,6 +62,31 @@ def make_and_write_cv_auc_table(auc_on_subsets, dir):
 
     return auc_on_subsets
 
+def make_and_write_cv_sens_spec_tables(sens_spec_on_subsets, dir):
+    # Format of dict: {diag: [{sens: spec, sens: spec}, {sens: spec, sens: spec}],  ...]}}
+    # 1 df per per sens 
+    # Cols of df: diag values
+    # Index in df: 1 to len(sens_spec_on_subsets[diag])
+    # Value: spec
+    # File name: cv-spec-on-subsets-sens-[sens].csv
+
+    dfs = {}
+
+    print("DEBUG", sens_spec_on_subsets)
+
+    for diag in sens_spec_on_subsets:
+        sens_specs_dicts = sens_spec_on_subsets[diag]
+        for sens_spec_dict in sens_specs_dicts:
+            for sens in sens_spec_dict:
+                if sens not in dfs:
+                    dfs[sens] = pd.DataFrame(columns=[diag], index=range(1, len(sens_spec_on_subsets)+1))
+                dfs[sens].loc[len(dfs[sens])+1] = sens_spec_dict[sens]
+        
+    for sens in dfs:
+        dfs[sens].to_csv(dir+'cv-spec-on-subsets-sens-'+str(sens)+'.csv', float_format='%.3f')
+
+    return dfs
+
 def make_performance_tables_opt_threshold(performances_on_feature_subsets, optimal_thresholds):
     # Create a table for each performance metric (AUC, Sensitivity, Specificity) for each number of features, using the optimal threshold
     # Build list of lists where each list is a row in the table
@@ -237,35 +262,39 @@ def main(models_from_file = 1):
     if models_from_file == 1:
         load_dirs = set_up_load_directories()
 
-        performances_on_feature_subsets = load(load_dirs["load_reports_dir"]+'performances-on-feature-subsets.joblib')    
-        cv_scores_on_feature_subsets = load(load_dirs["load_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
-        optimal_thresholds = load(load_dirs["load_reports_dir"]+'optimal-thresholds.joblib')
+        #performances_on_feature_subsets = load(load_dirs["load_reports_dir"]+'performances-on-feature-subsets.joblib')    
+        cv_aurocs_on_subsets = load(load_dirs["load_reports_dir"]+'cv-aurocs-on-feature-subsets.joblib')
+        cv_sens_specs_on_subsets = load(load_dirs["load_reports_dir"]+'cv-sens-specs-on-feature-subsets.joblib')
+
+        print("DEBUG", cv_aurocs_on_subsets, cv_sens_specs_on_subsets)
+        #optimal_thresholds = load(load_dirs["load_reports_dir"]+'optimal-thresholds.joblib')
         estimators_on_feature_subsets = load(load_dirs["load_models_dir"]+'estimators-on-feature-subsets.joblib')
         
         # Save reports to newly created directories
-        dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
-        dump(cv_scores_on_feature_subsets, dirs["output_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
-        dump(optimal_thresholds, dirs["output_reports_dir"]+'optimal-thresholds.joblib')
+        #dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
+        dump(cv_aurocs_on_subsets, dirs["output_reports_dir"]+'cv-aurocs-on-feature-subsets.joblib')
+        dump(cv_sens_specs_on_subsets, dirs["output_reports_dir"]+'cv-sens-specs-on-feature-subsets.joblib')
         dump(estimators_on_feature_subsets, dirs["output_models_dir"]+'estimators-on-feature-subsets.joblib')
     else:
         estimators_on_feature_subsets = models.re_train_models_on_feature_subsets(feature_subsets, datasets, best_estimators)
-        performances_on_feature_subsets, cv_scores_on_feature_subsets, optimal_thresholds = models.get_performances_on_feature_subsets(feature_subsets, 
-                                                                                                                                       datasets, 
-                                                                                                                                       best_estimators, # Need to pass best_estimators because estimators_on_feature_subsets are trained on the train_train set,
-                                                                                                                                                        # but we will need to fit them on val set to get thresholds, and on train set to get cv scores
-                                                                                                                                       estimators_on_feature_subsets, 
-                                                                                                                                       use_test_set = 1)
+        cv_aurocs_on_subsets, cv_sens_specs_on_subsets = models.get_performances_on_feature_subsets(feature_subsets, 
+                                                                                                    datasets, 
+                                                                                                    best_estimators, # Need to pass best_estimators because estimators_on_feature_subsets are trained on the train_train set,
+                                                                                                                    # but we will need to fit them on val set to get thresholds, and on train set to get cv scores
+                                                                                                    estimators_on_feature_subsets, 
+                                                                                                    use_test_set = 1)
 
         dump(estimators_on_feature_subsets, dirs["output_models_dir"]+'estimators-on-feature-subsets.joblib')
-        dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
-        dump(cv_scores_on_feature_subsets, dirs["output_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
-        dump(optimal_thresholds, dirs["output_reports_dir"]+'optimal-thresholds.joblib')
+        #dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
+        dump(cv_aurocs_on_subsets, dirs["output_reports_dir"]+'cv-aurocs-on-feature-subsets.joblib')
+        dump(cv_sens_specs_on_subsets, dirs["output_reports_dir"]+'cv-sens-specs-on-feature-subsets.joblib')
     
-    cv_auc_table = make_and_write_cv_auc_table(cv_scores_on_feature_subsets, dirs["output_reports_dir"])
+    cv_auc_table = make_and_write_cv_auc_table(cv_aurocs_on_subsets, dirs["output_reports_dir"])
+    cv_sens_spec_tables = make_and_write_cv_sens_spec_tables(cv_sens_specs_on_subsets, dirs["output_reports_dir"])
     optimal_nbs_features = get_and_write_optimal_nbs_features(cv_auc_table, dirs["output_reports_dir"])
-    make_and_write_test_set_performance_tables(performances_on_feature_subsets, dirs["output_reports_dir"], optimal_thresholds, optimal_nbs_features)
-    make_and_save_saturation_plot(performances_on_feature_subsets, optimal_thresholds, dirs["output_reports_dir"])
-    re_write_subsets_w_auroc(feature_subsets, estimators_on_feature_subsets, dirs["output_reports_dir"], performances_on_feature_subsets, optimal_nbs_features)
+    #make_and_write_test_set_performance_tables(performances_on_feature_subsets, dirs["output_reports_dir"], optimal_thresholds, optimal_nbs_features)
+    #make_and_save_saturation_plot(performances_on_feature_subsets, optimal_thresholds, dirs["output_reports_dir"])
+    #re_write_subsets_w_auroc(feature_subsets, estimators_on_feature_subsets, dirs["output_reports_dir"], performances_on_feature_subsets, optimal_nbs_features)
 
 if __name__ == "__main__":
     main(sys.argv[1])

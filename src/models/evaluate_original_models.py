@@ -6,6 +6,7 @@ import numpy as np
 import sys
 
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import cross_val_score
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -90,11 +91,34 @@ def get_aucs_cv_from_grid_search(reports_dir, diag_cols):
     auc_cv_from_grid_search.columns = ["Diag", "ROC AUC Mean CV", "ROC AUC SD CV", "ROC AUC Mean CV - SD"]
     return auc_cv_from_grid_search
 
+def get_aucs_cv(best_estimators, datasets):
+    aucs_cv = {}
+
+    for diag in datasets:
+        print(diag)
+        print(util.get_base_model_name_from_pipeline(best_estimators[diag]))
+        estimator = best_estimators[diag]
+
+        X, y = datasets[diag]["X_val"], datasets[diag]["y_val"]
+
+        roc_auc_cv = cross_val_score(estimator, X, y, cv=5, scoring="roc_auc")
+
+        aucs_cv[diag] = [roc_auc_cv.mean(), roc_auc_cv.std(), roc_auc_cv.mean() - roc_auc_cv.std()]
+
+    # Example of aucs_cv: {'Diag1': [0.5, 0.4, 0.1, 0.4], 'Diag2': [0.6, 0.5, 0.1, 0.5], 'Diag3': [0.7, 0.6, 0.1, 0.6]}
+    # Convert to a dataframe
+    results = pd.DataFrame.from_dict(aucs_cv, columns=["ROC AUC Mean CV", "ROC AUC SD CV", "ROC AUC Mean CV - SD"], orient="index").sort_values("ROC AUC Mean CV - SD", ascending=False).reset_index().rename(columns={'index': 'Diag'})
+    print(results)
+
+    results = add_number_of_positive_examples(results, datasets)
+
+    return results.sort_values(by="ROC AUC Mean CV - SD", ascending=False)
+
 def get_roc_aucs(best_estimators, datasets, use_test_set, diag_cols, input_reports_dir):
-    roc_aucs_cv_from_grid_search = get_aucs_cv_from_grid_search(input_reports_dir, diag_cols)
-    roc_aucs_on_test_set = get_aucs_on_test_set(best_estimators, datasets, use_test_set=use_test_set, diag_cols=diag_cols)
-    roc_aucs = roc_aucs_cv_from_grid_search.merge(roc_aucs_on_test_set, on="Diag").sort_values(by="ROC AUC Mean CV - SD", ascending=False)
-    return roc_aucs
+    roc_aucs_cv = get_aucs_cv(best_estimators, datasets)
+    #roc_aucs_on_test_set = get_aucs_on_test_set(best_estimators, datasets, use_test_set=use_test_set, diag_cols=diag_cols)
+    #roc_aucs = roc_aucs_cv_from_grid_search.merge(roc_aucs_on_test_set, on="Diag")
+    return roc_aucs_cv
 
 def main(use_test_set=1):
     use_test_set = int(use_test_set)
@@ -103,17 +127,16 @@ def main(use_test_set=1):
 
     from joblib import load
     best_estimators = load(dirs["models_dir"]+'best-estimators.joblib')
-    
-    diag_cols = best_estimators.keys()
-
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
+
+    diag_cols = best_estimators.keys()
 
     # Print performances of models on validation set
     roc_aucs = get_roc_aucs(best_estimators, datasets, use_test_set=use_test_set, 
                             diag_cols=diag_cols, input_reports_dir=dirs["input_reports_dir"])
     
-    if use_test_set == 1:
-        roc_aucs.to_csv(dirs["output_reports_dir"]+"performance_table_all_features.csv", float_format='%.3f', index=False)    
+    
+    roc_aucs.to_csv(dirs["output_reports_dir"]+"performance_table_all_features.csv", float_format='%.3f', index=False)    
 
 if __name__ == "__main__":
     main(sys.argv[1])
