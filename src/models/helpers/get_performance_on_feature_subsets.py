@@ -11,8 +11,8 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.base import clone
-from sklearn.model_selection import StratifiedKFold, cross_val_score
-from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import StratifiedKFold, cross_val_score, cross_val_predict
+from sklearn.metrics import confusion_matrix, roc_curve
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -75,20 +75,46 @@ def get_metrics(estimator, threshold, X, y):
     
     return metrics, metric_names
 
+def get_auc(estimator, X, y, scoring):
+    auc = cross_val_score(estimator, X, y, cv = StratifiedKFold(n_splits=8), scoring=scoring)
+    return auc
+
+def get_sens_spec(estimator, X, y, fixed_sens = []):
+    y_pred = cross_val_predict(estimator, X, y, cv = StratifiedKFold(n_splits=8), method='predict_proba')
+    fpr, tpr, thresholds = roc_curve(y, y_pred[:,1])
+    # Get average specificity where sensititivity (tpr) is closest to but higher than fixed_sens values
+    specs = {}
+    for target_sens in fixed_sens:
+        actual_sens = tpr[tpr >= target_sens].min()
+        spec = 1 - actual_sens
+        
+        specs[actual_sens] = spec
+    
+    return specs
+
 def get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_estimators):
-    cv_scores_on_feature_subsets = {}
+    aurocs = {}
+    sens_specs = {}
     
     for i, diag in enumerate(feature_subsets):
         if diag in datasets.keys():
             print("Getting CV scores on feature subsets for " + diag + " (" + str(i+1) + "/" + str(len(feature_subsets)) + ")")
-            cv_scores_on_feature_subsets[diag] = []
+
+            aurocs[diag] = []
+            sens_specs[diag] = []
+
             for nb_features in feature_subsets[diag].keys():
-                X_train, y_train = datasets[diag]["X_train"], datasets[diag]["y_train"]
+                print("DEBUG n_features", nb_features)
+                X_val, y_val = datasets[diag]["X_val"], datasets[diag]["y_val"]
                 top_n_features = models.get_top_n_features(feature_subsets, diag, nb_features)
                 new_estimator = make_pipeline(SimpleImputer(missing_values=np.nan, strategy='median'), StandardScaler(), clone(best_estimators[diag][2]))
-                cv_scores = cross_val_score(new_estimator, X_train[top_n_features], y_train, cv = StratifiedKFold(n_splits=8), scoring='roc_auc')
-                cv_scores_on_feature_subsets[diag].append(cv_scores.mean())
-    return cv_scores_on_feature_subsets
+                auc_cv_scores = get_auc(new_estimator, X_val[top_n_features], y_val, scoring='roc_auc')
+                sens_spec_cv_scores = get_sens_spec(new_estimator, X_val[top_n_features], y_val, fixed_sens=[0.8, 0.94])
+
+                aurocs[diag].append(auc_cv_scores.mean())
+                sens_specs[diag].append(sens_spec_cv_scores)
+
+    return aurocs, sens_specs
 
 def calculate_thresholds_for_feature_subsets_per_output(diag, feature_subsets, estimators_on_feature_subsets, datasets):
     X_train, y_train = datasets[diag]["X_train_train"], datasets[diag]["y_train_train"]
@@ -150,15 +176,15 @@ def get_performances_on_feature_subsets_per_output(diag, feature_subsets, estima
     return metrics_on_subsets, optimal_thresholds
 
 def get_performances_on_feature_subsets(feature_subsets, datasets, best_estimators, estimators_on_feature_subsets, use_test_set):
-    cv_scores_on_feature_subsets = get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_estimators)
-    thresholds_on_feature_subsets = calculate_thresholds_for_feature_subsets(feature_subsets, estimators_on_feature_subsets, datasets)
+    cv_aurocs_on_subsets, cv_sens_specs_on_subsets = get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_estimators)
+    #thresholds_on_feature_subsets = calculate_thresholds_for_feature_subsets(feature_subsets, estimators_on_feature_subsets, datasets)
 
     performances_on_subsets = {}
     optimal_thresholds = {}
     
-    for i, diag in enumerate(feature_subsets):
-        if diag in datasets.keys():
-            print("Getting performances on feature subsets for " + diag + " (" + str(i+1) + "/" + str(len(feature_subsets)) + ")")
-            performances_on_subsets[diag], optimal_thresholds[diag] = get_performances_on_feature_subsets_per_output(diag, feature_subsets, estimators_on_feature_subsets, thresholds_on_feature_subsets, datasets, use_test_set)
+    #for i, diag in enumerate(feature_subsets):
+    #    if diag in datasets.keys():
+    #        print("Getting performances on feature subsets for " + diag + " (" + str(i+1) + "/" + str(len(feature_subsets)) + ")")
+    #        performances_on_subsets[diag], optimal_thresholds[diag] = get_performances_on_feature_subsets_per_output(diag, feature_subsets, estimators_on_feature_subsets, thresholds_on_feature_subsets, datasets, use_test_set)#
 
-    return performances_on_subsets, cv_scores_on_feature_subsets, optimal_thresholds
+    return cv_aurocs_on_subsets, cv_sens_specs_on_subsets

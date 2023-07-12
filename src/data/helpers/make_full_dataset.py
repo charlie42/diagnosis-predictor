@@ -190,7 +190,7 @@ def transform_devhx_eduhx_cols(data_up_to_dropped):
     
     if list_of_preg_symp_cols:
         # If any of the preg_symp columns are 1, then the preg_symp column is 1, otherwise 0
-        data_up_to_dropped["preg_symp"] = (data_up_to_dropped[list_of_preg_symp_cols] == 1).any(axis=1)
+        data_up_to_dropped["preg_symp"] = (data_up_to_dropped[list_of_preg_symp_cols].astype(str) == "1").any(axis=1)
 
         print(data_up_to_dropped[[x for x in data_up_to_dropped.columns if "preg_symp" in x]])
 
