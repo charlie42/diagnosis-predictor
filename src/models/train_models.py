@@ -86,6 +86,11 @@ def get_base_models_and_param_grids():
     
     # Impute missing values
     imputer = SimpleImputer(missing_values=np.nan, strategy='median')
+    #from sklearn.ensemble import RandomForestRegressor
+    #from sklearn.linear_model import BayesianRidge
+    #from sklearn.experimental import enable_iterative_imputer
+    #from sklearn.impute import IterativeImputer
+    #imputer = IterativeImputer(random_state=0, estimator=BayesianRidge(), max_iter=25) # :todo try with HistGradientBoostingClassifier()
     
     # Standardize data
     scaler = StandardScaler()
@@ -132,7 +137,7 @@ def get_base_models_and_param_grids():
         (rf_pipe, rf_param_grid),
         (svc_pipe, svc_param_grid),
         (lr_pipe, lr_param_grid),
-        (lgbm_pipe, lgbm_param_grid)
+        #(lgbm_pipe, lgbm_param_grid)
     ]
     if DEBUG_MODE:
         base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode

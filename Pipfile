@@ -12,6 +12,7 @@ pyyaml = "*"
 joblib = "*"
 ipython = "*"
 mlxtend = "*"
+missingpy = "*"
 
 [dev-packages]
 

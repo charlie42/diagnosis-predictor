@@ -61,6 +61,22 @@ def get_aucs_on_test_set(best_estimators, datasets, use_test_set, diag_cols):
         print(diag)
         print(util.get_base_model_name_from_pipeline(best_estimators[diag]))
         estimator = best_estimators[diag]
+
+        ## DEBUG
+        # Chagnge imputer to IteratireImputer
+        from sklearn.linear_model import BayesianRidge
+        from sklearn.experimental import enable_iterative_imputer
+        from sklearn.impute import IterativeImputer
+        imputer = IterativeImputer(random_state=0, estimator=BayesianRidge(), max_iter=25) # :todo try with HistGradientBoostingClassifier()
+
+        from sklearn.pipeline import Pipeline
+        from sklearn.preprocessing import StandardScaler
+        estimator = Pipeline(steps=[('scaler', StandardScaler()), ('imputer', imputer), ('estimator', estimator)])
+
+        # Fit to train set
+        X_train, y_train = datasets[diag]["X_train"], datasets[diag]["y_train"]
+        estimator.fit(X_train, y_train)
+        ##
     
         if use_test_set == 1:
             X, y = datasets[diag]["X_test"], datasets[diag]["y_test"] 
