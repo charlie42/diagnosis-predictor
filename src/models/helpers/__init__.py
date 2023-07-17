@@ -7,3 +7,4 @@ from helpers.get_performance_on_feature_subsets import get_performances_on_featu
 from helpers.re_train_models_on_subsets import re_train_models_on_feature_subsets, get_top_n_features
 from helpers.write_feature_subsets_to_file import write_feature_subsets_to_file
 from helpers.get_optimal_nb_features import get_optimal_nb_features
+from helpers.get_cv_auc_from_sfs import get_cv_auc_from_sfs
