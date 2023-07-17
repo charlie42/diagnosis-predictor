@@ -8,3 +8,4 @@ from models.helpers.idenitfy_thresholds import calculate_thresholds
 from models.helpers.write_feature_subsets_to_file import write_feature_subsets_to_file
 from models.helpers.file_helpers import *
 from models.helpers.lr_coefficients_helpers import *
+from models.helpers.get_optimal_nb_features import get_optimal_nb_features
