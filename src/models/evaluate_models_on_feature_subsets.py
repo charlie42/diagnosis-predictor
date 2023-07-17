@@ -62,30 +62,43 @@ def make_and_write_cv_auc_table(auc_on_subsets, dir):
 
     return auc_on_subsets
 
-def make_and_write_cv_sens_spec_tables(sens_spec_on_subsets, dir):
-    # Format of dict: {diag: [{sens: spec, sens: spec}, {sens: spec, sens: spec}],  ...]}}
+def make_and_write_cv_sens_spec_tables(sens_spec_on_subsets, sens_to_check, dir):
+    # Format of dict: {diag: [[[sens_1_subset_1, spec_1_subset_1], [sens_2_subset_1, spec_2_subset_1]], ...]}, always 2 sensitivities
     # 1 df per per sens 
     # Cols of df: diag values
     # Index in df: 1 to len(sens_spec_on_subsets[diag])
     # Value: spec
     # File name: cv-spec-on-subsets-sens-[sens].csv
 
-    dfs = {}
+    new_dir = dir+'cv-sens-spec/'
+    util.create_dir_if_not_exists(new_dir)
+
+    for sens in sens_to_check:
+        util.create_dir_if_not_exists(new_dir+str(sens)+'/')
 
     print("DEBUG", sens_spec_on_subsets)
 
-    for diag in sens_spec_on_subsets:
-        sens_specs_dicts = sens_spec_on_subsets[diag]
-        for sens_spec_dict in sens_specs_dicts:
-            for sens in sens_spec_dict:
-                if sens not in dfs:
-                    dfs[sens] = pd.DataFrame(columns=[diag], index=range(1, len(sens_spec_on_subsets)+1))
-                dfs[sens].loc[len(dfs[sens])+1] = sens_spec_dict[sens]
-        
-    for sens in dfs:
-        dfs[sens].to_csv(dir+'cv-spec-on-subsets-sens-'+str(sens)+'.csv', float_format='%.3f')
+    first_sens = {}
+    second_sens = {}
+    for diag in sens_spec_on_subsets.keys():
+        # Take first pair of sens/spec for each subset
+        first_sens[diag] = [sens_spec_on_subsets[diag][i][0] for i in range(len(sens_spec_on_subsets[diag]))]
+        second_sens[diag] = [sens_spec_on_subsets[diag][i][1] for i in range(len(sens_spec_on_subsets[diag]))]
 
-    return dfs
+    # Now first_sens format is diag: [[subset_1_sens, subset_1_spec], [subset_2_sens, subset_2_spec], ...]
+    # Make dfs for each sens and each diag, where columns are "Sensitivity" and "Specificity", index is 1 to len(sens_spec_on_subsets[diag])
+    for diag in sens_spec_on_subsets.keys():
+        df = pd.DataFrame.from_dict(first_sens[diag])
+        df.index = range(1, len(df)+1)
+        df = df.rename(columns={0: "Sensitivity", 1: "Specificity"})
+        df.to_csv(new_dir+'cv-spec-sens-on-subsets-'+str(sens_to_check[0])+'/'+diag+'.csv', float_format='%.3f')
+
+        df = pd.DataFrame.from_dict(second_sens[diag])
+        df.index = range(1, len(df)+1)
+        df = df.rename(columns={0: "Sensitivity", 1: "Specificity"})
+        df.to_csv(new_dir+'cv-spec-sens-on-subsets-'+str(sens_to_check[1])+'/'+diag+'.csv', float_format='%.3f')
+        
+    return first_sens, second_sens
 
 def make_performance_tables_opt_threshold(performances_on_feature_subsets, optimal_thresholds):
     # Create a table for each performance metric (AUC, Sensitivity, Specificity) for each number of features, using the optimal threshold
@@ -253,6 +266,9 @@ def main(models_from_file = 1):
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
     best_estimators = load(dirs["input_models_dir"]+'best-estimators.joblib')
 
+    technical_config = util.read_config("technical")
+    sens_to_check = technical_config["sensitivities-to-check"]
+
     if DEBUG_MODE == True:
         # In debug mode, only use first diagnosis
         datasets = {list(datasets.keys())[0]: datasets[list(datasets.keys())[0]]}
@@ -282,7 +298,9 @@ def main(models_from_file = 1):
                                                                                                     best_estimators, # Need to pass best_estimators because estimators_on_feature_subsets are trained on the train_train set,
                                                                                                                     # but we will need to fit them on val set to get thresholds, and on train set to get cv scores
                                                                                                     estimators_on_feature_subsets, 
-                                                                                                    use_test_set = 1)
+                                                                                                    use_test_set = 1,
+                                                                                                    sens_to_check = sens_to_check,
+                                                                                                    )
 
         dump(estimators_on_feature_subsets, dirs["output_models_dir"]+'estimators-on-feature-subsets.joblib')
         #dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
@@ -290,7 +308,7 @@ def main(models_from_file = 1):
         dump(cv_sens_specs_on_subsets, dirs["output_reports_dir"]+'cv-sens-specs-on-feature-subsets.joblib')
     
     cv_auc_table = make_and_write_cv_auc_table(cv_aurocs_on_subsets, dirs["output_reports_dir"])
-    cv_sens_spec_tables = make_and_write_cv_sens_spec_tables(cv_sens_specs_on_subsets, dirs["output_reports_dir"])
+    cv_sens_spec_tables = make_and_write_cv_sens_spec_tables(cv_sens_specs_on_subsets, sens_to_check, dirs["output_reports_dir"])
     optimal_nbs_features = get_and_write_optimal_nbs_features(cv_auc_table, dirs["output_reports_dir"])
     #make_and_write_test_set_performance_tables(performances_on_feature_subsets, dirs["output_reports_dir"], optimal_thresholds, optimal_nbs_features)
     #make_and_save_saturation_plot(performances_on_feature_subsets, optimal_thresholds, dirs["output_reports_dir"])
