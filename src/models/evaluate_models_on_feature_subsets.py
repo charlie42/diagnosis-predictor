@@ -53,12 +53,10 @@ def set_up_load_directories():
     load_models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/" + "evaluate_models_on_feature_subsets/")
     return {"load_reports_dir": load_reports_dir, "load_models_dir": load_models_dir}
 
-def make_and_write_cv_auc_table(auc_on_subsets, dir):
+def make_cv_auc_table(auc_on_subsets, dir):
     auc_on_subsets = pd.DataFrame.from_dict(auc_on_subsets)
     auc_on_subsets.index = range(1, len(auc_on_subsets)+1)
     auc_on_subsets = auc_on_subsets.rename(columns={"index": "Diagnosis"})
-
-    auc_on_subsets.to_csv(dir+'cv-auc-on-subsets.csv', float_format='%.3f')
 
     return auc_on_subsets
 
@@ -155,21 +153,6 @@ def make_performance_tables_opt_nb_features(performances_on_feature_subsets, opt
 
     return sens_spec_tables
 
-def get_and_write_optimal_nbs_features(auc_table, dir):
-    optimal_nbs_features = {}
-
-    for diag in auc_table.columns:
-        # Get max score at number of features in the longest subcsale among those that perform best for each diag (from HBN-scripts repo)
-        max_score = auc_table[diag].iloc[0:41].max() 
-        optimal_score = max_score - 0.01
-        # Get index of the first row with a score >= optimal_score
-        optimal_nbs_features[diag] = auc_table[diag][auc_table[diag] >= optimal_score].index[0]
-
-    print(optimal_nbs_features)
-    util.write_dict_to_file(optimal_nbs_features, dir, "optimal-nb-features.txt")
-
-    return optimal_nbs_features
-
 def make_and_write_test_set_performance_tables(performances_on_feature_subsets, dir, optimal_thresholds, optimal_nbs_features):
 
     # Make AUC, Sens, Spec tables for optimal thresholds
@@ -220,6 +203,9 @@ def re_write_subsets_w_auroc(feature_subsets, estimators_on_subsets, output_dir,
 def main(models_from_file = 1):
     models_from_file = int(models_from_file)
 
+    clinical_config = util.read_config("clinical")
+    number_of_features_to_check = clinical_config["max items in screener"]
+
     dirs = set_up_directories()
 
     feature_subsets = load(dirs["input_reports_dir"]+'feature-subsets.joblib')
@@ -253,17 +239,23 @@ def main(models_from_file = 1):
                                                                                                                                                         # but we will need to fit them on val set to get thresholds, and on train set to get cv scores
                                                                                                                                        estimators_on_feature_subsets, 
                                                                                                                                        use_test_set = 1)
+        
 
         dump(estimators_on_feature_subsets, dirs["output_models_dir"]+'estimators-on-feature-subsets.joblib')
         dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
         dump(cv_scores_on_feature_subsets, dirs["output_reports_dir"]+'cv-scores-on-feature-subsets.joblib')
         dump(optimal_thresholds, dirs["output_reports_dir"]+'optimal-thresholds.joblib')
     
-    cv_auc_table = make_and_write_cv_auc_table(cv_scores_on_feature_subsets, dirs["output_reports_dir"])
-    optimal_nbs_features = get_and_write_optimal_nbs_features(cv_auc_table, dirs["output_reports_dir"])
-    make_and_write_test_set_performance_tables(performances_on_feature_subsets, dirs["output_reports_dir"], optimal_thresholds, optimal_nbs_features)
-    make_and_save_saturation_plot(performances_on_feature_subsets, optimal_thresholds, dirs["output_reports_dir"])
-    re_write_subsets_w_auroc(feature_subsets, estimators_on_feature_subsets, dirs["output_reports_dir"], performances_on_feature_subsets, optimal_nbs_features)
+    reports_dir = dirs["output_reports_dir"]
+    cv_auc_table = make_cv_auc_table(cv_scores_on_feature_subsets, reports_dir)
+    cv_auc_table.to_csv(reports_dir+'cv-auc-on-subsets.csv', float_format='%.3f')
+
+    optimal_nbs_features = models.get_optimal_nb_features(cv_auc_table, number_of_features_to_check)
+    util.write_dict_to_file(optimal_nbs_features, reports_dir, "optimal-nb-features.txt")
+
+    make_and_write_test_set_performance_tables(performances_on_feature_subsets, reports_dir, optimal_thresholds, optimal_nbs_features)
+    make_and_save_saturation_plot(performances_on_feature_subsets, optimal_thresholds, reports_dir)
+    re_write_subsets_w_auroc(feature_subsets, estimators_on_feature_subsets, reports_dir, performances_on_feature_subsets, optimal_nbs_features)
 
 if __name__ == "__main__":
     main(sys.argv[1])
