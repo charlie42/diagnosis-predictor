@@ -4,7 +4,8 @@ os.environ["PYTHONWARNINGS"] = "ignore::UserWarning" # Seems to be the only way 
 import numpy as np
 import pandas as pd
 
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV, cross_val_score
+from sklearn.pipeline import make_pipeline
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
@@ -12,10 +13,6 @@ from sklearn.linear_model import LogisticRegression
 
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
-
-from sklearn.pipeline import make_pipeline
-
-from sklearn.model_selection import RandomizedSearchCV
 
 import sys, inspect
 
@@ -130,86 +127,32 @@ def get_base_models_and_param_grids():
     
     return base_models_and_param_grids
 
-def get_best_estimator(base_model, grid, X_train, y_train):
-    cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 8)
-    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
-    
-    print("Fitting", base_model, "...")
-    rs.fit(X_train, y_train) 
-    
-    best_estimator = rs.best_estimator_
-    best_score = rs.best_score_
-    sd_of_score_of_best_estimator = rs.cv_results_['std_test_score'][rs.best_index_]
-
-    # If chosen model is SVM add a predict_proba parameter (not needed for grid search, and slows it down significantly)
-    if 'svc' in best_estimator.named_steps.keys():
-        best_estimator.set_params(svc__probability=True)
-
-    return (best_estimator, best_score, sd_of_score_of_best_estimator)
-
-def find_best_estimator_for_diag_and_its_score(X_train, y_train, performance_margin):
-    base_models_and_param_grids = get_base_models_and_param_grids()
-    best_estimators_and_scores = []
-    
-    for (base_model, grid) in base_models_and_param_grids:
-        best_estimator_for_model, best_score_for_model, sd_of_score_of_best_estimator_for_model = get_best_estimator(base_model, grid, X_train, y_train)
-        model_type = list(base_model.named_steps.keys())[-1]
-        best_estimators_and_scores.append([model_type, best_estimator_for_model, best_score_for_model, sd_of_score_of_best_estimator_for_model])
-    
-    best_estimators_and_scores = pd.DataFrame(best_estimators_and_scores, columns = ["Model type", "Best estimator", "Best score", "SD of best score"])
-    print(best_estimators_and_scores)
-    best_estimator = best_estimators_and_scores.sort_values("Best score", ascending=False)["Best estimator"].iloc[0]
-    best_score = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["Best score"].iloc[0]
-    sd_of_score_of_best_estimator = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["SD of best score"].iloc[0]
-    
-    # If LogisticRegression is not much worse than the best model, prefer LogisticRegression (much faster than rest)
-    best_base_model = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["Model type"].iloc[0]
-    if best_base_model != "logisticregression":
-        lr_score = best_estimators_and_scores[best_estimators_and_scores["Model type"] == "logisticregression"]["Best score"].iloc[0]
-        print("lr_score: ", lr_score, "; best_score: ", best_score)
-        if best_score - lr_score <= performance_margin:
-            best_estimator = best_estimators_and_scores[best_estimators_and_scores["Model type"] == "logisticregression"]["Best estimator"].iloc[0]
-            best_score = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["Best score"].iloc[0]
-            sd_of_score_of_best_estimator = best_estimators_and_scores[best_estimators_and_scores["Best estimator"] == best_estimator]["SD of best score"].iloc[0]
-        
-    print("best estimator:")
-    print(best_estimator)
-    
-    return best_estimator, best_score, sd_of_score_of_best_estimator
 
 # Find best estimator
 def find_best_estimators_and_scores(datasets, diag_cols, performance_margin):
     best_estimators = {}
     scores_of_best_estimators = {}
     sds_of_scores_of_best_estimators = {}
+
+    base_models_and_param_grids = get_base_models_and_param_grids()
+    base_model, param_grid = base_models_and_param_grids[0] # Test only on LR for now        
+
     for i, diag in enumerate(diag_cols):
         print(diag, f'{i+1}/{len(diag_cols)}')
 
-        X_train = datasets[diag]["X_train_train"]
-        y_train = datasets[diag]["y_train_train"]
-        
-        best_estimator_for_diag, best_score_for_diag, sd_of_score_of_best_estimator_for_diag = find_best_estimator_for_diag_and_its_score(X_train, y_train, performance_margin)
-        best_estimators[diag] = best_estimator_for_diag
-        sds_of_scores_of_best_estimators[diag] = sd_of_score_of_best_estimator_for_diag
-        scores_of_best_estimators[diag] = best_score_for_diag
+        X_train = datasets[diag]["X_train"]
+        y_train = datasets[diag]["y_train"]
 
-        if DEBUG_MODE and util.get_base_model_name_from_pipeline(best_estimators[diag]) == "logisticregression":
-            # In debug mode print top features from LR
-            models.print_top_features_from_lr(best_estimators[diag], X_train, 10)
+        # Run outer CV to find best estimator
+        inner_cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 8, shuffle=True, random_state=i)
+        outer_cv = StratifiedKFold(n_splits=6 if DEBUG_MODE else 8, shuffle=True, random_state=i)
+        
+        # Nested CV with parameter optimization
+        rs = RandomizedSearchCV(estimator=base_model, param_distributions=param_grid, cv=inner_cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
+        nested_score = cross_val_score(rs, X=X_train, y=y_train, cv=outer_cv, verbose=1, n_jobs = -1)
+        print("Nested CV score:", nested_score.mean(), "+/-", nested_score.std())
             
     return best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators
-
-def build_df_of_best_estimators_and_their_score_sds(best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators):
-    best_estimators_and_score_sds = []
-    for diag in best_estimators.keys():
-        best_estimator = best_estimators[diag]
-        score_of_best_estimator = scores_of_best_estimators[diag]
-        sd_of_score_of_best_estimator = sds_of_scores_of_best_estimators[diag]
-        model_type = util.get_base_model_name_from_pipeline(best_estimator)
-        best_estimators_and_score_sds.append([diag, model_type, best_estimator, score_of_best_estimator, sd_of_score_of_best_estimator])
-    best_estimators_and_score_sds = pd.DataFrame(best_estimators_and_score_sds, columns = ["Diag", "Model type", "Best estimator", "Best score", "SD of best score"])
-    best_estimators_and_score_sds["Score - SD"] = best_estimators_and_score_sds['Best score'] - best_estimators_and_score_sds['SD of best score'] 
-    return best_estimators_and_score_sds
 
 def dump_estimators_and_performances(dirs, best_estimators, scores_of_best_estimators, sds_of_scores_of_best_estimators):
     print(dirs["models_dir"])
