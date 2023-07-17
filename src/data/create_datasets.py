@@ -110,9 +110,9 @@ def split_datasets_per_diag(data, diag_cols, split_percentage, use_other_diags_a
         # Split train, validation, and test sets
         X_train, X_test, y_train, y_test = train_test_split(data, data[output_col], 
                                                             test_size=split_percentage, stratify=data[output_col], 
-                                                            random_state=1)
+                                                            random_state=0)
         X_train_train, X_val, y_train_train, y_val = train_test_split(X_train, y_train, test_size=split_percentage, 
-                                                                      stratify=y_train, random_state=1)
+                                                                      stratify=y_train, random_state=0)
         
         X_test_only_healthy_controls, y_test_only_healthy_controls = keep_only_healthy_controls(X_test, y_test)
         X_val_only_healthy_controls, y_val_only_healthy_controls = keep_only_healthy_controls(X_val, y_val)
