@@ -150,10 +150,8 @@ def make_performance_tables_opt_nb_features(performances_on_feature_subsets, opt
         sens_spec_tables[diag]["Threshold"] = range(1, len(sens_spec_tables[diag]) + 1)
         sens_spec_tables[diag].set_index("Threshold", inplace=True)
 
-        # If more than 25 thresholds, evenly take ~25 thresholds
-        if len(sens_spec_tables[diag]) > 25:
-            step = int(len(sens_spec_tables[diag])/25) 
-            sens_spec_tables[diag] = sens_spec_tables[diag][::step]
+        # Drop duplicates
+        sens_spec_tables[diag] = sens_spec_tables[diag].drop_duplicates()
 
     return sens_spec_tables
 
