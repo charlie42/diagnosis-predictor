@@ -83,16 +83,16 @@ def get_sens_spec(estimator, X, y, fixed_sens = []):
     y_pred = cross_val_predict(estimator, X, y, cv = StratifiedKFold(n_splits=8), method='predict_proba')
     fpr, tpr, thresholds = roc_curve(y, y_pred[:,1])
     # Get average specificity where sensititivity (tpr) is closest to but higher than fixed_sens values
-    specs = {}
+    sens_specs = []
     for target_sens in fixed_sens:
         actual_sens = tpr[tpr >= target_sens].min()
         spec = 1 - actual_sens
         
-        specs[actual_sens] = spec
+        sens_specs = [actual_sens, spec]
     
-    return specs
+    return sens_specs
 
-def get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_estimators):
+def get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_estimators, sens_to_check):
     aurocs = {}
     sens_specs = {}
     
@@ -109,7 +109,7 @@ def get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_estimators)
                 top_n_features = models.get_top_n_features(feature_subsets, diag, nb_features)
                 new_estimator = make_pipeline(SimpleImputer(missing_values=np.nan, strategy='median'), StandardScaler(), clone(best_estimators[diag][2]))
                 auc_cv_scores = get_auc(new_estimator, X_val[top_n_features], y_val, scoring='roc_auc')
-                sens_spec_cv_scores = get_sens_spec(new_estimator, X_val[top_n_features], y_val, fixed_sens=[0.8, 0.94])
+                sens_spec_cv_scores = get_sens_spec(new_estimator, X_val[top_n_features], y_val, sens_to_check)
 
                 aurocs[diag].append(auc_cv_scores.mean())
                 sens_specs[diag].append(sens_spec_cv_scores)
@@ -175,8 +175,8 @@ def get_performances_on_feature_subsets_per_output(diag, feature_subsets, estima
         
     return metrics_on_subsets, optimal_thresholds
 
-def get_performances_on_feature_subsets(feature_subsets, datasets, best_estimators, estimators_on_feature_subsets, use_test_set):
-    cv_aurocs_on_subsets, cv_sens_specs_on_subsets = get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_estimators)
+def get_performances_on_feature_subsets(feature_subsets, datasets, best_estimators, estimators_on_feature_subsets, use_test_set, sens_to_check):
+    cv_aurocs_on_subsets, cv_sens_specs_on_subsets = get_cv_scores_on_feature_subsets(feature_subsets, datasets, best_estimators, sens_to_check)
     #thresholds_on_feature_subsets = calculate_thresholds_for_feature_subsets(feature_subsets, estimators_on_feature_subsets, datasets)
 
     performances_on_subsets = {}

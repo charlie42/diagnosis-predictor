@@ -1,0 +1,3 @@
+sensitivities-to-check: # keep it length 2
+- 0.8
+- 0.94
