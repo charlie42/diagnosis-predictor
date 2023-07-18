@@ -1,5 +1,6 @@
 
 from sklearn.model_selection import cross_val_score, StratifiedKFold
+import pandas as pd
 
 def get_cv_auc_from_sfs_dict(datasets, best_estimators, feature_subsets, n_folds):
     # Re-train models on the feature subsets, get cross_val_scores
@@ -11,7 +12,12 @@ def get_cv_auc_from_sfs_dict(datasets, best_estimators, feature_subsets, n_folds
         for n in feature_subsets[diag].keys():
             print(n)
             features = feature_subsets[diag][n]
-            cv_scores[diag][n] = cross_val_score(best_estimators[diag], X_train_train[features], y_train_train, cv=StratifiedKFold(n_splits=n_folds), scoring="roc_auc", n_jobs=-1)
+            cv_scores[diag][n] = cross_val_score(best_estimators[diag], 
+                                                 X_train_train[features],
+                                                 y_train_train, 
+                                                 cv=StratifiedKFold(n_splits=n_folds), 
+                                                 scoring="roc_auc", 
+                                                 n_jobs=-1).mean()
 
     return cv_scores
 
@@ -22,6 +28,5 @@ def get_cv_auc_from_sfs(datasets, best_estimators, feature_subsets, n_folds):
     df = pd.DataFrame.from_dict(get_cv_auc_dict, orient="index")
     df = df.transpose()
     df = df.rename_axis("N features")
-    df = df.reset_index()
 
     return df

@@ -7,8 +7,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.base import clone
 
 def fit_estimator_on_subset_of_features(best_estimators, diag, X, y):
-    new_estimator_base = clone(best_estimators[diag][2])
-    new_estimator = make_pipeline(SimpleImputer(missing_values=np.nan, strategy='median'), StandardScaler(), new_estimator_base)
+    new_estimator_model = clone(best_estimators[diag][2])
+    new_estimator = make_pipeline(SimpleImputer(missing_values=np.nan, strategy='median'), StandardScaler(), new_estimator_model)
     new_estimator.fit(X, y)
     return new_estimator
 

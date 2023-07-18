@@ -12,6 +12,4 @@ def get_optimal_nb_features(auc_table, max_nb_features=27):
         # Get index of the first row with a score >= optimal_score
         optimal_nbs_features[diag] = auc_table[diag][auc_table[diag] >= optimal_score].index[0]
 
-        print(optimal_nbs_features)
-
     return optimal_nbs_features

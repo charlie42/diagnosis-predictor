@@ -75,7 +75,8 @@ def get_feature_subsets_and_score(best_estimators, datasets, number_of_features_
     return feature_subsets, scores
 
 def make_score_table(scores):
-    df = pd.DataFrame(scores)
+    print("scores", scores)
+    df = pd.DataFrame(list(scores.items()), columns=['Diagnosis', 'Score'])
     print(df)
     
     return df
@@ -93,17 +94,19 @@ def main(importances_from_file = 0):
 
     if DEBUG_MODE:
         # Only use the first diagnosis
-        best_estimators = {list(best_estimators.keys())[0]: best_estimators[list(best_estimators.keys())[0]]}
+        #best_estimators = {list(best_estimators.keys())[0]: best_estimators[list(best_estimators.keys())[0]]}
         pass
 
     if importances_from_file == 1:
         load_dirs = set_up_load_directories()
+
         feature_subsets = load(load_dirs["load_reports_dir"]+'feature-subsets.joblib')
         scores = load(load_dirs["load_reports_dir"]+'subset-cv-scores.joblib')
         estimators_on_subsets = load(load_dirs["load_models_dir"]+'estimators-on-subsets.joblib')
 
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
         dump(estimators_on_subsets, dirs["output_models_dir"]+'estimators-on-subsets.joblib')
+        dump(scores, dirs["output_reports_dir"]+'subset-cv-scores.joblib')
     else:
         feature_subsets, scores = get_feature_subsets_and_score(best_estimators, datasets, number_of_features_to_check, dirs)
         estimators_on_subsets = models.re_train_models_on_feature_subsets(feature_subsets, datasets, best_estimators) 
@@ -118,12 +121,13 @@ def main(importances_from_file = 0):
     cv_auc_table.to_csv(dirs["output_reports_dir"]+f'cv-auc-on-{number_of_features_to_check}-features.csv', float_format='%.3f')
 
     # Re-train models on each subset of features to get cv scores for each subset (to ID optimal number of features)
-    cv_auc_table_all_subsets = models.get_df_cv_auc_from_sfs(datasets, best_estimators, feature_subsets, n_folds=3 if DEBUG_MODE else 8)
+    cv_auc_table_all_subsets = models.get_cv_auc_from_sfs(datasets, best_estimators, feature_subsets, n_folds=3 if DEBUG_MODE else 8)
     print("cv_auc_table_all_subsets", cv_auc_table_all_subsets)
     cv_auc_table_all_subsets.to_csv(dirs["output_reports_dir"]+f'cv-auc-on-all-subsets.csv', float_format='%.3f')
 
     optimal_nbs_features = models.get_optimal_nb_features(cv_auc_table_all_subsets, number_of_features_to_check)
     util.write_dict_to_file(optimal_nbs_features, dirs["output_reports_dir"], "optimal-nb-features.txt")
+    dump(optimal_nbs_features, dirs["output_reports_dir"]+'optimal-nb-features.joblib')
 
     
 if __name__ == "__main__":
