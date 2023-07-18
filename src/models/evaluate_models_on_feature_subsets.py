@@ -53,14 +53,7 @@ def set_up_load_directories():
     load_models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/" + "evaluate_models_on_feature_subsets/")
     return {"load_reports_dir": load_reports_dir, "load_models_dir": load_models_dir}
 
-def find_threshold_sens_over_n(subset_performances, n):
-    # Find the threshold where sensitivity is > n and sensitivity is > specificity 
-    for threshold in subset_performances:
-        if subset_performances[threshold][1] > n and subset_performances[threshold][1] > subset_performances[threshold][2]:
-            return threshold
-        
-
-def make_performance_tables_one_threshold(performances_on_feature_subsets):
+def make_performance_tables_one_threshold(performances_on_feature_subsets, opt_threshold):
     # Create a table for each performance metric (AUC, Sensitivity, Specificity) for each number of features, using the threshold where sensitivity is 0.8 and > specificity
     # Build list of lists where each list is a row in the table
     auc_table = []
@@ -76,7 +69,7 @@ def make_performance_tables_one_threshold(performances_on_feature_subsets):
         for nb_features in performances_on_feature_subsets[diag]:
 
             # Find threshold where sensitivity is 0.8 and > specificity
-            threshold = find_threshold_sens_over_n(performances_on_feature_subsets[diag][nb_features], 0.8)
+            threshold = opt_threshold[diag][nb_features]
 
             diag_row_auc = diag_row_auc + [performances_on_feature_subsets[diag][nb_features][threshold][0]] 
             diag_row_sens = diag_row_sens + [performances_on_feature_subsets[diag][nb_features][threshold][1]]
@@ -155,37 +148,46 @@ def make_performance_tables_opt_nb_features(performances_on_feature_subsets, opt
 
     return sens_spec_tables
 
-def make_and_write_test_set_performance_tables(performances_on_feature_subsets, dir, optimal_nbs_features):
+def read_opt_nbs_features(reports_dir):
+    return load(reports_dir+'optimal-nb-features.joblib')
 
-    # Make AUC, Sens, Spec tables for one threshold
-    [auc_test_set_table_one_threshold, sens_test_set_table_one_threshold, spec_test_set_table_one_threshold] = make_performance_tables_one_threshold(performances_on_feature_subsets)
-    auc_test_set_table_one_threshold.to_csv(dir+'auc-on-subsets-test-set.csv', float_format='%.3f')
-    sens_test_set_table_one_threshold.to_csv(dir+'sens-on-subsets-test-set-one-threshold.csv', float_format='%.3f')
-    spec_test_set_table_one_threshold.to_csv(dir+'spec-on-subsets-test-set-one-threshold.csv', float_format='%.3f')
-
-    # Make AUC, Sens, Spec tables for all thresholds on optimal number of features
-    sens_spec_test_set_tables_optimal_nb_features = make_performance_tables_opt_nb_features(performances_on_feature_subsets, optimal_nbs_features)
-    path = dir + "sens-spec-on-subsets-test-set-optimal-nb-features/"
-    util.create_dir_if_not_exists(path)
-    for diag in sens_spec_test_set_tables_optimal_nb_features:
-        sens_spec_test_set_tables_optimal_nb_features[diag].to_csv(path+diag+'.csv', float_format='%.3f')
-
-    # Make a table with AUC, Sens, Spec for one threhsold on optimal number of features for each diagnosis
-    auc_sens_spec_test_set_one_thres_opt_nb_features = []
-    diags = auc_test_set_table_one_threshold.columns
+def make_perf_test_set_one_thres_opt_nb_features(auc_test_set, sens_test_set_one_threshold, spec_test_set_one_threshold, opt_nbs_features):
+    result = []
+    diags = auc_test_set.columns
     for diag in diags:
-        auc_test_set_one_threshold = auc_test_set_table_one_threshold[diag].loc[optimal_nbs_features[diag]]
-        sens_test_set_one_threshold = sens_test_set_table_one_threshold[diag].loc[optimal_nbs_features[diag]]
-        spec_test_set_one_threshold = spec_test_set_table_one_threshold[diag].loc[optimal_nbs_features[diag]]
-        auc_sens_spec_test_set_one_thres_opt_nb_features.append([diag, optimal_nbs_features[diag], auc_test_set_one_threshold, sens_test_set_one_threshold, spec_test_set_one_threshold])
+        diag_auc = auc_test_set[diag].loc[opt_nbs_features[diag]]
+        diag_sens_one_threshold = sens_test_set_one_threshold[diag].loc[opt_nbs_features[diag]]
+        diag_spec_one_threshold = spec_test_set_one_threshold[diag].loc[opt_nbs_features[diag]]
+        result.append([diag, opt_nbs_features[diag], diag_auc, diag_sens_one_threshold, diag_spec_one_threshold])
+    result_df = pd.DataFrame(result, columns=["Diagnosis", "Number of features", "AUC", "Sensitivity", "Specificity"])
+    return result_df
+
+def make_and_write_test_set_performance_tables(performances_on_feature_subsets, opt_nbs_features, opt_thresholds, output_dir):
+
+    # Make AUC table, Sens table, Spec table for one threshold, all subsets 
+    [auc_test_set, sens_test_set_one_threshold, spec_test_set_one_threshold] = make_performance_tables_one_threshold(performances_on_feature_subsets, opt_thresholds)
+
+    # Make a table for each diag on optimal number of features with all thresholds, sens, spec, ppv, npv
+    sens_spec_test_set_optimal_nb_features = make_performance_tables_opt_nb_features(performances_on_feature_subsets, opt_nbs_features) #dict of dataframes, key=diag
+
+    # Make a table with AUC, Sens, Spec, ppv, npv for one threhsold on optimal number of features (combine the two above)
+    perf_test_set_one_thres_opt_nb_features = make_perf_test_set_one_thres_opt_nb_features(auc_test_set, sens_test_set_one_threshold, spec_test_set_one_threshold, opt_nbs_features)
     
-    auc_sens_spec_test_set_opt_thres_opt_nb_features = pd.DataFrame(auc_sens_spec_test_set_one_thres_opt_nb_features, columns=["Diagnosis", "Number of features", "AUC", "Sensitivity", "Specificity"])
-    auc_sens_spec_test_set_opt_thres_opt_nb_features.to_csv(dir+'auc-sens-spec-on-subsets-test-set-one-threshold-optimal-nb-features.csv', float_format='%.3f')
+    # Write to csv
+    auc_test_set.to_csv(output_dir+'auc-on-subsets-test-set.csv', float_format='%.3f')
+    sens_test_set_one_threshold.to_csv(output_dir+'sens-on-subsets-test-set-one-threshold.csv', float_format='%.3f')
+    spec_test_set_one_threshold.to_csv(output_dir+'spec-on-subsets-test-set-one-threshold.csv', float_format='%.3f')
+    perf_test_set_one_thres_opt_nb_features.to_csv(output_dir+'perf-on-subsets-test-set-one-threshold-optimal-nb-features.csv', float_format='%.3f')
 
-def make_and_save_saturation_plot(performances_on_feature_subsets, optimal_thresholds, dir):
+    path = output_dir + "sens-spec-on-subsets-test-set-optimal-nb-features/"
+    util.create_dir_if_not_exists(path)
+    for diag in sens_spec_test_set_optimal_nb_features:
+        sens_spec_test_set_optimal_nb_features[diag].to_csv(path+diag+'.csv', float_format='%.3f')
+
+    return [auc_test_set, sens_test_set_one_threshold, spec_test_set_one_threshold, perf_test_set_one_thres_opt_nb_features, sens_spec_test_set_optimal_nb_features]
+
+def make_and_save_saturation_plot(auc_table, dir):
     import matplotlib.pyplot as plt
-
-    auc_table, _, _ = make_performance_tables_one_threshold(performances_on_feature_subsets, optimal_thresholds)
 
     # Plot a line of AUROCs at each number of features, one line per diagnosis. x axis is number of features (row index of auc_table), y axis is AUROC value
     fig, ax = plt.subplots()
@@ -199,7 +201,8 @@ def make_and_save_saturation_plot(performances_on_feature_subsets, optimal_thres
 
     fig.savefig(dir+'saturation-plot.png', bbox_inches='tight', dpi=800)
 
-def re_write_subsets_w_auroc(feature_subsets, estimators_on_subsets, output_dir, performance_table, optimal_nbs_features):
+def re_write_subsets_w_auroc(feature_subsets, estimators_on_subsets, optimal_nbs_features, performance_table, output_dir):
+    # optimal_nbs_features provided to drop subsets over the optimal number of features
     models.write_feature_subsets_to_file(feature_subsets, estimators_on_subsets, output_dir, performance_table, optimal_nbs_features)
 
 def main(models_from_file = 1):
@@ -207,6 +210,7 @@ def main(models_from_file = 1):
 
     clinical_config = util.read_config("clinical")
     number_of_features_to_check = clinical_config["max items in screener"]
+    minimum_sensitivity = clinical_config["minimum sensitivity"]
 
     dirs = set_up_directories()
 
@@ -223,28 +227,48 @@ def main(models_from_file = 1):
     if models_from_file == 1:
         load_dirs = set_up_load_directories()
 
-        performances_on_feature_subsets = load(load_dirs["load_reports_dir"]+'performances-on-feature-subsets.joblib')    
+        performances_on_feature_subsets_test_set = load(load_dirs["load_reports_dir"]+'performances-on-feature-subsets-test-set.joblib')    
+        performances_on_feature_subsets_val_set = load(load_dirs["load_reports_dir"]+'performances-on-feature-subsets-val-set.joblib')    
         estimators_on_feature_subsets = load(load_dirs["load_models_dir"]+'estimators-on-feature-subsets.joblib')
         
         # Save reports to newly created directories
-        dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
+        dump(performances_on_feature_subsets_test_set, dirs["output_reports_dir"]+'performances-on-feature-subsets-test-set.joblib')
+        dump(performances_on_feature_subsets_val_set, dirs["output_reports_dir"]+'performances-on-feature-subsets-val-set.joblib')
         dump(estimators_on_feature_subsets, dirs["output_models_dir"]+'estimators-on-feature-subsets.joblib')
+
     else:
         estimators_on_feature_subsets = models.re_train_models_on_feature_subsets(feature_subsets, datasets, best_estimators)
-        performances_on_feature_subsets = models.get_performances_on_feature_subsets(feature_subsets, 
+        performances_on_feature_subsets_test_set = models.get_performances_on_feature_subsets(feature_subsets, 
                                                                                     datasets, 
                                                                                     estimators_on_feature_subsets, 
                                                                                     use_test_set = 1)
 
+        performances_on_feature_subsets_val_set = models.get_performances_on_feature_subsets(feature_subsets, 
+                                                                                    datasets, 
+                                                                                    estimators_on_feature_subsets, 
+                                                                                    use_test_set = 0)
 
         dump(estimators_on_feature_subsets, dirs["output_models_dir"]+'estimators-on-feature-subsets.joblib')
-        dump(performances_on_feature_subsets, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
+        dump(performances_on_feature_subsets_test_set, dirs["output_reports_dir"]+'performances-on-feature-subsets.joblib')
+        dump(performances_on_feature_subsets_val_set, dirs["output_reports_dir"]+'performances-on-feature-subsets-val-set.joblib')
     
-    reports_dir = dirs["output_reports_dir"]
+    output_reports_dir = dirs["output_reports_dir"]
     
-    make_and_write_test_set_performance_tables(performances_on_feature_subsets, reports_dir, optimal_nbs_features)
-    make_and_save_saturation_plot(performances_on_feature_subsets, reports_dir)
-    re_write_subsets_w_auroc(feature_subsets, estimators_on_feature_subsets, reports_dir, performances_on_feature_subsets, optimal_nbs_features)
+    # Generate reports
+    opt_nbs_features = read_opt_nbs_features(dirs["input_reports_dir"])
+    opt_thresholds = models.find_thresholds_sens_over_n(performances_on_feature_subsets_val_set, minimum_sensitivity)
+
+    auc_test_set, sens_test_set_one_threshold, spec_test_set_one_threshold, perf_test_set_one_thres_opt_nb_features, sens_spec_test_set_optimal_nb_features = make_and_write_test_set_performance_tables(
+        performances_on_feature_subsets_test_set, 
+        opt_nbs_features,
+        opt_thresholds,
+        output_reports_dir)
+    make_and_save_saturation_plot(auc_test_set, output_reports_dir)
+    re_write_subsets_w_auroc(feature_subsets, 
+                             estimators_on_feature_subsets,
+                             opt_nbs_features, 
+                             performances_on_feature_subsets_test_set,
+                             output_reports_dir)
 
 if __name__ == "__main__":
     main(sys.argv[1])
