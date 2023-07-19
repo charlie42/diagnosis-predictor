@@ -1,4 +1,4 @@
-def get_optimal_nb_features(auc_table, max_nb_features=27):
+def get_optimal_nb_features(auc_table, max_nb_features, percentage_of_max_score):
 
     optimal_nbs_features = {}
 
@@ -7,7 +7,7 @@ def get_optimal_nb_features(auc_table, max_nb_features=27):
         max_score = auc_table[diag].iloc[0:max_nb_features].max() 
 
         # Get optimal score (95% of max score)
-        optimal_score = max_score * 0.95
+        optimal_score = max_score * percentage_of_max_score / 100
 
         # Get index of the first row with a score >= optimal_score
         optimal_nbs_features[diag] = auc_table[diag][auc_table[diag] >= optimal_score].index[0]

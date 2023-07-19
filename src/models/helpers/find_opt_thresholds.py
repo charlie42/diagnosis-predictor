@@ -9,6 +9,7 @@ def find_thresholds_sens_over_n(val_set_performances, n):
 
             results[diag][subset] = {}
             subset_performances = val_set_performances[diag][subset]
+            
             # Find the threshold where sensitivity the closest to n and sensitivity is > specificity 
             # If there are multiple thresholds with the same sensitivity, return the one with the highest specificity
             # If at the threshold where sensitivity is the closest to n, sensitivity is not > specificity, return the threshold with min sensisitivity where sensitivity is > specificity

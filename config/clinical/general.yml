@@ -150,7 +150,8 @@ first assessment to drop: ICU_P
 predict test-based diags: False
 predict consensus diags: True
 include non-standard assessments: True # True increses performance, False increases generalizability (other studies don't use the same pre-interview assessments)
-#max items in screener: 27
-max items in screener: 2
-use only research only assessments: False
-minimum sensitivity: 0.8
+max items in screener: 27
+#max items in screener: 2 # for testing
+use only research only assessments: False 
+minimum sensitivity: 0.8 # For identifying optimal threshold
+acceptable percentage of max performance: 99 # For identifying optimal number of items
