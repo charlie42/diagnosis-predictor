@@ -86,6 +86,7 @@ def main(importances_from_file = 0):
 
     clinical_config = util.read_config("clinical")
     number_of_features_to_check = clinical_config["max items in screener"]
+    percentage_of_max_performance = clinical_config["acceptable percentage of max performance"]
 
     dirs = set_up_directories()
 
@@ -125,7 +126,7 @@ def main(importances_from_file = 0):
     print("cv_auc_table_all_subsets", cv_auc_table_all_subsets)
     cv_auc_table_all_subsets.to_csv(dirs["output_reports_dir"]+f'cv-auc-on-all-subsets.csv', float_format='%.3f')
 
-    optimal_nbs_features = models.get_optimal_nb_features(cv_auc_table_all_subsets, number_of_features_to_check)
+    optimal_nbs_features = models.get_optimal_nb_features(cv_auc_table_all_subsets, number_of_features_to_check, percentage_of_max_performance)
     util.write_dict_to_file(optimal_nbs_features, dirs["output_reports_dir"], "optimal-nb-features.txt")
     dump(optimal_nbs_features, dirs["output_reports_dir"]+'optimal-nb-features.joblib')
 

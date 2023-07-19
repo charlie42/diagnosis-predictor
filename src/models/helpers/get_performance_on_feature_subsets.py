@@ -84,7 +84,7 @@ def get_performances_on_feature_subsets_per_output(diag, feature_subsets, estima
             top_n_features = models.get_top_n_features(feature_subsets, diag, nb_features)
             new_estimator = estimators_on_feature_subsets[diag][nb_features]
             metrics_on_subsets[nb_features] = {}
-            thresholds = np.arange(0.1, 1, 0.1)
+            thresholds = np.arange(0.1, 1, 0.01)
             for threshold in thresholds:
                 metrics, metric_names = get_metrics(new_estimator, threshold, X_test[top_n_features], y_test)
                 relevant_metrics = [
