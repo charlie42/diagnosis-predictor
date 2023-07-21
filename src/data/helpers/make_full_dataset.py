@@ -106,12 +106,25 @@ def plot_comul_number_of_examples(cumul_number_of_examples_df, data_statistics_d
     plt.figure(figsize=(16,8))
     plt.xticks(cumul_number_of_examples_df["N of Assessments"])
     plt.scatter(cumul_number_of_examples_df["N of Assessments"], cumul_number_of_examples_df["Respondents"])
+
     # Add vertical lines for each point
     for i in range(0, len(cumul_number_of_examples_df)):
         plt.axvline(x=cumul_number_of_examples_df["N of Assessments"][i], color='gray', linestyle='--')
-    plt.xlabel("Number of Assessments")
+
+    # Create labels for x axis with Number of Assessments and Last Assessment
+    labels = []
+    for i in range(0, len(cumul_number_of_examples_df)):
+        labels.append(str(cumul_number_of_examples_df["N of Assessments"][i])+" ("+cumul_number_of_examples_df["Last Assessment"][i]+")")
+    plt.xticks(cumul_number_of_examples_df["N of Assessments"], labels, rotation=90)
+
+    plt.xlabel("Number of Assessments (Last Assessment)")
     plt.ylabel("Number of Respondents")
+
     plt.title("Cumulative Number of Respondents with Complete Data")
+
+    # Fit into figure
+    plt.tight_layout()
+
     plt.savefig(data_statistics_dir+'figures/cumul_assessment_distrib.png', dpi=600)  
 
 def get_columns_until_dropped(full_wo_underscore, EID_columns_until_dropped):

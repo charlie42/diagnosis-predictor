@@ -236,6 +236,14 @@ def update_datasets_with_new_diags(item_level_ds, cog_tasks_ds, subscales_ds, to
 
     return cog_tasks_ds, subscales_ds
 
+def save_pos_ex_stats(positive_examples_in_ds, diag_cols, item_level_ds, dir):
+    pos_examples_col_name = f"Positive examples out of {item_level_ds.shape[0]}"
+    pd.DataFrame(positive_examples_in_ds.items(), columns=["Diag", pos_examples_col_name]).sort_values(pos_examples_col_name, ascending=False).to_csv(dir+"number-of-positive-examples.csv")
+
+    # Save only those diags that are used
+    positive_examples_in_ds_for_used = {k: v for k, v in positive_examples_in_ds.items() if k in diag_cols}
+    pd.DataFrame(positive_examples_in_ds_for_used.items(), columns=["Diag", pos_examples_col_name]).sort_values(pos_examples_col_name, ascending=False).to_csv(dir+"number-of-positive-examples-used.csv")
+
 
 def main(only_assessment_distribution, use_other_diags_as_input, only_free_assessments, learning):
     only_assessment_distribution = int(only_assessment_distribution)
@@ -288,8 +296,7 @@ def main(only_assessment_distribution, use_other_diags_as_input, only_free_asses
         dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)
 
         # Save number of positive examples for each diagnosis to csv (convert dict to df)
-        pos_examples_col_name = f"Positive examples out of {item_level_ds.shape[0]}"
-        pd.DataFrame(positive_examples_in_ds.items(), columns=["Diag", pos_examples_col_name]).sort_values(pos_examples_col_name, ascending=False).to_csv(dirs["data_statistics_dir"]+"number-of-positive-examples.csv")
-
+        save_pos_ex_stats(positive_examples_in_ds, diag_cols, item_level_ds, dirs["data_statistics_dir"])
+        
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
