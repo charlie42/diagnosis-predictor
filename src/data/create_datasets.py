@@ -40,33 +40,6 @@ def set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_
 
     return {"data_statistics_dir": data_statistics_dir, "data_output_dir": data_output_dir}
 
-def customize_input_cols_per_diag(input_cols, diag):
-    # Remove "Diag.Intellectual Disability-Mild" when predicting "Diag.Borderline Intellectual Functioning"
-    #   and vice versa because they are highly correlated, same for other diagnoses
-    #   (only useful when use_other_diags_as_input = 1)
-    
-    if diag == "Diag.Intellectual Disability-Mild":
-        input_cols = [x for x in input_cols if x != "Diag.Borderline Intellectual Functioning"]
-    if diag == "Diag.Borderline Intellectual Functioning":
-        input_cols = [x for x in input_cols if x != "Diag.Intellectual Disability-Mild"]
-    if diag == "Diag.No Diagnosis Given":
-        input_cols = [x for x in input_cols if not x.startswith("Diag.")]
-    if diag == "Diag.ADHD-Combined Type":
-        input_cols = [x for x in input_cols if x not in ["Diag.ADHD-Inattentive Type", 
-                                                         "Diag.ADHD-Hyperactive/Impulsive Type",
-                                                         "Diag.Other Specified Attention-Deficit/Hyperactivity Disorder",
-                                                         "Diag.Unspecified Attention-Deficit/Hyperactivity Disorder"]]
-    if diag == "Diag.ADHD-Inattentive Type":
-        input_cols = [x for x in input_cols if x not in ["Diag.ADHD-Combined Type", 
-                                                         "Diag.ADHD-Hyperactive/Impulsive Type",
-                                                         "Diag.Other Specified Attention-Deficit/Hyperactivity Disorder",
-                                                         "Diag.Unspecified Attention-Deficit/Hyperactivity Disorder"]]
-        
-    # Remove NIH scores for NVLD (used for diagnosis)
-    if "NVLD" in diag:
-        input_cols = [x for x in input_cols if not x.startswith("NIH")]
-                      
-    return input_cols
 
 def get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input, learning):
     
@@ -84,7 +57,7 @@ def get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input, learni
                             not x.startswith("NIH") and x.endswith("_P")]
 
 
-    input_cols = customize_input_cols_per_diag(input_cols, diag)
+    input_cols = data.customize_output_cols_per_output(input_cols, diag)
     print(f"Input assessemnts used for {diag}: ", list(set([x.split(",")[0] for x in input_cols])))
     
     return input_cols
@@ -157,53 +130,6 @@ def find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, al
             diags_w_enough_positive_examples_in_val_set.append(diag)
     return diags_w_enough_positive_examples_in_val_set
 
-def make_corr_df(full_dataset):
-    # Make table with correlation between all columns, sort by highest correlations
-    corr_df = full_dataset.corr()
-    corr_df_unstacked = corr_df.unstack().sort_values(kind="quicksort", ascending=False).reset_index()
-    corr_df_unstacked.rename(columns={"level_0": "Feature 1", "level_1": "Feature 2", 0: "Correlation Coefficient"}, inplace=True)
-    corr_df_unstacked.drop(corr_df_unstacked.iloc[corr_df_unstacked[corr_df_unstacked["Feature 1"] == corr_df_unstacked["Feature 2"]].index].index, inplace=True)
-    corr_df_unstacked.drop_duplicates(subset=["Correlation Coefficient"], inplace=True)
-    corr_df_unstacked.reset_index(drop=True, inplace=True)
-
-    # Percentage of columns with >0.3 or <-0.3 correlation with another column, except _WAS_MISSING ones
-    n_cols_over_03 = 0
-    for col in corr_df:
-        if "_WAS_MISSING" in col:
-            continue
-        # Get max_corr and column with highest correlation except if 1.0 (correlation with itself)
-        # Drop rows with correlation 1.0 (correlation with itself)
-        new_corr_col = corr_df[col].drop(corr_df[col].loc[corr_df[col] == 1.0].index)
-        max_corr = new_corr_col.abs().max()
-
-        if max_corr > 0.3:
-            n_cols_over_03 += 1
-
-    percentage = n_cols_over_03 / corr_df.shape[0]
-    print(f"Percentage of columns with >0.3 or <-0.3 correlation with another column: {percentage}")
-
-
-    return corr_df_unstacked
-
-def save_dataset_stats(datasets, diag_cols, item_level_ds, dir):
-    stats = {}
-    stats["n_rows_full_ds"] = item_level_ds.shape[0]
-    stats["n_rows_train_ds"] = datasets[diag_cols[0]]["X_train_train"].shape[0]
-    stats["n_rows_val_ds"] = datasets[diag_cols[0]]["X_val"].shape[0]
-    stats["n_rows_test_ds"] = datasets[diag_cols[0]]["X_test"].shape[0]
-    stats["n_rows_test_ds_only_healthy_controls"] = datasets[diag_cols[0]]["X_test_only_healthy_controls"].shape[0]
-    stats["n_rows_val_ds_only_healthy_controls"] = datasets[diag_cols[0]]["X_val_only_healthy_controls"].shape[0]
-    stats["n_input_cols"] = datasets[diag_cols[0]]["X_train_train"].shape[1] - len(diag_cols)
-    # To df
-    stats_df = pd.DataFrame.from_dict(stats, orient="index")
-    stats_df.columns = ["Value"]
-    stats_df.to_csv(dir + "dataset_stats.csv")
-
-    corr_df = make_corr_df(item_level_ds)
-    corr_df.to_csv(dir + "corr_df.csv")
-
-    item_level_ds.describe(include = 'all').T.to_csv(dir + "column_stats.csv")
-
 def add_cols_from_total_and_subscale_to_input(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config):
     if "add cols to input" in clinical_config and clinical_config["add cols to input"]:
         cols_to_add = clinical_config["add cols to input"]
@@ -235,15 +161,6 @@ def update_datasets_with_new_diags(item_level_ds, cog_tasks_ds, subscales_ds, to
     total_score_ds.to_csv(dir + "total_scores.csv")
 
     return cog_tasks_ds, subscales_ds
-
-def save_pos_ex_stats(positive_examples_in_ds, diag_cols, item_level_ds, dir):
-    pos_examples_col_name = f"Positive examples out of {item_level_ds.shape[0]}"
-    pd.DataFrame(positive_examples_in_ds.items(), columns=["Diag", pos_examples_col_name]).sort_values(pos_examples_col_name, ascending=False).to_csv(dir+"number-of-positive-examples.csv")
-
-    # Save only those diags that are used
-    positive_examples_in_ds_for_used = {k: v for k, v in positive_examples_in_ds.items() if k in diag_cols}
-    pd.DataFrame(positive_examples_in_ds_for_used.items(), columns=["Diag", pos_examples_col_name]).sort_values(pos_examples_col_name, ascending=False).to_csv(dir+"number-of-positive-examples-used.csv")
-
 
 def main(only_assessment_distribution, use_other_diags_as_input, only_free_assessments, learning):
     only_assessment_distribution = int(only_assessment_distribution)
@@ -285,18 +202,14 @@ def main(only_assessment_distribution, use_other_diags_as_input, only_free_asses
         if clinical_config["predict consensus diags"] == False: # Remove consensus diags, only keep new diags
             all_diags = [x for x in all_diags if x not in consensus_diags]
         positive_examples_in_ds = get_positive_examples_in_ds(item_level_ds, all_diags)
+        dump(positive_examples_in_ds, dirs["data_output_dir"]+'positive_examples_in_ds.joblib', compress=1)
         
         diag_cols = find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, all_diags, split_percentage, min_pos_examples_val_set)
 
         # Create datasets for each diagnosis (different input and output columns)
         datasets = split_datasets_per_diag(item_level_ds, diag_cols, split_percentage, use_other_diags_as_input, clinical_config, learning)
 
-        save_dataset_stats(datasets, diag_cols, item_level_ds, dirs["data_statistics_dir"])
-            
-        dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)
-
-        # Save number of positive examples for each diagnosis to csv (convert dict to df)
-        save_pos_ex_stats(positive_examples_in_ds, diag_cols, item_level_ds, dirs["data_statistics_dir"])
+        dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)        
         
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
