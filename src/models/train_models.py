@@ -89,7 +89,8 @@ def make_feature_selectors(model, number_of_features_to_check):
         floating=True, 
         verbose=0,
         n_jobs=-1)
-    return [rfe, sfs]
+    #return [rfe, sfs]
+    return [rfe]
 
 def make_models():
     # Define base models
@@ -102,13 +103,13 @@ def make_models():
 
     return models
 
-def make_pipeline(imputer, scaler, feature_selector1, feature_selector2, model):
+def make_pipeline(imputer, scaler, feature_selector1, model): # feature_selector2,
     # Make pipeline
     pipeline = Pipeline([
         ('imputer', imputer),
         ('scaler', scaler),
         ('featureselector1', feature_selector1),
-        ('featureselector2', feature_selector2),
+        #('featureselector2', feature_selector2),
         ('model', model)
     ])
     return pipeline
