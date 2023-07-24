@@ -59,19 +59,30 @@ def set_up_load_directories():
 def get_feature_subsets_and_score(best_estimators, datasets, number_of_features_to_check, dirs):
     feature_subsets = {}
     scores = {}
-    for i, diag in enumerate(best_estimators):
-        base_model_type = util.get_base_model_name_from_pipeline(best_estimators[diag])
-        base_model = util.get_estimator_from_pipeline(best_estimators[diag])
-        print(diag, base_model_type, f'{i+1}/{len(best_estimators)}')
-        if DEBUG_MODE and base_model_type != "logisticregression": # Don't do RF models in debug mode, takes long
-            continue
+    from joblib import load
+    param_search_obj = load(dirs["models_dir"]+'fit-param-search-objects-dict.joblib')
+    for diag in param_search_obj:
+        #print(param_search_obj[diag]["logisticregression"].best_estimator_.named_steps)
+        feature_subsets[diag] = param_search_obj[diag]["logisticregression"].best_estimator_.named_steps['featureselector1'].ranking_
+        scores[diag] = None
+        
+    print("feature_subsets", feature_subsets)
+    #for i, diag in enumerate(best_estimators):
+        #base_model_type = util.get_base_model_name_from_pipeline(best_estimators[diag])
+        #base_model = util.get_estimator_from_pipeline(best_estimators[diag])
+        #print(diag, base_model_type, f'{i+1}/{len(best_estimators)}')
+        #if DEBUG_MODE and base_model_type != "logisticregression": # Don't do RF models in debug mode, takes long
+        #    continue
         # If base model is exposes feature importances, use RFE to get first 50 feature, then use SFS to get the rest.
-        if not (base_model_type == "svc" and base_model.kernel != "linear"):
-            feature_subsets[diag], scores[diag] = models.get_feature_subsets_and_score_from_rfe_then_sfs(diag, best_estimators, datasets, number_of_features_to_check)
+        #if not (base_model_type == "svc" and base_model.kernel != "linear"):
+        #    feature_subsets[diag], scores[diag] = models.get_feature_subsets_and_score_from_rfe_then_sfs(diag, best_estimators, datasets, number_of_features_to_check)
         # If base model doesn't expose feature importances, use SFS to get feature subsets directly (will take very long)
-        else:
-            feature_subsets[diag], scores[diag] = models.get_feature_subsets_and_score_from_sfs(diag, best_estimators, datasets, number_of_features_to_check)
-        dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
+        #else:
+        #    feature_subsets[diag], scores[diag] = models.get_feature_subsets_and_score_from_sfs(diag, best_estimators, datasets, number_of_features_to_check)
+
+        # Get feature subset from param search object
+        
+        #dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
     return feature_subsets, scores
 
 def make_score_table(scores):
@@ -90,7 +101,7 @@ def main(importances_from_file = 0):
 
     dirs = set_up_directories()
 
-    best_estimators = load(dirs["models_dir"]+'best-estimators.joblib')
+    #best_estimators = load(dirs["models_dir"]+'best-estimators.joblib')
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
 
     if DEBUG_MODE:
@@ -109,8 +120,8 @@ def main(importances_from_file = 0):
         dump(estimators_on_subsets, dirs["output_models_dir"]+'estimators-on-subsets.joblib')
         dump(scores, dirs["output_reports_dir"]+'subset-cv-scores.joblib')
     else:
-        feature_subsets, scores = get_feature_subsets_and_score(best_estimators, datasets, number_of_features_to_check, dirs)
-        estimators_on_subsets = models.re_train_models_on_feature_subsets(feature_subsets, datasets, best_estimators) 
+        feature_subsets, scores = get_feature_subsets_and_score(None, datasets, number_of_features_to_check, dirs)
+        estimators_on_subsets = models.re_train_models_on_feature_subsets(feature_subsets, datasets, None) 
                 
         dump(feature_subsets, dirs["output_reports_dir"]+'feature-subsets.joblib')
         dump(scores, dirs["output_reports_dir"]+'subset-cv-scores.joblib')

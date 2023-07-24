@@ -86,15 +86,25 @@ def get_aucs_on_test_set(best_estimators, datasets, use_test_set, diag_cols):
 
 def get_aucs_cv_from_grid_search(reports_dir, diag_cols):
     auc_cv_from_grid_search = pd.read_csv(reports_dir + "df_of_best_estimators_and_their_scores.csv")
-    auc_cv_from_grid_search = auc_cv_from_grid_search[auc_cv_from_grid_search["Diag"].isin(diag_cols)][["Diag", "Best score", "SD of best score", "Score - SD"]]
-    auc_cv_from_grid_search.columns = ["Diag", "ROC AUC Mean CV", "ROC AUC SD CV", "ROC AUC Mean CV - SD"]
+    auc_cv_from_grid_search = auc_cv_from_grid_search[auc_cv_from_grid_search["Diag"].isin(diag_cols)][["Diag", "Best score", "SD of best score"]]
+    auc_cv_from_grid_search.columns = ["Diag", "ROC AUC Mean CV", "ROC AUC SD CV"]
     return auc_cv_from_grid_search
 
 def get_roc_aucs(best_estimators, datasets, use_test_set, diag_cols, input_reports_dir):
     roc_aucs_cv_from_grid_search = get_aucs_cv_from_grid_search(input_reports_dir, diag_cols)
     roc_aucs_on_test_set = get_aucs_on_test_set(best_estimators, datasets, use_test_set=use_test_set, diag_cols=diag_cols)
-    roc_aucs = roc_aucs_cv_from_grid_search.merge(roc_aucs_on_test_set, on="Diag").sort_values(by="ROC AUC Mean CV - SD", ascending=False)
+    roc_aucs = roc_aucs_cv_from_grid_search.merge(roc_aucs_on_test_set, on="Diag").sort_values(by="ROC AUC Mean CV", ascending=False)
     return roc_aucs
+
+def get_best_estimators_from_param_search_obj(models_dir):
+    from joblib import load
+    obj = load(models_dir+'fit-param-search-objects-dict.joblib')
+    print(obj)
+    # Get estimator from fitted param search object
+    best_estimators = {diag: obj[diag]['logisticregression'].best_estimator_ for diag in obj}
+    print(best_estimators)
+    print([best_estimators[diag].named_steps["featureselector1"].n_features_ for diag in best_estimators])
+    return best_estimators
 
 def main(use_test_set=1):
     use_test_set = int(use_test_set)
@@ -102,7 +112,7 @@ def main(use_test_set=1):
     dirs = set_up_directories(use_test_set)
 
     from joblib import load
-    best_estimators = load(dirs["models_dir"]+'best-estimators.joblib')
+    best_estimators = get_best_estimators_from_param_search_obj(dirs["models_dir"])
     
     diag_cols = best_estimators.keys()
 
