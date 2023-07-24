@@ -28,15 +28,15 @@ def set_up_directories():
     data_dir = "../diagnosis_predictor_data/"
 
     # Input dirs
-    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
+    input_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
     print("Reading data from: " + input_data_dir)
-    input_models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
+    input_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
     print("Reading models from: " + input_models_dir)
-    input_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir+ "reports/identify_feature_subsets/")
+    input_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/identify_feature_subsets/")
     print("Reading reports from: " + input_reports_dir)
     
     # Output dirs
-    params_from_previous_script = models.get_params_from_current_data_dir_name(input_models_dir)
+    params_from_previous_script = util.get_params_from_current_data_dir_name(input_models_dir)
     current_output_dir_name = build_output_dir_name(params_from_previous_script)
     
     output_models_dir = data_dir + "models/" + "evaluate_models_on_feature_subsets/" + current_output_dir_name + "/"
@@ -49,8 +49,8 @@ def set_up_directories():
 
 def set_up_load_directories():
     data_dir = "../diagnosis_predictor_data/"
-    load_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir+ "reports/evaluate_models_on_feature_subsets/")
-    load_models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/" + "evaluate_models_on_feature_subsets/")
+    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/evaluate_models_on_feature_subsets/")
+    load_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/" + "evaluate_models_on_feature_subsets/")
     return {"load_reports_dir": load_reports_dir, "load_models_dir": load_models_dir}
 
 def make_performance_tables_one_threshold(performances_on_feature_subsets, opt_threshold):

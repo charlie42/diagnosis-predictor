@@ -1,2 +1,2 @@
 from data.helpers.make_full_dataset import make_full_dataset
-from data.helpers.customise_input_cols_per_output import customise_input_cols_per_output
+from data.helpers.customize_input_cols_per_output import customize_input_cols_per_output

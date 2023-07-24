@@ -11,7 +11,7 @@ from sklearn.metrics import roc_auc_score
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-import util, models, data
+import util
 
 def build_output_dir_name(params_from_train_models, params_from_evaluate_original_models):
     # Part with the datetime
@@ -25,16 +25,16 @@ def set_up_directories(use_test_set):
     data_dir = "../diagnosis_predictor_data/"
 
     # Input dirs
-    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
-    models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
-    input_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir+ "reports/train_models/")
+    input_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
+    models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
+    input_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/train_models/")
 
     # Output dirs
 
     # Create directory inside the output directory with the run timestamp and params:
     #    - [params from train_models.py]
     #    - use test set
-    params_from_train_models = models.get_params_from_current_data_dir_name(models_dir)
+    params_from_train_models = util.get_params_from_current_data_dir_name(models_dir)
     params_from_current_file = {"use_test_set": use_test_set}
     current_output_dir_name = build_output_dir_name(params_from_train_models, params_from_current_file)
 

@@ -147,7 +147,7 @@ non-standard assessments:
   - PreInt_Lang
   - PreInt_TxHx
 first assessment to drop: ICU_P
-predict test-based diags: False
+predict test-based diags: True
 predict consensus diags: True
 include non-standard assessments: True # True increses performance, False increases generalizability (other studies don't use the same pre-interview assessments)
 max items in screener: 27
