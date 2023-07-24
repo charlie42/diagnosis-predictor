@@ -28,7 +28,7 @@ def get_coefficients_df_from_lr(pipeline, data):
     coef = estimator.coef_[0]
 
     # Get the feature names from scaler in pipeline
-    feature_selector = pipeline.named_steps["featureselector2"]
+    feature_selector = pipeline.named_steps["featureselector1"]
     feature_names = get_features_from_rfe(pipeline, data)
     
     # Create a dataframe of the coefficients and feature names

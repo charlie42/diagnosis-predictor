@@ -80,7 +80,8 @@ def make_feature_selectors(model, number_of_features_to_check):
     cv = StratifiedKFold(n_splits=2 if DEBUG_MODE else 8)
     rfe = RFE(model, 
               n_features_to_select=number_of_features_to_check, 
-              step=1)
+              step=1,
+              verbose=1)
     sfs = SFS(model, 
         k_features=number_of_features_to_check, 
         forward=True, 
@@ -207,7 +208,7 @@ def make_pipes_and_params(number_of_features_to_check):
 
 def fit_param_search(pipe, grid, X_train, y_train):
     cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 8)
-    rs = RandomizedSearchCV(estimator=pipe, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1, error_score="raise")
+    rs = RandomizedSearchCV(estimator=pipe, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=2, error_score="raise")
     
     print(f"Fitting {pipe} with {grid}")
     rs.fit(X_train, y_train) 
