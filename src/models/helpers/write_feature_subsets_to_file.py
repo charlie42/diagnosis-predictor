@@ -103,9 +103,5 @@ def write_feature_subsets_to_file(feature_subsets, estimators_on_subsets, output
 
         for diag in result.keys():
             result[diag] = {n_subset: result[diag][n_subset] for n_subset in result[diag] if int(n_subset) <= optimal_nbs_features[diag]}
-        
-        
-
-
-        
+                
     util.write_two_lvl_dict_to_file(result, path)

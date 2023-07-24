@@ -1,4 +1,4 @@
-def customize_input_cols_per_diag(input_cols, diag):
+def customize_input_cols_per_output(input_cols, diag):
     # Remove "Diag.Intellectual Disability-Mild" when predicting "Diag.Borderline Intellectual Functioning"
     #   and vice versa because they are highly correlated, same for other diagnoses
     #   (only useful when use_other_diags_as_input = 1)

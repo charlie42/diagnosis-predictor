@@ -57,7 +57,7 @@ def get_input_cols_per_diag(full_dataset, diag, use_other_diags_as_input, learni
                             not x.startswith("NIH") and x.endswith("_P")]
 
 
-    input_cols = data.customize_output_cols_per_output(input_cols, diag)
+    input_cols = data.customize_input_cols_per_output(input_cols, diag)
     print(f"Input assessemnts used for {diag}: ", list(set([x.split(",")[0] for x in input_cols])))
     
     return input_cols

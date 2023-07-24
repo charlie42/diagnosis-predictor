@@ -2,12 +2,14 @@ import sys, os, inspect
 from joblib import dump, load
 
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-import util, data, features, models
+import util
 
 
 def build_output_dir_name(params_from_create_datasets):
@@ -26,11 +28,11 @@ def set_up_directories():
     util.create_dir_if_not_exists(data_dir)
 
     # Input dirs
-    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
+    input_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
 
     # Create directory inside the output directory with the run timestamp and params:
     #    - [params from create_datasets.py]
-    params_from_create_datasets = models.get_params_from_current_data_dir_name(input_data_dir)
+    params_from_create_datasets = util.get_params_from_current_data_dir_name(input_data_dir)
     current_output_dir_name = build_output_dir_name(params_from_create_datasets)
 
     models_dir = data_dir + "models/" + "create_data_reports/" + current_output_dir_name + "/"
@@ -47,8 +49,8 @@ def set_up_load_directories():
 
     data_dir = "../diagnosis_predictor_data/"
     
-    load_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
-    load_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "reports/create_data_reports/")
+    load_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
+    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "reports/create_data_reports/")
     
     return {"load_data_dir": load_data_dir, "load_reports_dir": load_reports_dir}
 
@@ -108,6 +110,29 @@ def save_pos_ex_stats(positive_examples_in_ds, diag_cols, item_level_ds, dir):
     positive_examples_in_ds_for_used = {k: v for k, v in positive_examples_in_ds.items() if k in diag_cols}
     pd.DataFrame(positive_examples_in_ds_for_used.items(), columns=["Diag", pos_examples_col_name]).sort_values(pos_examples_col_name, ascending=False).to_csv(dir+"number-of-positive-examples-used.csv")
 
+def plot_age_distributions(item_level_ds, diag_cols, dir):
+    # Plot age distribution of whole dataset and of each diagnosis 
+    age_col = "Basic_Demos,Age"
+
+    fig, axes = plt.subplots(int(np.ceil(len(diag_cols)/2)), 2, figsize=(20, 20)) #calculate grid for nb of diags such that it is square
+    # Add gap between subplots
+    fig.subplots_adjust(hspace=0.4, wspace=0.4)
+
+    axes = axes.flatten()
+
+    # Set age range to min and max in itm_lvl_ds
+    axes[0].set_xlim([item_level_ds[age_col].min(), item_level_ds[age_col].max()])
+    
+    axes[0].hist(item_level_ds[age_col], bins=50)
+    axes[0].set_title("Age distribution of whole dataset")
+
+    for i, diag in enumerate(diag_cols):
+        if diag == "Diag.Any Diag":
+            continue
+        axes[i+1].hist(item_level_ds[item_level_ds[diag] == 1][age_col], bins=50)
+        axes[i+1].set_title(f"Age distribution of {diag}")
+
+    plt.savefig(dir + "age_distributions.png")
 
 def main():
     dirs = set_up_directories()
@@ -115,11 +140,16 @@ def main():
     datasets = load(dirs["input_data_dir"] + "datasets.joblib")
     item_level_ds = pd.read_csv(dirs["input_data_dir"] + "item_lvl.csv")
     positive_examples_in_ds = load(dirs["input_data_dir"] + "positive_examples_in_ds.joblib")
+
+    diag_cols = list(datasets.keys())
     
-    save_dataset_stats(datasets, item_level_ds, dirs["data_statistics_dir"])
+    save_dataset_stats(datasets, diag_cols, item_level_ds, dirs["reports_dir"])
 
     # Save number of positive examples for each diagnosis to csv (convert dict to df)
-    save_pos_ex_stats(positive_examples_in_ds, diag_cols = list(datasets.keys()), item_level_ds, dirs["data_statistics_dir"])
+    save_pos_ex_stats(positive_examples_in_ds, diag_cols, item_level_ds, dirs["reports_dir"])
+
+    # Plot age distribution of whole dataset and of each diagnosis
+    plot_age_distributions(item_level_ds, diag_cols, dirs["reports_dir"])
 
 
 if __name__ == "__main__":
