@@ -191,6 +191,7 @@ def main(only_assessment_distribution, use_other_diags_as_input, only_free_asses
         # Drop ID
         item_level_ds.drop("ID", axis=1, inplace=True)
 
+        item_level_ds.to_csv(dirs["data_output_dir"] + "item_lvl_new.csv")
         # Print dataset shape
         print("Full dataset shape: Number of rows: ", item_level_ds.shape[0], "Number of columns: ", item_level_ds.shape[1])
 

@@ -122,7 +122,7 @@ def plot_age_distributions(item_level_ds, diag_cols, dir):
 
     # Set age range to min and max in itm_lvl_ds
     axes[0].set_xlim([item_level_ds[age_col].min(), item_level_ds[age_col].max()])
-    
+
     axes[0].hist(item_level_ds[age_col], bins=50)
     axes[0].set_title("Age distribution of whole dataset")
 
@@ -138,7 +138,7 @@ def main():
     dirs = set_up_directories()
 
     datasets = load(dirs["input_data_dir"] + "datasets.joblib")
-    item_level_ds = pd.read_csv(dirs["input_data_dir"] + "item_lvl.csv")
+    item_level_ds = pd.read_csv(dirs["input_data_dir"] + "item_lvl_new.csv")
     positive_examples_in_ds = load(dirs["input_data_dir"] + "positive_examples_in_ds.joblib")
 
     diag_cols = list(datasets.keys())

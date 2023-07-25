@@ -146,7 +146,8 @@ non-standard assessments:
   - PreInt_EduHx
   - PreInt_Lang
   - PreInt_TxHx
-first assessment to drop: ICU_P
+#first assessment to drop: ICU_P # First drop-off in participants
+first assessment to drop: WHODAS_P # to include WISC
 predict test-based diags: True
 predict consensus diags: True
 include non-standard assessments: True # True increses performance, False increases generalizability (other studies don't use the same pre-interview assessments)
