@@ -106,9 +106,7 @@ def join_by_id_and_diag(df1, df2):
 
 def make_learning_diags(item_level_ds, cog_tasks_ds, subscales_ds):
     data = join_by_id_and_diag(item_level_ds, cog_tasks_ds)
-    print(data.columns)
     data = join_by_id_and_diag(data, subscales_ds)
-    print(data.columns)
 
     test_based_diags = {
         "read": "Diag.Specific Learning Disorder with Impairment in Reading (test)",
