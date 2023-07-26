@@ -9,13 +9,17 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import HistGradientBoostingClassifier
 
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
 from sklearn.pipeline import make_pipeline
 
-from sklearn.model_selection import RandomizedSearchCV
+#from sklearn.model_selection import RandomizedSearchCV
+#from sklearn.model_selection import GridSearchCV
+from sklearn.experimental import enable_halving_search_cv  # noqa
+from sklearn.model_selection import HalvingRandomSearchCV
 
 import sys, inspect
 
@@ -82,6 +86,7 @@ def get_base_models_and_param_grids():
     rf = RandomForestClassifier(n_estimators=200 if DEBUG_MODE else 400)
     svc = svm.SVC()
     lr = LogisticRegression(solver="saga")
+    lgbm = HistGradientBoostingClassifier()
     
     # Impute missing values
     imputer = SimpleImputer(missing_values=np.nan, strategy='median')
@@ -93,6 +98,7 @@ def get_base_models_and_param_grids():
     rf_pipe = make_pipeline(imputer, scaler, rf)
     svc_pipe = make_pipeline(imputer, scaler, svc)
     lr_pipe = make_pipeline(imputer, scaler, lr)
+    lgbm_pipe = make_pipeline(scaler, lgbm) # LGBM can handle missing values
     
     # Define parameter grids to search for each pipe
     from scipy.stats import loguniform, uniform
@@ -118,22 +124,48 @@ def get_base_models_and_param_grids():
         'logisticregression__class_weight': ['balanced', None],
         'logisticregression__l1_ratio': uniform(0, 1)
     }
+    # lr_param_grid = {
+    #     'logisticregression__C': [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],  # Logarithmic values from 1e-5 to 1e4
+    #     'logisticregression__penalty': ['l1', 'l2', 'elasticnet'],
+    #     'logisticregression__class_weight': ['balanced', None],
+    #     'logisticregression__l1_ratio': [i / 100 for i in range(101)]  # Linear values from 0.0 to 1.0 with a step of 0.01
+    # }
+    lgbm_param_grid = {
+        'histgradientboostingclassifier__learning_rate': np.logspace(-3, 0, num=100),  # Learning rate values from 0.001 to 1
+        'histgradientboostingclassifier__max_depth': [3, 5, 7, None],  # Maximum depth of the trees
+        'histgradientboostingclassifier__max_iter': np.arange(100, 1001, 100),  # Number of boosting iterations
+        'histgradientboostingclassifier__min_samples_leaf': [1, 2, 4],  # Minimum number of samples required to be at a leaf node
+        'histgradientboostingclassifier__l2_regularization': np.logspace(-3, 3, num=100)  # L2 regularization values from 0.001 to 1000
+    }
+    # lgbm_param_grid = {
+    #     'histgradientboostingclassifier__learning_rate': [10 ** (-i) for i in range(4)],  # Logarithmic values from 0.001 to 1
+    #     'histgradientboostingclassifier__max_depth': [3, 5, 7, None],
+    #     'histgradientboostingclassifier__max_iter': list(range(100, 1001, 100)),  # Linear values from 100 to 1000 with a step of 100
+    #     'histgradientboostingclassifier__min_samples_leaf': [1, 2, 4],
+    #     'histgradientboostingclassifier__l2_regularization': [10 ** i for i in range(-3, 4)]  # Logarithmic values from 0.001 to 1000
+    # }
     
     base_models_and_param_grids = [
         (rf_pipe, rf_param_grid),
         (svc_pipe, svc_param_grid),
         (lr_pipe, lr_param_grid),
+        (lgbm_pipe, lgbm_param_grid)
     ]
     if DEBUG_MODE:
-        base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
-        #base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[0]] # Only do LR and RF in debug mode
+        #base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
+        base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[-2]] # Only do LR and LGBM in debug mode
         pass
     
     return base_models_and_param_grids
 
 def get_best_estimator(base_model, grid, X_train, y_train):
     cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 8)
-    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
+    #rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
+    #rs = GridSearchCV(estimator=base_model, param_grid=grid, cv=cv, scoring="roc_auc", n_jobs = -1, verbose=1)
+    rs = HalvingRandomSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc",
+                                random_state=0,
+                                max_resources=100,
+                                n_jobs = -1, verbose=1)
     
     print("Fitting", base_model, "...")
     rs.fit(X_train, y_train) 
