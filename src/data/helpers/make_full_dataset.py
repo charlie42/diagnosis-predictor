@@ -89,6 +89,14 @@ def get_relevant_id_cols_by_popularity(assessment_answer_counts, relevant_assess
 
     return EID_columns_by_popularity
 
+def drop_participants_wo_mandatory_assessments(data_up_to_dropped, mandatory_assessments):
+    # Drop participants who don't have mandatory assessments
+    eid_cols_of_man_assessments = [x+",EID" for x in mandatory_assessments]
+    res = data_up_to_dropped[data_up_to_dropped[eid_cols_of_man_assessments].notnull().all(axis=1)]
+    n_dropped = data_up_to_dropped.shape[0] - res.shape[0]    
+    print(f"Dropping {n_dropped} participants who don't have mandatory assessments filled: {eid_cols_of_man_assessments}")
+    return res
+
 def get_cumul_number_of_examples_df(full_wo_underscore, EID_columns_by_popularity):
     cumul_number_of_examples_list = []
     for i in range(1, len(EID_columns_by_popularity)+1):
@@ -204,8 +212,6 @@ def transform_devhx_eduhx_cols(data_up_to_dropped):
     if list_of_preg_symp_cols:
         # If any of the preg_symp columns are 1, then the preg_symp column is 1, otherwise 0
         data_up_to_dropped["preg_symp"] = (data_up_to_dropped[list_of_preg_symp_cols].astype(str) == "1").any(axis=1)
-
-        print(data_up_to_dropped[[x for x in data_up_to_dropped.columns if "preg_symp" in x]])
 
         # Drop original preg_symp columns
         data_up_to_dropped = data_up_to_dropped.drop(list_of_preg_symp_cols, axis=1) 
@@ -382,6 +388,9 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
     proprietary_assessments = clinical_config["proprietary assessments"]
     res_only_assessments = clinical_config["research only assessments"]
     report_assessments = clinical_config["report assessments"]
+    predict_test_based_diags = clinical_config["predict test-based diags"]
+    mandatory_assessments = clinical_config["mandatory assessments"]
+    assessments_to_ignore = clinical_config["assessments to ignore"] if "assessments to ignore" in clinical_config else []
 
     if clinical_config["use only research only assessments"] == 1:
         #relevant_assessments_list = [x for x in relevant_assessments_list if x in res_only_assessments]
@@ -389,6 +398,11 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
     if only_free_assessments == 1:
         relevant_assessments_list = remove_proprietary_assessments(relevant_assessments_list, proprietary_assessments)
+        if predict_test_based_diags: # Add CBCL and CBCL_Pre back
+            relevant_assessments_list = relevant_assessments_list + ["CBCL", "CBCL_Pre"]
+    if mandatory_assessments:
+        relevant_assessments_list = relevant_assessments_list + mandatory_assessments
+    print("DEBUGmandatory_assessments", mandatory_assessments, relevant_assessments_list)
 
     # LORIS saved query (all data)
     full = pd.read_csv("data/raw/LORIS-release-10.csv", dtype=object)
@@ -406,7 +420,6 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
     # Get ID columns (contain quetsionnaire names, e.g. 'ACE,EID', will be used to check if an assessment is filled)
     EID_cols = [x for x in full.columns if ",EID" in x]
-    print("EID_cols", EID_cols)
 
     # Get ID col from EID cols
     full = get_ID_from_EID(full, EID_cols)
@@ -422,6 +435,9 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
     # Get list of assessments in data
     assessment_list = set([x.split(",")[0] for x in EID_cols])
+
+    if mandatory_assessments: # Drop participants who didn't take mandatory assessments
+            full_wo_underscore = drop_participants_wo_mandatory_assessments(full_wo_underscore, mandatory_assessments)
     
     # Check how many people filled each assessments
     assessment_answer_counts = get_assessment_answer_count(full_wo_underscore, EID_cols)
@@ -438,6 +454,7 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
         # Get data up to the dropped assessment
         # Get only people who took the most popular assessments until the first one from the drop list 
         columns_until_dropped = get_columns_until_dropped(full_wo_underscore, EID_columns_until_dropped)
+        
         data_up_to_dropped = get_data_up_to_dropped(full_wo_underscore, EID_columns_until_dropped, columns_until_dropped)
 
         # Remove EID columns: not needed anymore
@@ -475,6 +492,11 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
         # Separate subscale and total scores
         data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_up_to_dropped_cog_task_scores = separate_item_lvl_from_scale_scores(data_up_to_dropped, clinical_config)
+        
+        if predict_test_based_diags and only_free_assessments: # Remove CBCL from item-level
+            data_up_to_dropped_item_lvl = data_up_to_dropped_item_lvl.drop([x for x in data_up_to_dropped_item_lvl.columns if "CBCL" in x], axis=1)
+        if assessments_to_ignore: # Remove ignored assessments from item-level
+            data_up_to_dropped_item_lvl = data_up_to_dropped_item_lvl.drop([x for x in data_up_to_dropped_item_lvl.columns if any([y in x for y in assessments_to_ignore])], axis=1)
 
         # Remove _WAS_MISSING columns that are not linked to any columns from each dataset
         data_up_to_dropped_item_lvl, data_up_to_dropped_total_scores, data_up_to_dropped_subscale_scores, data_up_to_dropped_cog_task_scores = remove_irrelavent_missing_markers(data_up_to_dropped, 

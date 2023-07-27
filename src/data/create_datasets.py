@@ -11,25 +11,28 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util, data, features
 
-def build_output_dir_name(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning):
+def build_output_dir_name(params_for_dir_name):
+
+    first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning, NIH = params_for_dir_name
+
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
     # Part with the params
     params = {"first_assessment_to_drop": first_assessment_to_drop, "use_other_diags_as_input": use_other_diags_as_input, 
-              "only_free_assessments": only_free_assessments, "learning?": learning}
+              "only_free_assessments": only_free_assessments, "learning?": learning, "NIH?": NIH}
     params_part = util.build_param_string_for_dir_name(params)
     
     return datetime_part + "___" + params_part
 
-def set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning):
+def set_up_directories(params_for_dir_name):
 
     # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
     data_dir = "../diagnosis_predictor_data/"
     util.create_dir_if_not_exists(data_dir)
 
     # Create directory inside the output directory with the run timestamp and first_assessment_to_drop param
-    current_output_dir_name = build_output_dir_name(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning)
+    current_output_dir_name = build_output_dir_name(params_for_dir_name)
 
     data_statistics_dir = data_dir + "reports/create_datasets/" + current_output_dir_name + "/"
     util.create_dir_if_not_exists(data_statistics_dir)
@@ -167,12 +170,18 @@ def main(only_assessment_distribution, use_other_diags_as_input, only_free_asses
     use_other_diags_as_input = int(use_other_diags_as_input)
     only_free_assessments = int(only_free_assessments)
     learning = int(learning)
-
+    
     clinical_config = util.read_config("clinical", learning)
     
     first_assessment_to_drop = clinical_config["first assessment to drop"]
+    add_cols_to_input = clinical_config["add cols to input"]
 
-    dirs = set_up_directories(first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning)
+    params_for_dir_name = [first_assessment_to_drop, 
+                           use_other_diags_as_input, 
+                           only_free_assessments, 
+                           learning, 
+                           "1" if add_cols_to_input else "0"]
+    dirs = set_up_directories(params_for_dir_name)
 
     data.make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs, learning)
 

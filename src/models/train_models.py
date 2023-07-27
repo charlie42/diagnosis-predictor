@@ -16,8 +16,7 @@ from sklearn.preprocessing import StandardScaler
 
 from sklearn.pipeline import make_pipeline
 
-#from sklearn.model_selection import RandomizedSearchCV
-#from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.experimental import enable_halving_search_cv  # noqa
 from sklearn.model_selection import HalvingRandomSearchCV
 
@@ -152,20 +151,19 @@ def get_base_models_and_param_grids():
         (lgbm_pipe, lgbm_param_grid)
     ]
     if DEBUG_MODE:
-        #base_models_and_param_grids = [base_models_and_param_grids[-1]] # Only do LR in debug mode
-        base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[-2]] # Only do LR and LGBM in debug mode
+        base_models_and_param_grids = [base_models_and_param_grids[-2]] # Only do LR in debug mode
+        #base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[-2]] # Only do LR and LGBM in debug mode
         pass
     
     return base_models_and_param_grids
 
 def get_best_estimator(base_model, grid, X_train, y_train):
     cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 8)
-    #rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
-    #rs = GridSearchCV(estimator=base_model, param_grid=grid, cv=cv, scoring="roc_auc", n_jobs = -1, verbose=1)
-    rs = HalvingRandomSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc",
-                                random_state=0,
-                                max_resources=100,
-                                n_jobs = -1, verbose=1)
+    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
+    #rs = HalvingRandomSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc",
+    #                            random_state=0,
+    #                            max_resources=100,
+    #                            n_jobs = -1, verbose=1)
     
     print("Fitting", base_model, "...")
     rs.fit(X_train, y_train) 
