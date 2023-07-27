@@ -124,7 +124,6 @@ report assessments:
   - SRS
   - SRS_Pre
   - ASSQ
-  - NIH_Scores
   - SWAN
   - PreInt_Demos_Fam
   - PreInt_Demos_Home
@@ -146,6 +145,8 @@ non-standard assessments:
   - PreInt_EduHx
   - PreInt_Lang
   - PreInt_TxHx
+mandatory assessments:
+  #- C3SR
 #first assessment to drop: ICU_P # First drop-off in participants
 first assessment to drop: WHODAS_P # to include WISC
 predict test-based diags: True

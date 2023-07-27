@@ -27,7 +27,7 @@ Arguments: only_assessment_distribution, use_other_diags_as_input = 0, only_free
 
 Arguments: performance_margin = 0.02, models_from_file = 1
 
-## 3 step (optinpal):
+## 3 step (optional):
 
 `python -W ignore src/models/evaluate_original_models.py 1`
 
