@@ -402,7 +402,6 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
             relevant_assessments_list = relevant_assessments_list + ["CBCL", "CBCL_Pre"]
     if mandatory_assessments:
         relevant_assessments_list = relevant_assessments_list + mandatory_assessments
-    print("DEBUGmandatory_assessments", mandatory_assessments, relevant_assessments_list)
 
     # LORIS saved query (all data)
     full = pd.read_csv("data/raw/LORIS-release-10.csv", dtype=object)

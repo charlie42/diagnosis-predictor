@@ -174,7 +174,7 @@ def main(only_assessment_distribution, use_other_diags_as_input, only_free_asses
     clinical_config = util.read_config("clinical", learning)
     
     first_assessment_to_drop = clinical_config["first assessment to drop"]
-    add_cols_to_input = clinical_config["add cols to input"]
+    add_cols_to_input = clinical_config["add cols to input"] if "add cols to input" in clinical_config else None
 
     params_for_dir_name = [first_assessment_to_drop, 
                            use_other_diags_as_input, 
