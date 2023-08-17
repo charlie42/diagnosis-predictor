@@ -13,9 +13,9 @@ Predicting HBN consensus diagnoses, and test-based disagnoses for:
 
 ## 1 step:
 
-`python -W ignore src/data/create_datasets.py 0 0 0 0`
+`python -W ignore src/data/create_datasets.py 0 0 0 0 0`
 
-Arguments: only_assessment_distribution, use_other_diags_as_input = 0, only_free_assessments = 0, learning = 0
+Arguments: only_assessment_distribution, only_parent_report, use_other_diags_as_input = 0, only_free_assessments = 0, learning = 0
 
 ### 2 step (optional):
 

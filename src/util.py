@@ -121,9 +121,6 @@ def get_string_with_current_datetime():
 import yaml
 def read_config(type, learning = 0):
     config = yaml.safe_load(open(f"config/{type}/general.yml", "r"))
-    # Append cognitive batteries needed for test-based digas to relevant assessments 
-    cog_batteries = config["cog batteries"]
-    config["relevant assessments"] += list(cog_batteries)
     
     if type == "clinical" and learning == 1:
         learning_config = yaml.safe_load(open(f"config/{type}/learning.yml", "r"))
