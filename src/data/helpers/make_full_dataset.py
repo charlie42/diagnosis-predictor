@@ -380,11 +380,16 @@ def generate_assessment_reports(full_wo_underscore, EID_columns_by_popularity, a
     # Plot cumulative distribution of assessments
     plot_comul_number_of_examples(cumul_number_of_examples_df, dir)
 
-def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs, learning):
+def make_full_dataset(only_assessment_distribution, only_parent_report, first_assessment_to_drop, only_free_assessments, dirs, learning):
 
     clinical_config = util.read_config("clinical", learning)
 
-    relevant_assessments_list = clinical_config["relevant assessments"]
+    if only_parent_report:
+        relevant_assessments_list = clinical_config["relevant assessments parent-report"]
+    else:
+        relevant_assessments_list = clinical_config["relevant assessments self-report"] + clinical_config["relevant assessments parent-report"]
+    cog_batteries = clinical_config["cog batteries"]
+    relevant_assessments_list += list(cog_batteries)
     proprietary_assessments = clinical_config["proprietary assessments"]
     res_only_assessments = clinical_config["research only assessments"]
     report_assessments = clinical_config["report assessments"]
@@ -398,7 +403,7 @@ def make_full_dataset(only_assessment_distribution, first_assessment_to_drop, on
 
     if only_free_assessments == 1:
         relevant_assessments_list = remove_proprietary_assessments(relevant_assessments_list, proprietary_assessments)
-        if predict_test_based_diags: # Add CBCL and CBCL_Pre back
+        if predict_test_based_diags: # Add CBCL and CBCL_Pre back, for NVLD
             relevant_assessments_list = relevant_assessments_list + ["CBCL", "CBCL_Pre"]
     if mandatory_assessments:
         relevant_assessments_list = relevant_assessments_list + mandatory_assessments

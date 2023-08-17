@@ -13,14 +13,19 @@ import util, data, features
 
 def build_output_dir_name(params_for_dir_name):
 
-    first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning, NIH = params_for_dir_name
+    only_parent_report, first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning, NIH = params_for_dir_name
 
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
 
     # Part with the params
-    params = {"first_assessment_to_drop": first_assessment_to_drop, "use_other_diags_as_input": use_other_diags_as_input, 
-              "only_free_assessments": only_free_assessments, "learning?": learning, "NIH?": NIH}
+    params = {
+        "only_parent_report": only_parent_report,
+        "first_assessment_to_drop": first_assessment_to_drop, 
+        "use_other_diags_as_input": use_other_diags_as_input, 
+        "only_free_assessments": only_free_assessments, 
+        "learning?": learning, 
+        "NIH?": NIH}
     params_part = util.build_param_string_for_dir_name(params)
     
     return datetime_part + "___" + params_part
@@ -165,8 +170,9 @@ def update_datasets_with_new_diags(item_level_ds, cog_tasks_ds, subscales_ds, to
 
     return cog_tasks_ds, subscales_ds
 
-def main(only_assessment_distribution, use_other_diags_as_input, only_free_assessments, learning):
+def main(only_assessment_distribution, only_parent_report, use_other_diags_as_input, only_free_assessments, learning):
     only_assessment_distribution = int(only_assessment_distribution)
+    only_parent_report = int(only_parent_report)
     use_other_diags_as_input = int(use_other_diags_as_input)
     only_free_assessments = int(only_free_assessments)
     learning = int(learning)
@@ -176,14 +182,16 @@ def main(only_assessment_distribution, use_other_diags_as_input, only_free_asses
     first_assessment_to_drop = clinical_config["first assessment to drop"]
     add_cols_to_input = clinical_config["add cols to input"] if "add cols to input" in clinical_config else None
 
-    params_for_dir_name = [first_assessment_to_drop, 
-                           use_other_diags_as_input, 
-                           only_free_assessments, 
-                           learning, 
-                           "1" if add_cols_to_input else "0"]
+    params_for_dir_name = [
+        only_parent_report,
+        first_assessment_to_drop, 
+        use_other_diags_as_input, 
+        only_free_assessments, 
+        learning, 
+        "1" if add_cols_to_input else "0"] # Use NIH scores as input or not
     dirs = set_up_directories(params_for_dir_name)
 
-    data.make_full_dataset(only_assessment_distribution, first_assessment_to_drop, only_free_assessments, dirs, learning)
+    data.make_full_dataset(only_assessment_distribution, only_parent_report, first_assessment_to_drop, only_free_assessments, dirs, learning)
 
     if only_assessment_distribution == 0:
         item_level_ds = pd.read_csv(dirs["data_output_dir"] + "item_lvl.csv")
@@ -222,4 +230,4 @@ def main(only_assessment_distribution, use_other_diags_as_input, only_free_asses
         dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)        
         
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
