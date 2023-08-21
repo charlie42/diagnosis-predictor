@@ -86,7 +86,8 @@ def get_newest_non_empty_dir_in_dir(path):
     # Find non-empty dir with the latest timestamp, dir name format: 2023-01-05 11.03.00___first_dropped_assessment__ICU_P___other_diag_as_input__0___debug_mode__True
     
     timestamps = [d.split("___")[0] for d in non_empty_dir_names]
-    timestamps = [datetime.datetime.strptime(t, "%Y-%m-%d %H.%M.%S") for t in timestamps]
+    timestamps = [datetime.datetime.strptime(t, "%Y-%m-%d_%H.%M.%S") for t in timestamps]
+    print("DEBUG timestamps", timestamps, "non_empty_dir_names", non_empty_dir_names, "path", path)
     newest_dir_name = non_empty_dir_names[timestamps.index(max(timestamps))]
     return path + newest_dir_name + "/"
 
@@ -112,7 +113,7 @@ def get_string_with_current_datetime():
     now = datetime.datetime.now()
 
     # Format the date and time as a string with the format 'YYYY-MM-DD HH.MM.SS' (Can't use ':' in file names)
-    date_time_str = now.strftime('%Y-%m-%d %H.%M.%S')
+    date_time_str = now.strftime('%Y-%m-%d_%H.%M.%S')
 
     return date_time_str
 
