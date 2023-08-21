@@ -66,15 +66,17 @@ def set_up_directories():
 
     return {"input_data_dir": input_data_dir, "models_dir": models_dir, "reports_dir": reports_dir}
 
-def set_up_load_directories():
+def set_up_load_directories(models_from_file):
     # When loading existing models, can't take the newest directory, we just created it, it will be empty. 
     #   Need to take the newest non-empty directory.
+    # When the script is run on a new location for the first time, there won't be any non-empty directories. 
+    #   We only take non-empthy directries when we load existing models (script arguemnt 'models_from_file')
 
     data_dir = "../diagnosis_predictor_data/"
     
     load_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
-    load_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
-    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "reports/train_models/")
+    load_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/") if models_from_file == 1 else None
+    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "reports/train_models/") if models_from_file == 1 else None
     
     return {"load_data_dir": load_data_dir, "load_models_dir": load_models_dir, "load_reports_dir": load_reports_dir}
     
@@ -260,7 +262,7 @@ def main(performance_margin = 0.02, models_from_file = 1):
     performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
 
     dirs = set_up_directories()
-    load_dirs = set_up_load_directories()
+    load_dirs = set_up_load_directories(models_from_file)
 
     datasets = load(load_dirs["load_data_dir"]+'datasets.joblib')
     diag_cols = list(datasets.keys())
