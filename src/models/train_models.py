@@ -166,7 +166,11 @@ def main(models_from_file = 1):
     optimal_number_of_features = {}
     for diag in diag_cols:
         optimal_number_of_features[diag] = np.argmax(cv_perf_scores[diag] >= np.max(cv_perf_scores[diag]) * performance_margin) + 1
-        
+
+    # Save models, optimal # features, and cross_val_score at each # features
+    dump(rs, dirs["models_dir"]+'models.joblib')
+    dump(optimal_number_of_features, dirs["models_dir"]+'optimal_number_of_features.joblib')
+    dump(cv_perf_scores, dirs["models_dir"]+'cv_perf_scores.joblib')
     ###########
 
 
