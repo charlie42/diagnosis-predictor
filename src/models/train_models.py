@@ -29,7 +29,7 @@ import time
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-import util, data, models, util
+import util, models, util
 
 DEBUG_MODE = True
 
@@ -50,13 +50,13 @@ def set_up_directories():
     util.create_dir_if_not_exists(data_dir)
 
     # Input dirs
-    input_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
+    input_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
 
     # Create directory inside the output directory with the run timestamp and params:
     #    - [params from create_datasets.py]
     #    - use other diags as input
     #    - debug mode
-    params_from_create_datasets = models.get_params_from_current_data_dir_name(input_data_dir)
+    params_from_create_datasets = util.get_params_from_current_data_dir_name(input_data_dir)
     current_output_dir_name = build_output_dir_name(params_from_create_datasets)
 
     models_dir = data_dir + "models/" + "train_models/" + current_output_dir_name + "/"
@@ -67,15 +67,18 @@ def set_up_directories():
 
     return {"input_data_dir": input_data_dir, "models_dir": models_dir, "reports_dir": reports_dir}
 
-def set_up_load_directories():
+def set_up_load_directories(models_from_file):
     # When loading existing models, can't take the newest directory, we just created it, it will be empty. 
     #   Need to take the newest non-empty directory.
+    # When the script is run on a new location for the first time, there won't be any non-empty directories. 
+    #   We only take non-empthy directries when we load existing models (script arguemnt 'models_from_file')
+
 
     data_dir = "../diagnosis_predictor_data/"
     
-    load_data_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
-    load_models_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
-    load_reports_dir = models.get_newest_non_empty_dir_in_dir(data_dir + "reports/train_models/")
+    load_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
+    load_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/") if models_from_file == 1 else None
+    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "reports/train_models/") if models_from_file == 1 else None
     
     return {"load_data_dir": load_data_dir, "load_models_dir": load_models_dir, "load_reports_dir": load_reports_dir}
 
@@ -98,15 +101,15 @@ def main(models_from_file = 1):
     performance_margin = technical_config["performance margin"] # Margin of error for ROC AUC (for prefering logistic regression over other models)
 
     dirs = set_up_directories()
-    load_dirs = set_up_load_directories()
+    load_dirs = set_up_load_directories(models_from_file)
 
     datasets = load(load_dirs["load_data_dir"]+'datasets.joblib')
     diag_cols = list(datasets.keys())
     print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
 
     if DEBUG_MODE:
-        diag_cols = diag_cols[0:1]
-        #diag_cols = ["Diag.Processing Speed Deficit (test)"]
+        #diag_cols = diag_cols[0:1]
+        diag_cols = ["Diag.Autism Spectrum Disorder"]
         pass
 
     
@@ -117,7 +120,7 @@ def main(models_from_file = 1):
     # Parameters
     lr_param_grid = {
         #'C': loguniform(1e-5, 1e4), 
-        'sequentialfeatureselector__estimator__penalty': ['l1', 'l2', 'elasticnet'], 
+        'estimator__lr__penalty': ['l1', 'l2', 'elasticnet'], 
         #'class_weight': ['balanced', None], 
         #'l1_ratio': uniform(0, 1) 
     }
