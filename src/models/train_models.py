@@ -79,9 +79,6 @@ def set_up_load_directories():
     
     return {"load_data_dir": load_data_dir, "load_models_dir": load_models_dir, "load_reports_dir": load_reports_dir}
 
-def get_performance_of_models(datasets, diag_cols, pipeline, cv_perf):
-
-
 class MyPipeline(Pipeline): # Needed to expose feature importances for RFE
     @property
     def coef_(self):
