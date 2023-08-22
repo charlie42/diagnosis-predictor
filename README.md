@@ -30,9 +30,9 @@ Arguments: only_assessment_distribution, only_parent_report, use_other_diags_as_
 
 ## 2 step:
 
-`pipenv run python -W ignore src/models/train_models.py 0.02 0`
+`pipenv run python -W ignore src/models/train_models.py 0`
 
-Arguments: performance_margin = 0.02, models_from_file = 1
+Arguments: models_from_file = 1
 
 ## 3 step (optional):
 
