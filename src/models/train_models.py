@@ -7,9 +7,9 @@ import pandas as pd
 from scipy.stats import loguniform, uniform
 
 from sklearn.model_selection import StratifiedKFold
-from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
@@ -20,6 +20,7 @@ from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.model_selection import HalvingRandomSearchCV
 from sklearn.model_selection import cross_val_score
+import mlxtend
 
 import sys, inspect
 from joblib import load, dump
@@ -90,6 +91,20 @@ class MyPipeline(Pipeline): # Needed to expose feature importances for RFE
     def feature_importances_(self):
         return self._final_estimator.feature_importances_
 
+class CSequentialFeatureSelector(mlxtend.feature_selection.SequentialFeatureSelector):
+    def predict(self, X):
+        X = self.transform(X)
+        return self.estimator.predict(X)
+
+    def predict_proba(self, X):
+        X = self.transform(X)
+        return self.estimator.predict_proba(X)
+
+    #def fit(self, X, y):
+     #   self.fit(X, y) # fit helper is the 'old' fit method, which I copied and renamed to fit_helper
+     #   self.estimator.fit(self.transform(X), y)
+     #   return self
+
 def main(models_from_file = 1):
     start_time = time.time() # Start timer for measuring total time of script
 
@@ -109,72 +124,133 @@ def main(models_from_file = 1):
 
     if DEBUG_MODE:
         #diag_cols = diag_cols[0:1]
-        diag_cols = ["Diag.Autism Spectrum Disorder"]
+        #diag_cols = ["Diag.Any Diag"]
         pass
 
+    ### TEST print value counts when doing 3 nested kfolds
+    kf1 = StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
+    kf2 = StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
+    kf3 = StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
+    for diag in diag_cols:
+        print(diag)
+        for train, test in kf1.split(datasets[diag]["X_train"], datasets[diag]["y_train"]):
+            #print("kf1")
+            #print(datasets[diag]["y_train"].iloc[test].value_counts())
+            for train2, test2 in kf2.split(datasets[diag]["X_train"].iloc[train], datasets[diag]["y_train"].iloc[train]):
+                #print("kf2")
+                #print(datasets[diag]["y_train"].iloc[test2].value_counts())
+                for train3, test3 in kf3.split(datasets[diag]["X_train"].iloc[train].iloc[train2], datasets[diag]["y_train"].iloc[train].iloc[train2]):
+                    #print("kf3")
+                    if datasets[diag]["y_train"].iloc[test3].value_counts()[1] < 10:
+                        print(datasets[diag]["y_train"].iloc[test3].value_counts())
+
+    #sys.exit()
+    ###
+    
     
     ###########
     # Model
     lr = LogisticRegression(solver="saga")
+    lgbm = HistGradientBoostingClassifier()
 
     # Parameters
     lr_param_grid = {
-        #'C': loguniform(1e-5, 1e4), 
-        'estimator__lr__penalty': ['l1', 'l2', 'elasticnet'], 
-        #'class_weight': ['balanced', None], 
-        #'l1_ratio': uniform(0, 1) 
+        'model__C': loguniform(1e-5, 1e4), 
+        'model__penalty': ['l1', 'l2', 'elasticnet'], 
+        'model__class_weight': ['balanced', None], 
+        'model__l1_ratio': uniform(0, 1) 
+    }
+    lgbm_param_grid = {
+        'model__learning_rate': np.logspace(-3, 0, num=100),  # Learning rate values from 0.001 to 1
+        'model__max_depth': [3, 5, 7, None],  # Maximum depth of the trees
+        'model__max_iter': np.arange(100, 1001, 100),  # Number of boosting iterations
+        'model__min_samples_leaf': [1, 2, 4],  # Minimum number of samples required to be at a leaf node
+        'model__l2_regularization': np.logspace(-3, 3, num=100)  # L2 regularization values from 0.001 to 1000
     }
 
-    # Pipeline
-    pipeline = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy="median")),
-        ("scale",StandardScaler()),
-        ("lr",lr)])
+    for model, grid in zip([lr, lgbm], [lr_param_grid, lgbm_param_grid]):
+        print("Model", model)
 
-    # Feature selection
-    fs = SFS(estimator=pipeline, k_features=number_of_features_to_check, forward=True, floating=False if DEBUG_MODE else True, scoring='roc_auc', n_jobs=-1, verbose=2)
+        pipeline_for_fs = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy="median")),
+            ("scale",StandardScaler()),
+            ("model",model)])
+        
+        n_splits = 2 if DEBUG_MODE else 10
+        cv_rs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
+        cv_fs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
+        cv_perf = StratifiedKFold(n_splits, shuffle=True, random_state=0)
 
-    n_splits = 2 if DEBUG_MODE else 10
-    cv_rs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
-    cv_perf = StratifiedKFold(n_splits, shuffle=True, random_state=0)
+        # Feature selection
+        fs = SFS(
+        #fs = CSequentialFeatureSelector(
+            estimator=pipeline_for_fs,
+            k_features=number_of_features_to_check, 
+            cv=cv_fs,
+            forward=True, 
+            floating=True, 
+            scoring='roc_auc', 
+            n_jobs=-1, 
+            verbose=2)
+        
+        # Pipeline
+        pipeline_for_rs = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy="median")),
+            ("scale",StandardScaler()),
+            ('selector', fs),
+            ("model", model)])
 
-    # Search
-    rs = RandomizedSearchCV(
-        estimator=fs,
-        param_distributions=lr_param_grid,
-        n_iter=10 if DEBUG_MODE else 100,
-        scoring='roc_auc',
-        n_jobs=-1,
-        cv=cv_rs,
-        refit=True,
-        random_state=0
-    )
+        # Search
+        rs = RandomizedSearchCV(
+            estimator=pipeline_for_rs,
+            param_distributions=grid,
+            n_iter=50 if DEBUG_MODE else 200,
+            scoring='roc_auc',
+            n_jobs=-1,
+            cv=cv_rs,
+            refit=True,
+            error_score='raise',
+            random_state=0,
+            verbose=1
+        )
 
-    # Get cross_val_score at each number of features for each diagnosis
-    cv_perf_scores = {}
-    for diag in diag_cols:
-        print(f"Training {diag}")
-        cv_perf_scores = []
-        for i in range(1, number_of_features_to_check+1):
-            print(f"Checking {i} features")
-            fs.k_features = i
-            cv_perf_scores.append(np.mean(cross_val_score(rs, datasets[diag]["X_train_train"], datasets[diag]["y_train_train"], cv=cv_perf, scoring="roc_auc", n_jobs=-1)))
+        # rs = HalvingRandomSearchCV(estimator=fs, 
+        #                         param_distributions=grid, 
+        #                         cv=cv_rs, 
+        #                         scoring="roc_auc",
+        #                         random_state=0,
+        #                         max_resources=6, #max_resources=100,
+        #                         error_score='raise',
+        #                         n_jobs = -1, 
+        #                         verbose=1)
+        
+
+        # Get cross_val_score at each number of features for each diagnosis
+        cv_perf_scores = {}
+        for diag in diag_cols:
+            # for train, test in cv_perf.split(datasets[diag]["X_train"], datasets[diag]["y_train"]):
+            #     rs.fit(datasets[diag]["X_train"].iloc[train], datasets[diag]["y_train"].iloc[train])
+            #     print("Best subset", rs.best_estimator_.k_feature_names_)
+            #     print("Best score", rs.best_score_)
+            #     print("Best params", rs.best_params_)
+            #     print("Best estimator", rs.best_estimator_)
+            cv_perf_scores[diag] = np.mean(cross_val_score(rs, datasets[diag]["X_train"], datasets[diag]["y_train"], cv=cv_perf, scoring="roc_auc", n_jobs=-1, verbose=1))
+
         print(cv_perf_scores)
-        cv_perf_scores[diag] = cv_perf_scores
 
-    # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
-    optimal_number_of_features = {}
-    for diag in diag_cols:
-        optimal_number_of_features[diag] = np.argmax(cv_perf_scores[diag] >= np.max(cv_perf_scores[diag]) * performance_margin) + 1
+        # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
+        optimal_number_of_features = {}
+        for diag in diag_cols:
+            optimal_number_of_features[diag] = np.argmax(cv_perf_scores[diag] >= np.max(cv_perf_scores[diag]) * performance_margin) + 1
 
-    # Save models, optimal # features, and cross_val_score at each # features
-    dump(rs, dirs["models_dir"]+'models.joblib')
-    dump(optimal_number_of_features, dirs["models_dir"]+'optimal_number_of_features.joblib')
-    dump(cv_perf_scores, dirs["models_dir"]+'cv_perf_scores.joblib')
+        # Save models, optimal # features, and cross_val_score at each # features
+        dump(rs, dirs["models_dir"]+f'rs_{model}.joblib')
+        dump(optimal_number_of_features, dirs["models_dir"]+f'optimal_number_of_features_{model}.joblib')
+        dump(cv_perf_scores, dirs["models_dir"]+f'cv_perf_scores_{model}.joblib')
     ###########
 
 
-    util.print_and_save_string(time.time() - start_time, dirs["reports_dir"], "execution-time.txt")
+    print("\n\nExecution time:", time.time() - start_time)
 
 if __name__ == "__main__":
     main(sys.argv[1])
