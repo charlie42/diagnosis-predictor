@@ -191,7 +191,7 @@ def main(only_assessment_distribution, only_parent_report, use_other_diags_as_in
         "1" if add_cols_to_input else "0"] # Use NIH scores as input or not
     dirs = set_up_directories(params_for_dir_name)
 
-    data.make_full_dataset(only_assessment_distribution, only_parent_report, first_assessment_to_drop, only_free_assessments, dirs, learning)
+    data.make_HBN(only_assessment_distribution, only_parent_report, first_assessment_to_drop, only_free_assessments, dirs, learning)
 
     if only_assessment_distribution == 0:
         item_level_ds = pd.read_csv(dirs["data_output_dir"] + "item_lvl.csv")
