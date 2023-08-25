@@ -380,7 +380,7 @@ def generate_assessment_reports(full_wo_underscore, EID_columns_by_popularity, a
     # Plot cumulative distribution of assessments
     plot_comul_number_of_examples(cumul_number_of_examples_df, dir)
 
-def make_full_dataset(only_assessment_distribution, only_parent_report, first_assessment_to_drop, only_free_assessments, dirs, learning):
+def make_HBN(only_assessment_distribution, only_parent_report, first_assessment_to_drop, only_free_assessments, dirs, learning):
 
     clinical_config = util.read_config("clinical", learning)
 

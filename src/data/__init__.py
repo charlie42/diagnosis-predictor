@@ -1,2 +1,2 @@
-from data.helpers.make_full_dataset import make_full_dataset
+from data.helpers.make_HBN import make_HBN
 from data.helpers.customize_input_cols_per_output import customize_input_cols_per_output
