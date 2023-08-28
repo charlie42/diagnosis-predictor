@@ -21,6 +21,7 @@ from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.model_selection import HalvingRandomSearchCV
 from sklearn.model_selection import cross_val_score
 import mlxtend
+import multiprocessing
 
 import sys, inspect
 from joblib import load, dump
@@ -105,6 +106,103 @@ class CSequentialFeatureSelector(mlxtend.feature_selection.SequentialFeatureSele
      #   self.estimator.fit(self.transform(X), y)
      #   return self
 
+def parallel_grid_search(args):
+
+    dataset, output_name = args
+
+    # Model
+    lr = LogisticRegression(solver="saga")
+    lgbm = HistGradientBoostingClassifier()
+
+    # Parameters
+    lr_param_grid = {
+        'model__C': loguniform(1e-5, 1e4), 
+        'model__penalty': ['l1', 'l2', 'elasticnet'], 
+        'model__class_weight': ['balanced', None], 
+        'model__l1_ratio': uniform(0, 1) 
+    }
+    lgbm_param_grid = {
+        'model__learning_rate': np.logspace(-3, 0, num=100),  # Learning rate values from 0.001 to 1
+        'model__max_depth': [3, 5, 7, None],  # Maximum depth of the trees
+        'model__max_iter': np.arange(100, 1001, 100),  # Number of boosting iterations
+        'model__min_samples_leaf': [1, 2, 4],  # Minimum number of samples required to be at a leaf node
+        'model__l2_regularization': np.logspace(-3, 3, num=100)  # L2 regularization values from 0.001 to 1000
+    }
+
+    #for model, grid in zip([lr, lgbm], [lr_param_grid, lgbm_param_grid]):
+    # DEBUG
+    model = lr
+    grid = lr_param_grid
+
+    print("Model", model)
+
+    pipeline_for_fs = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy="median")),
+        ("scale",StandardScaler()),
+        ("model",model)])
+    
+    n_splits = 4 if DEBUG_MODE else 10
+    cv_rs = StratifiedKFold(n_splits, shuffle=True, random_state=0) #n_splits, shuffle=True, random_state=0)
+    cv_fs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
+    cv_perf = StratifiedKFold(n_splits, shuffle=True, random_state=0)
+
+    rfe = RFE(
+        estimator=pipeline_for_fs,
+        importance_getter="named_steps.model.coef_",
+        step=1, 
+        n_features_to_select=100,  #n_features_to_select=28, 
+        verbose=1)
+
+    # Feature selection
+    fs = SFS(
+    #fs = CSequentialFeatureSelector(
+        estimator=pipeline_for_fs,
+        k_features=27, #k_features=27, 
+        cv=cv_fs,
+        forward=True, 
+        floating=True, 
+        scoring='roc_auc', 
+        n_jobs=-1, 
+        verbose=2)
+    
+    # Pipeline
+    pipeline_for_rs = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy="median")),
+        ("scale",StandardScaler()),
+        ("rfe", rfe),
+        ('selector', fs),
+        ("model", model)])
+
+    # Search
+    # rs = RandomizedSearchCV(
+    #     estimator=pipeline_for_rs,
+    #     param_distributions=grid,
+    #     n_iter=2 if DEBUG_MODE else 200, #n_iter=50 if DEBUG_MODE else 200,
+    #     scoring='roc_auc',
+    #     n_jobs=-1,
+    #     cv=cv_rs,
+    #     refit=True,
+    #     error_score='raise',
+    #     random_state=0,
+    #     verbose=1
+    #)
+
+    rs = HalvingRandomSearchCV( # Need a lot of folds, otherwise ValueError: This solver needs samples of at least 2 classes in the data, but the data contains only one class: 0
+        estimator=pipeline_for_rs, 
+        param_distributions=grid, 
+        cv=cv_rs, 
+        scoring="roc_auc",
+        random_state=0,
+        max_resources=200, #max_resources=100,
+        #error_score='raise',
+        n_jobs = -1, 
+        verbose=1)
+    
+    scores = cross_val_score(rs, dataset["X_train"], dataset["y_train"], cv=cv_perf, scoring="roc_auc", n_jobs=-1, verbose=1)
+
+    return {output_name: scores}
+
+
 def main(models_from_file = 1):
     start_time = time.time() # Start timer for measuring total time of script
 
@@ -128,6 +226,7 @@ def main(models_from_file = 1):
         pass
 
     ### TEST print value counts when doing 3 nested kfolds
+
     kf1 = StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
     kf2 = StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
     kf3 = StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
@@ -143,110 +242,47 @@ def main(models_from_file = 1):
                     #print("kf3")
                     if datasets[diag]["y_train"].iloc[test3].value_counts()[1] < 10:
                         print(datasets[diag]["y_train"].iloc[test3].value_counts())
-
     #sys.exit()
     ###
     
-    
-    ###########
-    # Model
-    lr = LogisticRegression(solver="saga")
-    lgbm = HistGradientBoostingClassifier()
+    # Get cross_val_score at each number of features for each diagnosis
+    #cv_perf_scores = {}
+    #for diag in diag_cols:
+        # for train, test in cv_perf.split(datasets[diag]["X_train"], datasets[diag]["y_train"]):
+        #     rs.fit(datasets[diag]["X_train"].iloc[train], datasets[diag]["y_train"].iloc[train])
+        #     print("Best subset", rs.best_estimator_.k_feature_names_)
+        #     print("Best score", rs.best_score_)
+        #     print("Best params", rs.best_params_)
+        #     print("Best estimator", rs.best_estimator_)
+    #    cv_perf_scores[diag] = np.mean(cross_val_score(rs, datasets[diag]["X_train"], datasets[diag]["y_train"], cv=cv_perf, scoring="roc_auc", n_jobs=-1, verbose=1))
 
-    # Parameters
-    lr_param_grid = {
-        'model__C': loguniform(1e-5, 1e4), 
-        'model__penalty': ['l1', 'l2', 'elasticnet'], 
-        'model__class_weight': ['balanced', None], 
-        'model__l1_ratio': uniform(0, 1) 
-    }
-    lgbm_param_grid = {
-        'model__learning_rate': np.logspace(-3, 0, num=100),  # Learning rate values from 0.001 to 1
-        'model__max_depth': [3, 5, 7, None],  # Maximum depth of the trees
-        'model__max_iter': np.arange(100, 1001, 100),  # Number of boosting iterations
-        'model__min_samples_leaf': [1, 2, 4],  # Minimum number of samples required to be at a leaf node
-        'model__l2_regularization': np.logspace(-3, 3, num=100)  # L2 regularization values from 0.001 to 1000
-    }
+    #print(cv_perf_scores)
 
-    for model, grid in zip([lr, lgbm], [lr_param_grid, lgbm_param_grid]):
-        print("Model", model)
+    args_list = [(dataset, output_name) for dataset, output_name in zip([datasets[diag] for diag in diag_cols], diag_cols)]
 
-        pipeline_for_fs = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy="median")),
-            ("scale",StandardScaler()),
-            ("model",model)])
-        
-        n_splits = 2 if DEBUG_MODE else 10
-        cv_rs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
-        cv_fs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
-        cv_perf = StratifiedKFold(n_splits, shuffle=True, random_state=0)
+    with multiprocessing.Pool() as pool:
+        results = pool.map(parallel_grid_search, args_list)
 
-        # Feature selection
-        fs = SFS(
-        #fs = CSequentialFeatureSelector(
-            estimator=pipeline_for_fs,
-            k_features=number_of_features_to_check, 
-            cv=cv_fs,
-            forward=True, 
-            floating=True, 
-            scoring='roc_auc', 
-            n_jobs=-1, 
-            verbose=2)
-        
-        # Pipeline
-        pipeline_for_rs = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy="median")),
-            ("scale",StandardScaler()),
-            ('selector', fs),
-            ("model", model)])
+    # Aggregate the results into a DataFrame
+    result_df = pd.DataFrame()
+    for result in results:
+        output_name, scores = list(result.items())[0]
+        mean_score = pd.Series(scores).mean()  # Calculate mean score using .mean()
+        result_df[output_name] = [mean_score]  # Add mean score to DataFrame
 
-        # Search
-        rs = RandomizedSearchCV(
-            estimator=pipeline_for_rs,
-            param_distributions=grid,
-            n_iter=50 if DEBUG_MODE else 200,
-            scoring='roc_auc',
-            n_jobs=-1,
-            cv=cv_rs,
-            refit=True,
-            error_score='raise',
-            random_state=0,
-            verbose=1
-        )
+    result_df = result_df.T  
+    print(result_df)
 
-        # rs = HalvingRandomSearchCV(estimator=fs, 
-        #                         param_distributions=grid, 
-        #                         cv=cv_rs, 
-        #                         scoring="roc_auc",
-        #                         random_state=0,
-        #                         max_resources=6, #max_resources=100,
-        #                         error_score='raise',
-        #                         n_jobs = -1, 
-        #                         verbose=1)
-        
 
-        # Get cross_val_score at each number of features for each diagnosis
-        cv_perf_scores = {}
-        for diag in diag_cols:
-            # for train, test in cv_perf.split(datasets[diag]["X_train"], datasets[diag]["y_train"]):
-            #     rs.fit(datasets[diag]["X_train"].iloc[train], datasets[diag]["y_train"].iloc[train])
-            #     print("Best subset", rs.best_estimator_.k_feature_names_)
-            #     print("Best score", rs.best_score_)
-            #     print("Best params", rs.best_params_)
-            #     print("Best estimator", rs.best_estimator_)
-            cv_perf_scores[diag] = np.mean(cross_val_score(rs, datasets[diag]["X_train"], datasets[diag]["y_train"], cv=cv_perf, scoring="roc_auc", n_jobs=-1, verbose=1))
+    # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
+    #optimal_number_of_features = {}
+    #for diag in diag_cols:
+    #    optimal_number_of_features[diag] = np.argmax(cv_perf_scores[diag] >= np.max(cv_perf_scores[diag]) * performance_margin) + 1
 
-        print(cv_perf_scores)
-
-        # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
-        optimal_number_of_features = {}
-        for diag in diag_cols:
-            optimal_number_of_features[diag] = np.argmax(cv_perf_scores[diag] >= np.max(cv_perf_scores[diag]) * performance_margin) + 1
-
-        # Save models, optimal # features, and cross_val_score at each # features
-        dump(rs, dirs["models_dir"]+f'rs_{model}.joblib')
-        dump(optimal_number_of_features, dirs["models_dir"]+f'optimal_number_of_features_{model}.joblib')
-        dump(cv_perf_scores, dirs["models_dir"]+f'cv_perf_scores_{model}.joblib')
+    # Save models, optimal # features, and cross_val_score at each # features
+    #dump(rs, dirs["models_dir"]+f'rs_{model}.joblib')
+    #dump(optimal_number_of_features, dirs["models_dir"]+f'optimal_number_of_features_{model}.joblib')
+    dump(result_df, dirs["models_dir"]+f'cv_perf_scores_lr_debug.joblib')
     ###########
 
 
