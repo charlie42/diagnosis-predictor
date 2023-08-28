@@ -134,6 +134,29 @@ def plot_age_distributions(item_level_ds, diag_cols, dir):
 
     plt.savefig(dir + "age_distributions.png")
 
+def plot_hist(df, col, bins, dir):
+    plt.figure()
+    plt.hist(df[col], bins=bins)
+    plt.title(f"Distribution of {col}")
+    plt.savefig(dir + f"/{col}.png", dpi=300)
+
+def plot_col_value_distrib(df, dir):
+    # Plot value distribution of every column, except _WAS_MISSING columns, in separate plots
+    new_dir = dir+"column_value_distributions"
+    util.create_dir_if_not_exists(new_dir)
+
+    df = df.copy()
+
+    df = df.drop([col for col in df.columns if "_WAS_MISSING" in col], axis=1)
+
+    for i, col in enumerate(df.columns):
+        n_bins = df[col].nunique()
+        df[col] = df[col].replace({True: 1, False: 0})
+        if n_bins > 10:
+            plot_hist(df, col, bins=10, dir=new_dir)
+        else:
+            plot_hist(df, col, bins=n_bins, dir=new_dir)
+
 def main():
     dirs = set_up_directories()
 
@@ -150,6 +173,9 @@ def main():
 
     # Plot age distribution of whole dataset and of each diagnosis
     plot_age_distributions(item_level_ds, diag_cols, dirs["reports_dir"])
+
+    # Plot value distribution of every column
+    plot_col_value_distrib(item_level_ds, dirs["reports_dir"])
 
 
 if __name__ == "__main__":

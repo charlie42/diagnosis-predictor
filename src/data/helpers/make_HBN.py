@@ -66,6 +66,19 @@ def drop_rows_w_underscore_in_id(full):
 
     return full_wo_underscore
 
+def replace_out_of_range_responses(full_wo_underscore):
+    assessments_and_vals_to_replace = {
+        "CIS_P": [5],
+        "CIS_SR": [5],
+        "PBQ": [4, 5]
+    }
+
+    for assessment, vals_to_replace in assessments_and_vals_to_replace.items():
+        cols_to_replace = [x for x in full_wo_underscore.columns if x.startswith(assessment)]
+        full_wo_underscore[cols_to_replace] = full_wo_underscore[cols_to_replace].replace(vals_to_replace, np.nan)
+        
+    return full_wo_underscore
+
 def remove_incomplete_and_missing_diag(full_wo_underscore):
     full_wo_underscore = full_wo_underscore[full_wo_underscore["Diagnosis_ClinicianConsensus,DX_01"] != "No Diagnosis Given: Incomplete Eval"]
     full_wo_underscore = full_wo_underscore[full_wo_underscore["Diagnosis_ClinicianConsensus,EID"].notna()]
@@ -429,6 +442,9 @@ def make_HBN(only_assessment_distribution, only_parent_report, first_assessment_
     full = get_ID_from_EID(full, EID_cols)
 
     full_wo_underscore = drop_rows_w_underscore_in_id(full)
+
+    # Replace response options that are out of range (e.g. 5 in CIS_P is "Don't know")
+    full_wo_underscore = replace_out_of_range_responses(full_wo_underscore)
 
     # Drop questionnaires present in rows with underscores from data from list of ID columns
     EID_cols = [x for x in EID_cols if 'TRF' not in x]
