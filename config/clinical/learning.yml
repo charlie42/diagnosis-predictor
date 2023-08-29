@@ -1,0 +1,11 @@
+first assessment to drop: CPIC
+predict test-based diags: True
+predict consensus diags: True
+add cols to input: 
+  - NIH_Scores,NIH7_Card_P
+  - NIH_Scores,NIH7_Cog_P
+  - NIH_Scores,NIH7_Flanker_P
+  - NIH_Scores,NIH7_List_P
+  - NIH_Scores,NIH7_Pattern_P
+  - NIH_Scores,NIH7_Picture_P
+use only research only assessments: False
