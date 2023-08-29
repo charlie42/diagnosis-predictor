@@ -1,0 +1,160 @@
+relevant assessments parent-report:
+  - "Basic_Demos"
+  - "PreInt_EduHx"
+  - "PreInt_DevHx"
+  - "SympChck"
+  - "SCQ"
+  - "Barratt"
+  - "ASSQ"
+  - "ARI_P"
+  - "SDQ"
+  - "SWAN"
+  - "SRS"
+  - "CBCL"
+  - "ICU_P"
+  - "APQ_P"
+  - "PCIAT"
+  - "DTS"
+  - "ESWAN"
+  - "MFQ_P"
+  - "WHODAS_P"
+  - "CIS_P"
+  - "SAS"
+  - "PSI"
+  - "RBS"
+  - "PhenX_Neighborhood"
+  - "SCARED_P"
+  - "CCSC"
+  - "PhenX_SchoolRisk"
+  - "CBCL_Pre"
+  - "SRS_Pre"
+relevant assessments self-report:
+  - "ARI_S"
+  - "ICU_SR"
+  - "PANAS"
+  - "MFQ_SR"
+  - "APQ_SR"
+  - "WHODAS_SR"
+  - "CIS_SR"
+  - "SCARED_SR"
+  - "C3SR"
+  - "CPIC"
+  - "YSR"
+  - "ASR"
+proprietary assessments:
+  - "ASR"
+  - "BDI"
+  - "TRF"
+  - "TRF_P"
+  - "CBCL"
+  - "CBCL_Pre"
+  - "CDI"
+  - "CDI_P"
+  - "CGAS"
+  - "C3SR"
+  - "CAARS"
+  - "PCIAT"
+  - "PPVT"
+  - "PAQ_A"
+  - "PAQ_C"
+  - "RBS"
+  - "SCQ"
+  - "SRS"
+  - "SRS_Pre"
+  - "YSR"
+  - "EHQ"
+  - "Barratt"
+  - "PSI"
+  - "PBQ"
+research only assessments:
+  - AMAS
+  - ACE
+  - ARI_S
+  - ARI_P
+  - APQ_P
+  - APQ_SR
+  - AUDIT
+  - Barratt
+  - CFS
+  - CCSC
+  - Basic_Demos
+  - DTS
+  - EHQ
+  - Education
+  - FTND
+  - GSE
+  - GRIT
+  - IUQ
+  - ICU_SR
+  - ICU_P
+  - mAMAS
+  - FTQA
+  - MEIM
+  - PMHS
+  - PCIAT
+  - PSI
+  - PPS
+  - PhenX_Neighborhood
+  - PhenX_School
+  - PAQ_A
+  - PAQ_C
+  - PANAS
+  - PBS
+  - SDS
+  - SAS
+  - SDQ
+  - CIS_P
+  - CIS_SR
+  - WHODAS_P
+  - WHODAS_SR
+  - YFAS
+report assessments:
+  - YSR
+  - ASR
+  - CBCL
+  - CBCL_Pre
+  - TRF
+  - C3SR
+  - ESWAN
+  - GARS
+  - MFQ_P
+  - MFQ_SR
+  - SCARED_P 
+  - SCARED_SR
+  - SCQ
+  - SRS
+  - SRS_Pre
+  - ASSQ
+  - SWAN
+  - PreInt_Demos_Fam
+  - PreInt_Demos_Home
+  - PreInt_DevHx 
+  - PreInt_EduHx
+  - PreInt_Lang
+  - PreInt_TxHx
+cog batteries:
+  - WISC
+  - WIAT
+  - WASI
+  - WAIS
+  - NIH_Scores
+  - Pegboard
+non-standard assessments:
+  - PreInt_Demos_Fam
+  - PreInt_Demos_Home
+  - PreInt_DevHx 
+  - PreInt_EduHx
+  - PreInt_Lang
+  - PreInt_TxHx
+mandatory assessments:
+  #- C3SR
+#first assessment to drop: ICU_P # First drop-off in participants
+first assessment to drop: WHODAS_P # to include WISC
+predict test-based diags: True
+predict consensus diags: True
+include non-standard assessments: True # True increses performance, False increases generalizability (other studies don't use the same pre-interview assessments)
+max items in screener: 27
+#max items in screener: 2 # for testing
+use only research only assessments: False 
+minimum sensitivity: 0.8 # For identifying optimal threshold
+acceptable percentage of max performance: 99 # For identifying optimal number of items

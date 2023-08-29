@@ -7,8 +7,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.base import clone
 
 def fit_estimator_on_subset_of_features(best_estimators, diag, X, y):
-    new_estimator_base = clone(best_estimators[diag][2])
-    new_estimator = make_pipeline(SimpleImputer(missing_values=np.nan, strategy='median'), StandardScaler(), new_estimator_base)
+    new_estimator_model = clone(best_estimators[diag][2])
+    new_estimator = make_pipeline(SimpleImputer(missing_values=np.nan, strategy='median'), StandardScaler(), new_estimator_model)
     new_estimator.fit(X, y)
     return new_estimator
 
@@ -32,9 +32,9 @@ def re_train_models_on_feature_subsets_per_output(diag, feature_subsets, dataset
 
 def re_train_models_on_feature_subsets(feature_subsets, datasets, best_estimators):
     estimators_on_feature_subsets = {}
-    for diag in feature_subsets.keys():
+    for i, diag in enumerate(feature_subsets):
         if diag in datasets.keys():
-            print("Re-training models on feature subsets for output: " + diag)
+            print("Re-training models on feature subsets for output: " + diag + " (" + str(i+1) + "/" + str(len(feature_subsets)) + ")")
             estimators_on_feature_subsets[diag] = re_train_models_on_feature_subsets_per_output(diag, feature_subsets, datasets, best_estimators)
             
     return estimators_on_feature_subsets
