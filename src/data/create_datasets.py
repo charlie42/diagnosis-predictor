@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-import yaml
+import numpy as np
 
 from joblib import dump
 import sys, os, inspect
@@ -25,7 +25,9 @@ def build_output_dir_name(params_for_dir_name):
         "use_other_diags_as_input": use_other_diags_as_input, 
         "only_free_assessments": only_free_assessments, 
         "learning?": learning, 
-        "NIH?": NIH}
+        "NIH?": NIH,
+        "fix_n": str(1) # Fix number of training examples when using less assessments
+    }
     params_part = util.build_param_string_for_dir_name(params)
     
     return datetime_part + "___" + params_part
@@ -33,7 +35,7 @@ def build_output_dir_name(params_for_dir_name):
 def set_up_directories(params_for_dir_name):
 
     # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
-    data_dir = "../diagnosis_predictor_data/"
+    data_dir = "../diagnosis_predictor_data_archive/"
     util.create_dir_if_not_exists(data_dir)
 
     # Create directory inside the output directory with the run timestamp and first_assessment_to_drop param
@@ -170,6 +172,23 @@ def update_datasets_with_new_diags(item_level_ds, cog_tasks_ds, subscales_ds, to
 
     return cog_tasks_ds, subscales_ds
 
+def fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs, n):
+    # Gen random n indices
+    indices_to_keep = np.random.choice(item_level_ds.index, n, replace=False)
+
+    item_level_ds = item_level_ds.loc[indices_to_keep]
+    cog_tasks_ds = cog_tasks_ds.loc[indices_to_keep]
+    subscales_ds = subscales_ds.loc[indices_to_keep]
+    total_scores_ds = total_scores_ds.loc[indices_to_keep]
+
+    # Rewrite csv files
+    item_level_ds.to_csv(dirs["data_output_dir"] + "item_lvl.csv")
+    cog_tasks_ds.to_csv(dirs["data_output_dir"] + "cog_tasks.csv")
+    subscales_ds.to_csv(dirs["data_output_dir"] + "subscale_scores.csv")
+    total_scores_ds.to_csv(dirs["data_output_dir"] + "total_scores.csv")
+
+    return item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds
+
 def main(only_assessment_distribution, only_parent_report, use_other_diags_as_input, only_free_assessments, learning):
     only_assessment_distribution = int(only_assessment_distribution)
     only_parent_report = int(only_parent_report)
@@ -188,16 +207,20 @@ def main(only_assessment_distribution, only_parent_report, use_other_diags_as_in
         use_other_diags_as_input, 
         only_free_assessments, 
         learning, 
-        "1" if add_cols_to_input else "0"] # Use NIH scores as input or not
+        "1" if add_cols_to_input else "0",] # Use NIH scores as input or not
     dirs = set_up_directories(params_for_dir_name)
 
     data.make_HBN(only_assessment_distribution, only_parent_report, first_assessment_to_drop, only_free_assessments, dirs, learning)
 
     if only_assessment_distribution == 0:
+
         item_level_ds = pd.read_csv(dirs["data_output_dir"] + "item_lvl.csv")
         cog_tasks_ds = pd.read_csv(dirs["data_output_dir"] + "cog_tasks.csv") 
         subscales_ds = pd.read_csv(dirs["data_output_dir"] + "subscale_scores.csv")
         total_scores_ds = pd.read_csv(dirs["data_output_dir"] + "total_scores.csv")
+
+        # Fix n when using less assessments: read and rewrite csv files
+        item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds = fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs, n = 2323)
 
         consensus_diags = [x for x in item_level_ds.columns if x.startswith("Diag.")]
 
