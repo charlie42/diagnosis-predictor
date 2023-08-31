@@ -22,7 +22,7 @@ def build_output_dir_name(params_from_train_models, params_from_evaluate_origina
 
 def set_up_directories(use_test_set):
 
-    data_dir = "../diagnosis_predictor_data/"
+    data_dir = "../diagnosis_predictor_data_archive/"
 
     # Input dirs
     input_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")

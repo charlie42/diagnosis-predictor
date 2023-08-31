@@ -45,7 +45,7 @@ def build_output_dir_name(params_from_create_datasets):
 def set_up_directories():
 
     # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
-    data_dir = "../diagnosis_predictor_data/"
+    data_dir = "../diagnosis_predictor_data_archive/"
     util.create_dir_if_not_exists(data_dir)
 
     # Input dirs
@@ -70,7 +70,7 @@ def set_up_load_directories():
     # When loading existing models, can't take the newest directory, we just created it, it will be empty. 
     #   Need to take the newest non-empty directory.
 
-    data_dir = "../diagnosis_predictor_data/"
+    data_dir = "../diagnosis_predictor_data_archive/"
     
     load_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
     load_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
