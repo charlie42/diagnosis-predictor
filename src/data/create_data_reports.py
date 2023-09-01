@@ -140,7 +140,7 @@ def plot_hist(df, col, bins, dir):
     plt.title(f"Distribution of {col}")
     plt.savefig(dir + f"/{col}.png", dpi=300)
 
-def plot_col_value_distrib(df, dir):
+def plot_col_value_distributions(df, dir):
     # Plot value distribution of every column, except _WAS_MISSING columns, in separate plots
     new_dir = dir+"column_value_distributions"
     util.create_dir_if_not_exists(new_dir)
@@ -150,6 +150,7 @@ def plot_col_value_distrib(df, dir):
     df = df.drop([col for col in df.columns if "_WAS_MISSING" in col], axis=1)
 
     for i, col in enumerate(df.columns):
+        print(f"Plotting {col} ({i+1}/{len(df.columns)})")
         n_bins = df[col].nunique()
         df[col] = df[col].replace({True: 1, False: 0})
         if n_bins > 10:
@@ -157,7 +158,9 @@ def plot_col_value_distrib(df, dir):
         else:
             plot_hist(df, col, bins=n_bins, dir=new_dir)
 
-def main():
+def main(plot_col_value_distrib=1):
+    plot_col_value_distrib = int(plot_col_value_distrib)
+
     dirs = set_up_directories()
 
     datasets = load(dirs["input_data_dir"] + "datasets.joblib")
@@ -175,8 +178,9 @@ def main():
     plot_age_distributions(item_level_ds, diag_cols, dirs["reports_dir"])
 
     # Plot value distribution of every column
-    plot_col_value_distrib(item_level_ds, dirs["reports_dir"])
+    if plot_col_value_distrib == 1:
+        plot_col_value_distributions(item_level_ds, dirs["reports_dir"])
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])
