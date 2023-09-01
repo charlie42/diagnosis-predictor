@@ -151,7 +151,8 @@ def parallel_grid_search(args):
         importance_getter="named_steps.model.coef_",
         step=1, 
         n_features_to_select=100,  #n_features_to_select=28, 
-        verbose=1)
+        verbose=0
+    )
 
     # Feature selection
     fs = SFS(
@@ -163,7 +164,8 @@ def parallel_grid_search(args):
         floating=True, 
         scoring='roc_auc', 
         n_jobs=-1, 
-        verbose=2)
+        verbose=2
+    )
     
     # Pipeline
     pipeline_for_rs = Pipeline(steps=[
@@ -174,29 +176,29 @@ def parallel_grid_search(args):
         ("model", model)])
 
     # Search
-    # rs = RandomizedSearchCV(
-    #     estimator=pipeline_for_rs,
-    #     param_distributions=grid,
-    #     n_iter=2 if DEBUG_MODE else 200, #n_iter=50 if DEBUG_MODE else 200,
-    #     scoring='roc_auc',
-    #     n_jobs=-1,
-    #     cv=cv_rs,
-    #     refit=True,
-    #     error_score='raise',
-    #     random_state=0,
-    #     verbose=1
-    #)
-
-    rs = HalvingRandomSearchCV( # Need a lot of folds, otherwise ValueError: This solver needs samples of at least 2 classes in the data, but the data contains only one class: 0
-        estimator=pipeline_for_rs, 
-        param_distributions=grid, 
-        cv=cv_rs, 
-        scoring="roc_auc",
+    rs = RandomizedSearchCV(
+        estimator=pipeline_for_rs,
+        param_distributions=grid,
+        n_iter=2 if DEBUG_MODE else 200, #n_iter=50 if DEBUG_MODE else 200,
+        scoring='roc_auc',
+        n_jobs=-1,
+        cv=cv_rs,
+        refit=True,
+        error_score='raise',
         random_state=0,
-        max_resources=200, #max_resources=100,
-        #error_score='raise',
-        n_jobs = -1, 
-        verbose=1)
+        verbose=1
+    )
+
+    # rs = HalvingRandomSearchCV( # Need a lot of folds, otherwise ValueError: This solver needs samples of at least 2 classes in the data, but the data contains only one class: 0
+    #     estimator=pipeline_for_rs, 
+    #     param_distributions=grid, 
+    #     cv=cv_rs, 
+    #     scoring="roc_auc",
+    #     random_state=0,
+    #     max_resources=200, #max_resources=100,
+    #     #error_score='raise',
+    #     n_jobs = -1, 
+    #     verbose=1)
     
     scores = cross_val_score(rs, dataset["X_train"], dataset["y_train"], cv=cv_perf, scoring="roc_auc", n_jobs=-1, verbose=1)
 
