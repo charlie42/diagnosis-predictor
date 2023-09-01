@@ -22,14 +22,14 @@ def build_output_dir_name(params_from_train_models, params_from_evaluate_origina
     return datetime_part + "___" + util.build_param_string_for_dir_name(params_from_train_models) + "___" +\
         util.build_param_string_for_dir_name(params_from_evaluate_original_models)
 
-def set_up_directories(use_test_set):
+def set_up_directories(use_test_set, args_to_read_data):
 
     data_dir = "../diagnosis_predictor_data_archive/"
 
     # Input dirs
-    input_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
-    models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
-    input_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/train_models/")
+    input_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/", args_to_read_data)
+    models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/", args_to_read_data)
+    input_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/train_models/", args_to_read_data)
 
     # Output dirs
 
@@ -100,10 +100,31 @@ def get_roc_aucs(best_estimators, datasets, use_test_set, diag_cols, input_repor
 
 def main():
     parser = argparse.ArgumentParser()
+    # New args
     parser.add_argument("--val-set", action='store_true', help="Use the validation set instead of the test set")
     use_test_set = 0 if parser.parse_args().val_set else 1
 
-    dirs = set_up_directories(use_test_set)
+    # Args to read data from previous step
+    parser.add_argument('--distrib-only', action='store_true', help='Only generate assessment distribution, do not create datasets')
+    parser.add_argument('--parent-only', action='store_true', help='Only use parent-report assessments')
+    parser.add_argument('--use-other-diags', action='store_true', help='Use other diagnoses as input')
+    parser.add_argument('--free-only', action='store_true', help='Only use free assessments')
+    parser.add_argument('--learning', action='store_true', help='Use additional assessments like C3SR (reduces # of examples)')
+    parser.add_argument('--nih', action='store_true', help='Use NIH toolbox scores')
+    parser.add_argument('--fix-n-all', action='store_true', help='Fix number of training examples when using less assessments')
+    parser.add_argument('--fix-n-learning', action='store_true', help='Fix number of training examples when using less assessments')
+
+    args_to_read_data = {
+        "only_parent_report": parser.parse_args().parent_only,
+        "use_other_diags_as_input": parser.parse_args().use_other_diags,
+        "only_free_assessments": parser.parse_args().free_only,
+        "learning?": parser.parse_args().learning,
+        "NIH?": parser.parse_args().nih,
+        "fix_n_all": parser.parse_args().fix_n_all, 
+        "fix_n_learning": parser.parse_args().fix_n_learning
+    }
+    
+    dirs = set_up_directories(use_test_set, args_to_read_data)
 
     best_estimators = load(dirs["models_dir"]+'best-estimators.joblib')
     

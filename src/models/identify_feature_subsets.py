@@ -25,16 +25,16 @@ def build_output_dir_name(params_from_previous_script):
 
     return datetime_part + "___" + util.build_param_string_for_dir_name(params_from_previous_script)
 
-def set_up_directories():
+def set_up_directories(args_to_read_data):
 
     data_dir = "../diagnosis_predictor_data_archive/"
 
     # Input dirs
-    input_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
+    input_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/", args_to_read_data)
     print("Reading data from: " + input_data_dir)
-    models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/")
+    models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/", args_to_read_data)
     print("Reading models from: " + models_dir)
-    input_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/train_models/")
+    input_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/train_models/", args_to_read_data)
     print("Reading reports from: " + input_reports_dir)
 
     # Output dirs
@@ -50,11 +50,11 @@ def set_up_directories():
     return {"input_data_dir": input_data_dir,  "models_dir": models_dir, "input_reports_dir": input_reports_dir, 
             "output_reports_dir": output_reports_dir, "output_models_dir": output_models_dir}
 
-def set_up_load_directories():
+def set_up_load_directories(args_to_read_data):
     data_dir = "../diagnosis_predictor_data_archive/"
 
-    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/identify_feature_subsets/")
-    load_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/identify_feature_subsets/")
+    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir+ "reports/identify_feature_subsets/", args_to_read_data)
+    load_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/identify_feature_subsets/", args_to_read_data)
 
     return {"load_reports_dir": load_reports_dir, "load_models_dir": load_models_dir}
 
@@ -85,7 +85,27 @@ def make_score_table(scores):
     
 def main():
     parser = argparse.ArgumentParser()
+    # New args
     parser.add_argument("--from-file", action='store_true', help="Import feature importances from file instead of calculating new ones")
+    # Args to read data from previous step
+    parser.add_argument('--distrib-only', action='store_true', help='Only generate assessment distribution, do not create datasets')
+    parser.add_argument('--parent-only', action='store_true', help='Only use parent-report assessments')
+    parser.add_argument('--use-other-diags', action='store_true', help='Use other diagnoses as input')
+    parser.add_argument('--free-only', action='store_true', help='Only use free assessments')
+    parser.add_argument('--learning', action='store_true', help='Use additional assessments like C3SR (reduces # of examples)')
+    parser.add_argument('--nih', action='store_true', help='Use NIH toolbox scores')
+    parser.add_argument('--fix-n-all', action='store_true', help='Fix number of training examples when using less assessments')
+    parser.add_argument('--fix-n-learning', action='store_true', help='Fix number of training examples when using less assessments')
+
+    args_to_read_data = {
+        "only_parent_report": parser.parse_args().parent_only,
+        "use_other_diags_as_input": parser.parse_args().use_other_diags,
+        "only_free_assessments": parser.parse_args().free_only,
+        "learning?": parser.parse_args().learning,
+        "NIH?": parser.parse_args().nih,
+        "fix_n_all": parser.parse_args().fix_n_all, 
+        "fix_n_learning": parser.parse_args().fix_n_learning
+    }
     
     importances_from_file = parser.parse_args().from_file
 
@@ -93,7 +113,7 @@ def main():
     number_of_features_to_check = clinical_config["max items in screener"]
     percentage_of_max_performance = clinical_config["acceptable percentage of max performance"]
 
-    dirs = set_up_directories()
+    dirs = set_up_directories(args_to_read_data)
 
     best_estimators = load(dirs["models_dir"]+'best-estimators.joblib')
     datasets = load(dirs["input_data_dir"]+'datasets.joblib')
@@ -104,7 +124,7 @@ def main():
         pass
 
     if importances_from_file is True:
-        load_dirs = set_up_load_directories()
+        load_dirs = set_up_load_directories(args_to_read_data)
 
         feature_subsets = load(load_dirs["load_reports_dir"]+'feature-subsets.joblib')
         scores = load(load_dirs["load_reports_dir"]+'subset-cv-scores.joblib')
