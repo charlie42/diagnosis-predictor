@@ -11,6 +11,11 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util, data, features
 
+N_SAMPLES_ALL = 2323
+N_SAMPLES_LEARNING = 1406
+FIX_N_SAMPLES = False
+FIX_N_SAMPLES_LEARNING = True
+
 def build_output_dir_name(params_for_dir_name):
 
     only_parent_report, first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning, NIH = params_for_dir_name
@@ -26,7 +31,8 @@ def build_output_dir_name(params_for_dir_name):
         "only_free_assessments": only_free_assessments, 
         "learning?": learning, 
         "NIH?": NIH,
-        "fix_n": str(1) # Fix number of training examples when using less assessments
+        "fix_n_all": 1 if FIX_N_SAMPLES else 0,  # Fix number of training examples when using less assessments
+        "fix_n_learning": 1 if FIX_N_SAMPLES_LEARNING else 0 # Fix number of training examples when using less assessments
     }
     params_part = util.build_param_string_for_dir_name(params)
     
@@ -172,7 +178,15 @@ def update_datasets_with_new_diags(item_level_ds, cog_tasks_ds, subscales_ds, to
 
     return cog_tasks_ds, subscales_ds
 
-def fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs, n):
+def fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs):
+    # Check if want to fix n and how many values (n_samples_all for comparing free vs all vs only parent report, n_samples_learning for comparing after adding C3SR etc. and NIH)
+    if FIX_N_SAMPLES:
+        n = N_SAMPLES_ALL
+    elif FIX_N_SAMPLES_LEARNING:
+        n = N_SAMPLES_LEARNING
+    else:
+        return item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds
+
     # Gen random n indices
     indices_to_keep = np.random.choice(item_level_ds.index, n, replace=False)
 
@@ -189,25 +203,29 @@ def fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs, n):
 
     return item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds
 
-def main(only_assessment_distribution, only_parent_report, use_other_diags_as_input, only_free_assessments, learning):
+def main(only_assessment_distribution, only_parent_report, use_other_diags_as_input, only_free_assessments, learning, nih):
     only_assessment_distribution = int(only_assessment_distribution)
     only_parent_report = int(only_parent_report)
     use_other_diags_as_input = int(use_other_diags_as_input)
     only_free_assessments = int(only_free_assessments)
     learning = int(learning)
+    nih = int(nih)
     
     clinical_config = util.read_config("clinical", learning)
     
     first_assessment_to_drop = clinical_config["first assessment to drop"]
-    add_cols_to_input = clinical_config["add cols to input"] if "add cols to input" in clinical_config else None
+
+    if learning == 1 and nih == 0: # Don't add NIH scores to input
+        clinical_config["add cols to input"] = [x for x in clinical_config["add cols to input"] if not x.startswith("NIH")]
 
     params_for_dir_name = [
         only_parent_report,
         first_assessment_to_drop, 
         use_other_diags_as_input, 
         only_free_assessments, 
-        learning, 
-        "1" if add_cols_to_input else "0",] # Use NIH scores as input or not
+        learning, # use additional assessments like C3SR (reduces # of examples)
+        nih # use NIH toolbox scores
+    ] 
     dirs = set_up_directories(params_for_dir_name)
 
     data.make_HBN(only_assessment_distribution, only_parent_report, first_assessment_to_drop, only_free_assessments, dirs, learning)
@@ -220,7 +238,7 @@ def main(only_assessment_distribution, only_parent_report, use_other_diags_as_in
         total_scores_ds = pd.read_csv(dirs["data_output_dir"] + "total_scores.csv")
 
         # Fix n when using less assessments: read and rewrite csv files
-        item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds = fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs, n = 2323)
+        item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds = fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs)
 
         consensus_diags = [x for x in item_level_ds.columns if x.startswith("Diag.")]
 
@@ -240,7 +258,7 @@ def main(only_assessment_distribution, only_parent_report, use_other_diags_as_in
         min_pos_examples_val_set = 20
         split_percentage = 0.2
         all_diags = [x for x in item_level_ds.columns if x.startswith("Diag.")]
-        if clinical_config["predict consensus diags"] == False: # Remove consensus diags, only keep new diags
+        if clinical_config["predict consensus diags"] is False: # Remove consensus diags, only keep new diags
             all_diags = [x for x in all_diags if x not in consensus_diags]
         positive_examples_in_ds = get_positive_examples_in_ds(item_level_ds, all_diags)
         dump(positive_examples_in_ds, dirs["data_output_dir"]+'positive_examples_in_ds.joblib', compress=1)
@@ -253,4 +271,4 @@ def main(only_assessment_distribution, only_parent_report, use_other_diags_as_in
         dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)        
         
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
