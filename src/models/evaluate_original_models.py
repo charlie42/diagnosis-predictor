@@ -4,6 +4,8 @@ os.environ["PYTHONWARNINGS"] = "ignore::UserWarning" # Seems to be the only way 
 import pandas as pd
 import numpy as np
 import sys
+import argparse
+from joblib import load
 
 from sklearn.metrics import roc_auc_score
 
@@ -96,12 +98,13 @@ def get_roc_aucs(best_estimators, datasets, use_test_set, diag_cols, input_repor
     roc_aucs = roc_aucs_cv_from_grid_search.merge(roc_aucs_on_test_set, on="Diag").sort_values(by="ROC AUC Mean CV - SD", ascending=False)
     return roc_aucs
 
-def main(use_test_set=1):
-    use_test_set = int(use_test_set)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--val-set", action='store_true', help="Use the validation set instead of the test set")
+    use_test_set = 0 if parser.parse_args().val_set else 1
 
     dirs = set_up_directories(use_test_set)
 
-    from joblib import load
     best_estimators = load(dirs["models_dir"]+'best-estimators.joblib')
     
     diag_cols = best_estimators.keys()
@@ -118,4 +121,4 @@ def main(use_test_set=1):
         roc_aucs.to_csv(dirs["output_reports_dir"]+"performance_table_all_features_val_set.csv", float_format='%.3f', index=False)
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main()

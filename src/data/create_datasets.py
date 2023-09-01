@@ -4,6 +4,7 @@ import numpy as np
 
 from joblib import dump
 import sys, os, inspect
+import argparse
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -13,8 +14,8 @@ import util, data, features
 
 N_SAMPLES_ALL = 2323
 N_SAMPLES_LEARNING = 1406
-FIX_N_SAMPLES = False
-FIX_N_SAMPLES_LEARNING = True
+FIX_N_SAMPLES = True
+FIX_N_SAMPLES_LEARNING = False
 
 def build_output_dir_name(params_for_dir_name):
 
@@ -203,14 +204,23 @@ def fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs):
 
     return item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds
 
-def main(only_assessment_distribution, only_parent_report, use_other_diags_as_input, only_free_assessments, learning, nih):
-    only_assessment_distribution = int(only_assessment_distribution)
-    only_parent_report = int(only_parent_report)
-    use_other_diags_as_input = int(use_other_diags_as_input)
-    only_free_assessments = int(only_free_assessments)
-    learning = int(learning)
-    nih = int(nih)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--distrib-only', action='store_true', help='Only generate assessment distribution, do not create datasets')
+    parser.add_argument('--parent-only', action='store_true', help='Only use parent-report assessments')
+    parser.add_argument('--use-other-diags', action='store_true', help='Use other diagnoses as input')
+    parser.add_argument('--free-only', action='store_true', help='Only use free assessments')
+    parser.add_argument('--learning', action='store_true', help='Use additional assessments like C3SR (reduces # of examples)')
+    parser.add_argument('--nih', action='store_true', help='Use NIH toolbox scores')
     
+    args = parser.parse_args()
+    only_assessment_distribution = args.distrib_only
+    only_parent_report = args.parent_only
+    use_other_diags_as_input = args.use_other_diags
+    only_free_assessments = args.free_only
+    learning = args.learning
+    nih = args.nih
+
     clinical_config = util.read_config("clinical", learning)
     
     first_assessment_to_drop = clinical_config["first assessment to drop"]
@@ -271,4 +281,4 @@ def main(only_assessment_distribution, only_parent_report, use_other_diags_as_in
         dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)        
         
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
+    main()

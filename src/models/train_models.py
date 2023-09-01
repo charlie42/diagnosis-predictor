@@ -21,6 +21,7 @@ from sklearn.experimental import enable_halving_search_cv  # noqa
 from sklearn.model_selection import HalvingRandomSearchCV
 
 import sys, inspect
+import argparse
 
 from joblib import load, dump
 
@@ -257,9 +258,13 @@ def save_coefficients_of_lr_models(best_estimators, datasets, diag_cols, output_
             X_train = datasets[diag]["X_train_train"]
             models.save_coefficients_from_lr(diag, best_estimator, X_train, output_dir)
 
-def main(performance_margin = 0.02, models_from_file = 1):
-    models_from_file = int(models_from_file)
-    performance_margin = float(performance_margin) # Margin of error for ROC AUC (for prefering logistic regression over other models)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--performance-margin", type=float, default=0.02, help="Margin of error for ROC AUC (for prefering logistic regression over other models)")
+    parser.add_argument("--from-file", action='store_true', help="Load existing models from file instead of training new models")
+
+    models_from_file = parser.parse_args().from_file
+    performance_margin = parser.parse_args().performance_margin
 
     dirs = set_up_directories()
     load_dirs = set_up_load_directories(models_from_file)
@@ -269,11 +274,11 @@ def main(performance_margin = 0.02, models_from_file = 1):
     print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
 
     if DEBUG_MODE:
-        #diag_cols = diag_cols[0:1]
+        diag_cols = diag_cols[0:1]
         #diag_cols = ["Diag.Processing Speed Deficit (test)"]
         pass
 
-    if models_from_file == 1:
+    if models_from_file is True:
         
         best_estimators = load(load_dirs["load_models_dir"]+'best-estimators.joblib')
         scores_of_best_estimators = load(load_dirs["load_reports_dir"]+'scores-of-best-estimators.joblib')
@@ -296,4 +301,4 @@ def main(performance_margin = 0.02, models_from_file = 1):
     save_coefficients_of_lr_models(best_estimators, datasets, diag_cols, dirs["reports_dir"])
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main()

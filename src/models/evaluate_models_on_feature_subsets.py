@@ -8,6 +8,7 @@ sys.excepthook = ultratb.FormattedTB(color_scheme='Neutral', call_pdb=False)
 import pandas as pd
 
 from joblib import dump, load
+import argparse
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -217,8 +218,10 @@ def re_write_subsets_w_auroc(feature_subsets, estimators_on_subsets, optimal_nbs
     # optimal_nbs_features provided to drop subsets over the optimal number of features
     models.write_feature_subsets_to_file(feature_subsets, estimators_on_subsets, output_dir, performance_table, optimal_nbs_features)
 
-def main(models_from_file = 1):
-    models_from_file = int(models_from_file)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--from-file", action="store_true", help="Load models from file instead of re-training them")
+    models_from_file = parser.parse_args().from_file
 
     clinical_config = util.read_config("clinical")
     number_of_features_to_check = clinical_config["max items in screener"]
@@ -236,7 +239,7 @@ def main(models_from_file = 1):
         feature_subsets = {list(feature_subsets.keys())[0]: feature_subsets[list(feature_subsets.keys())[0]]}
         best_estimators = {list(best_estimators.keys())[0]: best_estimators[list(best_estimators.keys())[0]]}
 
-    if models_from_file == 1:
+    if models_from_file is True:
         load_dirs = set_up_load_directories()
 
         performances_on_feature_subsets_test_set = load(load_dirs["load_reports_dir"]+'performances-on-feature-subsets-test-set.joblib')    
@@ -284,4 +287,4 @@ def main(models_from_file = 1):
                              output_reports_dir)
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main()

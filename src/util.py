@@ -46,7 +46,10 @@ def remove_chars_forbidden_in_file_names(string):
 def build_param_string_for_dir_name(params):
     param_string = ""
     for param_name, param_value in params.items():
+        if type(param_value) == bool: # Transform bool to 0 or 1
+            param_value = int(param_value)
         param_string += param_name + "__" + str(param_value) + "___"
+        print("DEBUG", param_name, param_value, param_string)
     # Drop last "___"
     param_string = param_string[:-3]
     return param_string
