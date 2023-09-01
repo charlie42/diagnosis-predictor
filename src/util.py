@@ -83,16 +83,32 @@ def get_params_from_current_data_dir_name(current_data_dir_name):
     # Return the dictionary
     return param_dict
 
-def get_newest_non_empty_dir_in_dir(path):
+def get_dir_names_with_args(args, dir_names):
+    print(args)
+    for arg_name, value in args.items():
+
+        if type(value) == bool:
+            value = int(value)
+
+        if arg_name == "fix_n_all" and value == 1: # REMOVE THIS WHEN GENERATED NEW DATA
+            arg_name = "fix_n" 
+
+        print("DEBUG", arg_name, value, dir_names)
+        dir_names = [d for d in dir_names if f"{arg_name}__{value}" in d]
+    return dir_names
+
+def get_newest_non_empty_dir_in_dir(path, args=None):
     dir_names = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
-    non_empty_dir_names = [d for d in dir_names if len(os.listdir(path+d)) > 0]
     # Find non-empty dir with the latest timestamp, dir name format: 2023-01-05 11.03.00___first_dropped_assessment__ICU_P___other_diag_as_input__0___debug_mode__True
+    non_empty_dir_names = [d for d in dir_names if len(os.listdir(path+d)) > 0]
+    dir_names_with_args = get_dir_names_with_args(args, non_empty_dir_names)
     
-    timestamps = [d.split("___")[0] for d in non_empty_dir_names]
-    print("DEBUG timestamps", timestamps, "\nnon_empty_dir_names", non_empty_dir_names, "\npath", path)
+    timestamps = [d.split("___")[0] for d in dir_names_with_args]
+    print("DEBUG timestamps", timestamps, "\nnon_empty_dir_names", dir_names_with_args, "\npath", path)
+
     timestamps = [datetime.datetime.strptime(t, "%Y-%m-%d %H.%M.%S") for t in timestamps]
     
-    newest_dir_name = non_empty_dir_names[timestamps.index(max(timestamps))]
+    newest_dir_name = dir_names_with_args[timestamps.index(max(timestamps))]
     return path + newest_dir_name + "/"
 
 

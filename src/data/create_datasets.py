@@ -14,12 +14,10 @@ import util, data, features
 
 N_SAMPLES_ALL = 2323
 N_SAMPLES_LEARNING = 1406
-FIX_N_SAMPLES = True
-FIX_N_SAMPLES_LEARNING = False
 
 def build_output_dir_name(params_for_dir_name):
 
-    only_parent_report, first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning, NIH = params_for_dir_name
+    only_parent_report, first_assessment_to_drop, use_other_diags_as_input, only_free_assessments, learning, NIH, fix_n_all, fix_n_learning = params_for_dir_name
 
     # Part with the datetime
     datetime_part = util.get_string_with_current_datetime()
@@ -32,8 +30,8 @@ def build_output_dir_name(params_for_dir_name):
         "only_free_assessments": only_free_assessments, 
         "learning?": learning, 
         "NIH?": NIH,
-        "fix_n_all": 1 if FIX_N_SAMPLES else 0,  # Fix number of training examples when using less assessments
-        "fix_n_learning": 1 if FIX_N_SAMPLES_LEARNING else 0 # Fix number of training examples when using less assessments
+        "fix_n_all": fix_n_all,  # Fix number of training examples when using less assessments
+        "fix_n_learning": fix_n_learning # Fix number of training examples when using less assessments
     }
     params_part = util.build_param_string_for_dir_name(params)
     
@@ -179,15 +177,7 @@ def update_datasets_with_new_diags(item_level_ds, cog_tasks_ds, subscales_ds, to
 
     return cog_tasks_ds, subscales_ds
 
-def fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs):
-    # Check if want to fix n and how many values (n_samples_all for comparing free vs all vs only parent report, n_samples_learning for comparing after adding C3SR etc. and NIH)
-    if FIX_N_SAMPLES:
-        n = N_SAMPLES_ALL
-    elif FIX_N_SAMPLES_LEARNING:
-        n = N_SAMPLES_LEARNING
-    else:
-        return item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds
-
+def fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs, n):
     # Gen random n indices
     indices_to_keep = np.random.choice(item_level_ds.index, n, replace=False)
 
@@ -212,6 +202,8 @@ def main():
     parser.add_argument('--free-only', action='store_true', help='Only use free assessments')
     parser.add_argument('--learning', action='store_true', help='Use additional assessments like C3SR (reduces # of examples)')
     parser.add_argument('--nih', action='store_true', help='Use NIH toolbox scores')
+    parser.add_argument('--fix-n-all', action='store_true', help='Fix number of training examples when using less assessments')
+    parser.add_argument('--fix-n-learning', action='store_true', help='Fix number of training examples when using less assessments (learning))')
     
     args = parser.parse_args()
     only_assessment_distribution = args.distrib_only
@@ -220,6 +212,8 @@ def main():
     only_free_assessments = args.free_only
     learning = args.learning
     nih = args.nih
+    fix_n_all = args.fix_n_all
+    fix_n_learning = args.fix_n_learning
 
     clinical_config = util.read_config("clinical", learning)
     
@@ -234,7 +228,9 @@ def main():
         use_other_diags_as_input, 
         only_free_assessments, 
         learning, # use additional assessments like C3SR (reduces # of examples)
-        nih # use NIH toolbox scores
+        nih, # use NIH toolbox scores
+        fix_n_all,  # Fix number of training examples when using less assessments
+        fix_n_learning # Fix number of training examples when using less assessments
     ] 
     dirs = set_up_directories(params_for_dir_name)
 
@@ -248,7 +244,10 @@ def main():
         total_scores_ds = pd.read_csv(dirs["data_output_dir"] + "total_scores.csv")
 
         # Fix n when using less assessments: read and rewrite csv files
-        item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds = fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs)
+        if fix_n_all:
+            item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds = fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs, N_SAMPLES_ALL)
+        elif fix_n_learning:
+            item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds = fix_n(item_level_ds, cog_tasks_ds, subscales_ds, total_scores_ds, dirs, N_SAMPLES_LEARNING)
 
         consensus_diags = [x for x in item_level_ds.columns if x.startswith("Diag.")]
 

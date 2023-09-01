@@ -43,14 +43,14 @@ def build_output_dir_name(params_from_create_datasets):
     
     return datetime_part + "___" + params_part
 
-def set_up_directories():
+def set_up_directories(args_to_read_data):
 
     # Create directory in the parent directory of the project (separate repo) for output data, models, and reports
     data_dir = "../diagnosis_predictor_data_archive/"
     util.create_dir_if_not_exists(data_dir)
 
     # Input dirs
-    input_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
+    input_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/", args_to_read_data)
 
     # Create directory inside the output directory with the run timestamp and params:
     #    - [params from create_datasets.py]
@@ -67,7 +67,7 @@ def set_up_directories():
 
     return {"input_data_dir": input_data_dir, "models_dir": models_dir, "reports_dir": reports_dir}
 
-def set_up_load_directories(models_from_file):
+def set_up_load_directories(models_from_file, args_to_read_data):
     # When loading existing models, can't take the newest directory, we just created it, it will be empty. 
     #   Need to take the newest non-empty directory.
     # When the script is run on a new location for the first time, there won't be any non-empty directories. 
@@ -75,9 +75,9 @@ def set_up_load_directories(models_from_file):
 
     data_dir = "../diagnosis_predictor_data_archive/"
     
-    load_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/")
-    load_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/") if models_from_file == 1 else None
-    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "reports/train_models/") if models_from_file == 1 else None
+    load_data_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "data/create_datasets/", args_to_read_data)
+    load_models_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "models/train_models/", args_to_read_data) if models_from_file == 1 else None
+    load_reports_dir = util.get_newest_non_empty_dir_in_dir(data_dir + "reports/train_models/", args_to_read_data) if models_from_file == 1 else None
     
     return {"load_data_dir": load_data_dir, "load_models_dir": load_models_dir, "load_reports_dir": load_reports_dir}
     
@@ -260,14 +260,34 @@ def save_coefficients_of_lr_models(best_estimators, datasets, diag_cols, output_
 
 def main():
     parser = argparse.ArgumentParser()
+    # New args
     parser.add_argument("--performance-margin", type=float, default=0.02, help="Margin of error for ROC AUC (for prefering logistic regression over other models)")
     parser.add_argument("--from-file", action='store_true', help="Load existing models from file instead of training new models")
+    # Args to read data from previous step
+    parser.add_argument('--distrib-only', action='store_true', help='Only generate assessment distribution, do not create datasets')
+    parser.add_argument('--parent-only', action='store_true', help='Only use parent-report assessments')
+    parser.add_argument('--use-other-diags', action='store_true', help='Use other diagnoses as input')
+    parser.add_argument('--free-only', action='store_true', help='Only use free assessments')
+    parser.add_argument('--learning', action='store_true', help='Use additional assessments like C3SR (reduces # of examples)')
+    parser.add_argument('--nih', action='store_true', help='Use NIH toolbox scores')
+    parser.add_argument('--fix-n-all', action='store_true', help='Fix number of training examples when using less assessments')
+    parser.add_argument('--fix-n-learning', action='store_true', help='Fix number of training examples when using less assessments')
+
+    args_to_read_data = {
+        "only_parent_report": parser.parse_args().parent_only,
+        "use_other_diags_as_input": parser.parse_args().use_other_diags,
+        "only_free_assessments": parser.parse_args().free_only,
+        "learning?": parser.parse_args().learning,
+        "NIH?": parser.parse_args().nih,
+        "fix_n_all": parser.parse_args().fix_n_all, 
+        "fix_n_learning": parser.parse_args().fix_n_learning
+    }
 
     models_from_file = parser.parse_args().from_file
     performance_margin = parser.parse_args().performance_margin
 
-    dirs = set_up_directories()
-    load_dirs = set_up_load_directories(models_from_file)
+    dirs = set_up_directories(args_to_read_data)
+    load_dirs = set_up_load_directories(models_from_file, args_to_read_data)
 
     datasets = load(load_dirs["load_data_dir"]+'datasets.joblib')
     diag_cols = list(datasets.keys())
