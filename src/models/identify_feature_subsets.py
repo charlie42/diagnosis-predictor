@@ -9,6 +9,8 @@ from joblib import load, dump
 import yaml
 import pandas as pd
 
+import argparse
+
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -81,8 +83,11 @@ def make_score_table(scores):
     
     return df
     
-def main(importances_from_file = 0):
-    importances_from_file = int(importances_from_file)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--from-file", action='store_true', help="Import feature importances from file instead of calculating new ones")
+    
+    importances_from_file = parser.parse_args().from_file
 
     clinical_config = util.read_config("clinical")
     number_of_features_to_check = clinical_config["max items in screener"]
@@ -98,7 +103,7 @@ def main(importances_from_file = 0):
         #best_estimators = {list(best_estimators.keys())[0]: best_estimators[list(best_estimators.keys())[0]]}
         pass
 
-    if importances_from_file == 1:
+    if importances_from_file is True:
         load_dirs = set_up_load_directories()
 
         feature_subsets = load(load_dirs["load_reports_dir"]+'feature-subsets.joblib')
@@ -124,7 +129,7 @@ def main(importances_from_file = 0):
     # Re-train models on each subset of features to get cv scores for each subset (to ID optimal number of features)
     cv_auc_table_all_subsets = models.get_cv_auc_from_sfs(datasets, best_estimators, feature_subsets, n_folds=3 if DEBUG_MODE else 8)
     print("cv_auc_table_all_subsets", cv_auc_table_all_subsets)
-    cv_auc_table_all_subsets.to_csv(dirs["output_reports_dir"]+f'cv-auc-on-all-subsets.csv', float_format='%.3f')
+    cv_auc_table_all_subsets.to_csv(dirs["output_reports_dir"]+'cv-auc-on-all-subsets.csv', float_format='%.3f')
 
     optimal_nbs_features = models.get_optimal_nb_features(cv_auc_table_all_subsets, number_of_features_to_check, percentage_of_max_performance)
     util.write_dict_to_file(optimal_nbs_features, dirs["output_reports_dir"], "optimal-nb-features.txt")
@@ -132,4 +137,4 @@ def main(importances_from_file = 0):
 
     
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main()

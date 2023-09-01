@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+import argparse
+
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -159,7 +161,10 @@ def plot_col_value_distributions(df, dir):
             plot_hist(df, col, bins=n_bins, dir=new_dir)
 
 def main(plot_col_value_distrib=1):
-    plot_col_value_distrib = int(plot_col_value_distrib)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--plot-col-value-distrib", action="store_true", help="Plot value distribution of every column or not (takes time)")
+
+    plot_col_value_distrib = parser.parse_args().plot_col_value_distrib
 
     dirs = set_up_directories()
 
@@ -178,7 +183,7 @@ def main(plot_col_value_distrib=1):
     plot_age_distributions(item_level_ds, diag_cols, dirs["reports_dir"])
 
     # Plot value distribution of every column
-    if plot_col_value_distrib == 1:
+    if plot_col_value_distrib is True:
         plot_col_value_distributions(item_level_ds, dirs["reports_dir"])
 
 
