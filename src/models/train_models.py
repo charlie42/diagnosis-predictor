@@ -34,6 +34,7 @@ sys.path.insert(0, parentdir)
 import util, models, util
 
 DEBUG_MODE = True
+DEV_MODE = False
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
@@ -115,7 +116,7 @@ def parallel_grid_search(args):
     lgbm = HistGradientBoostingClassifier()
 
     # Parameters
-    lr_param_grid = {
+    lr_param_grid = {'model__C': loguniform(1e-5, 1e4)} if DEV_MODE else {
         'model__C': loguniform(1e-5, 1e4), 
         'model__penalty': ['l1', 'l2', 'elasticnet'], 
         'model__class_weight': ['balanced', None], 
@@ -141,7 +142,7 @@ def parallel_grid_search(args):
         ("scale",StandardScaler()),
         ("model",model)])
     
-    n_splits = 4 if DEBUG_MODE else 10
+    n_splits = 2 if DEV_MODE else 4 if DEBUG_MODE else 10
     cv_rs = StratifiedKFold(n_splits, shuffle=True, random_state=0) #n_splits, shuffle=True, random_state=0)
     cv_fs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
     cv_perf = StratifiedKFold(n_splits, shuffle=True, random_state=0)
@@ -150,15 +151,15 @@ def parallel_grid_search(args):
         estimator=pipeline_for_fs,
         importance_getter="named_steps.model.coef_",
         step=1, 
-        n_features_to_select=100,  #n_features_to_select=28, 
-        verbose=0
+        n_features_to_select=800 if DEV_MODE else 100,
+        verbose=1
     )
 
     # Feature selection
     fs = SFS(
     #fs = CSequentialFeatureSelector(
         estimator=pipeline_for_fs,
-        k_features=27, #k_features=27, 
+        k_features=1 if DEV_MODE else 27,
         cv=cv_fs,
         forward=True, 
         floating=True, 
@@ -179,7 +180,7 @@ def parallel_grid_search(args):
     rs = RandomizedSearchCV(
         estimator=pipeline_for_rs,
         param_distributions=grid,
-        n_iter=2 if DEBUG_MODE else 200, #n_iter=50 if DEBUG_MODE else 200,
+        n_iter=2 if DEV_MODE else 50 if DEBUG_MODE else 200, 
         scoring='roc_auc',
         n_jobs=-1,
         cv=cv_rs,
@@ -202,7 +203,7 @@ def parallel_grid_search(args):
     
     scores = cross_val_score(rs, dataset["X_train"], dataset["y_train"], cv=cv_perf, scoring="roc_auc", n_jobs=-1, verbose=1)
 
-    return {output_name: scores}
+    return output_name, scores, rs
 
 
 def main(models_from_file = 1):
@@ -223,8 +224,11 @@ def main(models_from_file = 1):
     print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
 
     if DEBUG_MODE:
-        #diag_cols = diag_cols[0:1]
         #diag_cols = ["Diag.Any Diag"]
+        pass
+
+    if DEV_MODE:
+        diag_cols = diag_cols[0:2]
         pass
 
     ### TEST print value counts when doing 3 nested kfolds
@@ -265,10 +269,15 @@ def main(models_from_file = 1):
     with multiprocessing.Pool() as pool:
         results = pool.map(parallel_grid_search, args_list)
 
-    # Aggregate the results into a DataFrame
+    # Aggregate the results into a DataFrame and a list of objects
     result_df = pd.DataFrame()
+    rs_objects = []
     for result in results:
-        output_name, scores = list(result.items())[0]
+        # Recevice otuput_name, scores, rs object
+        output_name, scores, rs = result
+
+        rs_objects.append(rs)  # Add rs object to list of objects
+
         mean_score = pd.Series(scores).mean()  # Calculate mean score using .mean()
         result_df[output_name] = [mean_score]  # Add mean score to DataFrame
 
@@ -285,6 +294,7 @@ def main(models_from_file = 1):
     #dump(rs, dirs["models_dir"]+f'rs_{model}.joblib')
     #dump(optimal_number_of_features, dirs["models_dir"]+f'optimal_number_of_features_{model}.joblib')
     dump(result_df, dirs["models_dir"]+f'cv_perf_scores_lr_debug.joblib')
+    dump(rs_objects, dirs["models_dir"]+f'rs_objects_lr_debug.joblib')
     ###########
 
 
