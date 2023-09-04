@@ -49,7 +49,6 @@ def build_param_string_for_dir_name(params):
         if type(param_value) == bool: # Transform bool to 0 or 1
             param_value = int(param_value)
         param_string += param_name + "__" + str(param_value) + "___"
-        print("DEBUG", param_name, param_value, param_string)
     # Drop last "___"
     param_string = param_string[:-3]
     return param_string
@@ -93,22 +92,37 @@ def get_dir_names_with_args(args, dir_names):
         if arg_name == "fix_n_all" and value == 1: # REMOVE THIS WHEN GENERATED NEW DATA
             arg_name = "fix_n" 
 
-        print("DEBUG", arg_name, value, dir_names)
+        print("DEBUG", f"{arg_name}__{value}")
+
         dir_names = [d for d in dir_names if f"{arg_name}__{value}" in d]
     return dir_names
 
 def get_newest_non_empty_dir_in_dir(path, args=None):
+    print("Looking for dir in path", path)
     dir_names = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+    if dir_names == []:
+        print("No dir found in path", path, "among", os.listdir(path))
+        raise ValueError
     # Find non-empty dir with the latest timestamp, dir name format: 2023-01-05 11.03.00___first_dropped_assessment__ICU_P___other_diag_as_input__0___debug_mode__True
     non_empty_dir_names = [d for d in dir_names if len(os.listdir(path+d)) > 0]
+    if non_empty_dir_names == []:
+        print("No non-empty dir found in path", path, "among", os.listdir(path))
+        raise ValueError
+    
     dir_names_with_args = get_dir_names_with_args(args, non_empty_dir_names)
+    if dir_names_with_args == []:
+        print("\nNo dir found with args", args, "in path", path, "among", non_empty_dir_names)
+        raise ValueError
     
     timestamps = [d.split("___")[0] for d in dir_names_with_args]
-    print("DEBUG timestamps", timestamps, "\nnon_empty_dir_names", dir_names_with_args, "\npath", path)
 
     timestamps = [datetime.datetime.strptime(t, "%Y-%m-%d %H.%M.%S") for t in timestamps]
     
-    newest_dir_name = dir_names_with_args[timestamps.index(max(timestamps))]
+    try:
+        newest_dir_name = dir_names_with_args[timestamps.index(max(timestamps))]
+    except ValueError:
+        print("\nNo dir found with args", args, "in path", path, "among", dir_names_with_args)
+        raise ValueError
     return path + newest_dir_name + "/"
 
 
