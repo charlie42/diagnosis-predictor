@@ -21,6 +21,7 @@ from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.model_selection import HalvingRandomSearchCV
 from sklearn.model_selection import cross_val_score, cross_validate
 from sklearn.metrics import roc_auc_score, recall_score, make_scorer
+from sklearn.base import clone
 import mlxtend
 import multiprocessing
 
@@ -35,7 +36,7 @@ sys.path.insert(0, parentdir)
 import util, models, util
 
 DEBUG_MODE = True
-DEV_MODE = False
+DEV_MODE = True
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
@@ -108,6 +109,105 @@ class CSequentialFeatureSelector(mlxtend.feature_selection.SequentialFeatureSele
      #   self.estimator.fit(self.transform(X), y)
      #   return self
 
+def get_opt_n(sfs, performance_fraction):
+    '''
+    Format of sfs.get_metric_dict() (dict): {
+        1: {
+            'feature_idx': (306,), 
+            'cv_scores': array([0.79714058, 0.737824  ]), 
+            'avg_score': 0.7674822865269321, 
+            'feature_names': ('306',), 
+            'ci_bound': 0.12760932885928136, 
+            'std_dev': 0.029658291493562583, 
+            'std_err': 0.02965829149356258
+            }, 
+        2: {
+            'feature_idx': (306, 313), 
+            ...
+        }
+    '''
+
+    avg_performances = [sfs.get_metric_dict()[n]["avg_score"] for n in sfs.get_metric_dict().keys()]
+    max_performance = np.max(avg_performances)
+    opt_n = np.argmax(avg_performances >= max_performance * performance_fraction) + 1
+
+    return opt_n
+
+def get_opt_thresh(y_test, y_pred_proba, opt_sens):
+    ''''
+    Find the threshold where sensitivity the closest to opt_sens and sensitivity is > specificity 
+    If there are multiple thresholds with the same sensitivity, return the one with the highest specificity
+    If at the threshold where sensitivity is the closest to opt_sens, sensitivity is not > specificity, 
+    return the threshold with min sensisitivity where sensitivity is > specificity
+    opt_sens is a float between 0 and 1
+    '''
+    
+    # Make a df with sens and spec on each thereshold
+    df = pd.DataFrame(columns=["threshold", "sens", "spec"])
+    thresholds = np.arange(0, 1.01, 0.01)
+    for threshold in thresholds:
+        y_pred_binary = (y_pred_proba[:,1] >= threshold).astype(bool) 
+        sens = recall_score(y_test, y_pred_binary)
+        spec = recall_score(y_test, y_pred_binary, pos_label=0)
+
+        df = df.append({"threshold": threshold, "sens": sens, "spec": spec}, ignore_index=True)
+
+    print(df)
+
+    sens_closest_to_opt_sens = 2 # sensitivity closest to optimal (search will start with the highest sensitivity)
+    # Find the threshold where sensitivity is the closest to opt_sens
+    for threshold in thresholds:
+        sens = df[df["threshold"] == threshold]["sens"].values[0]
+        # If sens is closer to opt_sens than the current closest
+        if abs(sens - opt_sens) < abs(sens_closest_to_opt_sens - opt_sens):
+            sens_closest_to_opt_sens = sens
+
+    # Find the threshold with the highest specificity where sensitivity is the closest to opt_sens
+    spec_highest = 0
+    opt_thresh = None
+    for threshold in thresholds:
+        sens = df[df["threshold"] == threshold]["sens"].values[0]
+        spec = df[df["threshold"] == threshold]["spec"].values[0]
+        if sens == sens_closest_to_opt_sens and spec > spec_highest:
+            spec_highest = spec
+            opt_thresh = threshold
+
+    # If found spec is higher than sens, return the threshold with the highest sensitivity where sensitivity is > specificity and sensitivity > opt_sens
+    if spec_highest < sens_closest_to_opt_sens:
+        for threshold in thresholds:
+            sens = df[df["threshold"] == threshold]["sens"].values[0]
+            spec = df[df["threshold"] == threshold]["spec"].values[0]
+            if sens > spec and sens > opt_sens:
+                sens_closest_to_opt_sens = sens
+                spec_highest = spec
+                opt_thresh = threshold
+
+    print(opt_thresh, sens_closest_to_opt_sens, spec_highest)
+
+    return opt_thresh
+
+def get_subset_at_n(sfs, n):
+    '''
+    Format of sfs.get_metric_dict() (dict): {
+        1: {
+            'feature_idx': (306,), 
+            'cv_scores': array([0.79714058, 0.737824  ]), 
+            'avg_score': 0.7674822865269321, 
+            'feature_names': ('306',), 
+            'ci_bound': 0.12760932885928136, 
+            'std_dev': 0.029658291493562583, 
+            'std_err': 0.02965829149356258
+            }, 
+        2: {
+            'feature_idx': (306, 313),
+            ...
+        }
+    '''
+    features = sfs.get_metric_dict()[n]["feature_idx"]
+
+    return features
+
+
 def parallel_grid_search(args):
 
     dataset, output_name = args
@@ -166,7 +266,7 @@ def parallel_grid_search(args):
         floating=True, 
         scoring='roc_auc', 
         n_jobs=-1, 
-        verbose=2
+        verbose=1 if DEV_MODE else 2
     )
     
     # Pipeline
@@ -201,30 +301,104 @@ def parallel_grid_search(args):
     #     #error_score='raise',
     #     n_jobs = -1, 
     #     verbose=1)
-    
-    cv_scoring = {
-        'roc_auc': make_scorer(roc_auc_score, needs_proba=True),
+
+    # Get cross_val_score at each number of features for each diagnosis
+    cv_perf_scores = {
+        "auc_27": [],
+        "opt_ns": [],
+        "perf_on_features": {x:[{"auc":[], "opt_thresh":[]}] for x in range(1, 28)}
     }
 
-    scores = cross_validate(
-        rs, 
-        dataset["X_train"], 
-        dataset["y_train"], 
-        cv=cv_perf, 
-        #scoring="roc_auc", 
-        scoring=cv_scoring, 
-        return_estimator=True, 
-        return_indices=True,
-        n_jobs=-1, 
-        verbose=1)
+    # Get cross_val_score at each number of features for each diagnosis
+    for fold in cv_perf.split(dataset["X_train"], dataset["y_train"]):
+        X_train, y_train = dataset["X_train"].iloc[fold[0]], dataset["y_train"].iloc[fold[0]]
+        X_test, y_test = dataset["X_train"].iloc[fold[1]], dataset["y_train"].iloc[fold[1]]
 
-    return output_name, scores
+        # Fit the model to get subsets and performance on 27 features
+        rs.fit(X_train, y_train)
+
+        # Get perforamnce
+        y_pred = rs.predict_proba(X_test)[:, 1]
+        auc = roc_auc_score(y_test, y_pred)
+        cv_perf_scores["auc_27"].append(auc)
+        print("DEBUG auc 27", auc)
+
+        # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
+        # (get aurocs from sfs object)
+        sfs = rs.best_estimator_.named_steps["selector"]
+        opt_n = get_opt_n(sfs, 0.95)
+        cv_perf_scores["opt_ns"].append(opt_n)
+        print("DEBUG opt n", opt_n)
+
+        # Get performance on each subset
+        for subset in range(1, 28):
+            # Fit the model to the subset
+            features = sfs.get_metric_dict()[subset]["feature_idx"]
+            new_model = clone(rs.best_estimator_.named_steps["model"])
+            new_model.fit(X_train.iloc[:, features], y_train)
+
+            # Get perforamnce
+            y_pred = new_model.predict_proba(X_test.iloc[:, features])[:, 1]
+            auc = roc_auc_score(y_test, y_pred)
+            cv_perf_scores["perf_on_features"][subset]["auc"].append(auc)
+            print("DEBUG auc", subset, auc)
+
+            # Find optimal threshold
+            opt_thresh = get_opt_thresh(y_test, y_pred, opt_sens=0.8)
+            cv_perf_scores["perf_on_features"][subset]["opt_thresh"].append(opt_thresh)
+            print("DEBUG opt thresh", subset, opt_thresh)
+
+    print(cv_perf_scores)
+
+    average_opt_n = np.mean(cv_perf_scores["opt_ns"])
+    print("DEBUG average opt n", average_opt_n)
+    # Fit the model to get sensitivity and specificity on optimal n features
+    pipe_with_best_model = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy="median")),
+        ("scale",StandardScaler()),
+        ("model", rs.best_estimator_.named_steps["model"])
+        ])
+    
+    subset_at_opt_n = get_subset_at_n(sfs)
+    print("DEBUG subset at opt n", subset_at_opt_n)
+    pipe_with_best_model.fit(dataset["X_train"].iloc[:, subset_at_opt_n], dataset["y_train"])
+
+    # Get perforamnce
+    y_pred = pipe_with_best_model.predict_proba(dataset["X_test"].iloc[:, subset_at_opt_n])[:, 1]
+    # Get sens, spec at optimal threshold
+    average_opt_thresh = np.mean(cv_perf_scores["perf_on_features"][average_opt_n]["opt_thresh"])
+    print("DEBUG average opt thresh", average_opt_thresh)
+    auc = roc_auc_score(dataset["y_test"], y_pred)
+    y_pred_binary = (y_pred >= average_opt_thresh).astype(bool)
+    sens = recall_score(dataset["y_test"], y_pred_binary)
+    spec = recall_score(dataset["y_test"], y_pred_binary, pos_label=0)
+    print("DEBUG test set", auc, sens, spec)
+
+    cv_perf_scores["auc_test_set"] = auc
+    cv_perf_scores["sens_test_set"] = sens
+    cv_perf_scores["spec_test_set"] = spec
+    
+    # cv_scoring = {
+    #     'roc_auc': make_scorer(roc_auc_score, needs_proba=True),
+    # }
+
+    # scores = cross_validate(
+    #     rs, 
+    #     dataset["X_train"], 
+    #     dataset["y_train"], 
+    #     cv=cv_perf, 
+    #     #scoring="roc_auc", 
+    #     scoring=cv_scoring, 
+    #     return_estimator=True, 
+    #     return_indices=True,
+    #     n_jobs=-1, 
+    #     verbose=1)
+
+    return output_name, cv_perf_scores
 
 
-def main(models_from_file = 1):
+def main():
     start_time = time.time() # Start timer for measuring total time of script
-
-    models_from_file = int(models_from_file)
 
     clinical_config = util.read_config("clinical")
     technical_config = util.read_config("technical")
@@ -232,7 +406,7 @@ def main(models_from_file = 1):
     performance_margin = technical_config["performance margin"] # Margin of error for ROC AUC (for prefering logistic regression over other models)
 
     dirs = set_up_directories()
-    load_dirs = set_up_load_directories(models_from_file)
+    load_dirs = set_up_load_directories(models_from_file = 0)
 
     datasets = load(load_dirs["load_data_dir"]+'datasets.joblib')
     diag_cols = list(datasets.keys())
@@ -285,27 +459,26 @@ def main(models_from_file = 1):
         results = pool.map(parallel_grid_search, args_list)
 
     # Aggregate the results into a DataFrame and a list of objects
-    result_df = pd.DataFrame()
+    #result_df = pd.DataFrame()
     scores_objects = {}
     for result in results:
         # Recevice otuput_name, scores, rs object
         output_name, scores = result
 
         scores_objects[output_name] = scores  # Add rs object to list of objects
-
+        
         #mean_auc = pd.Series(scores['test_score']).mean()  # Calculate mean AUC using .mean()
+        # mean_auc = pd.Series(scores['test_roc_auc']).mean()  # Calculate mean AUC using .mean()
+        # sd_auc = pd.Series(scores['test_roc_auc']).std()  # Calculate sd AUC using .std()
 
-        mean_auc = pd.Series(scores['test_roc_auc']).mean()  # Calculate mean AUC using .mean()
-        sd_auc = pd.Series(scores['test_roc_auc']).std()  # Calculate sd AUC using .std()
+        # result_df = result_df.append(pd.DataFrame({
+        #     'output': output_name,
+        #     'mean_auc': mean_auc, 
+        #     'sd_auc': sd_auc,
+        #     }, index=[output_name]))  # Add mean scores to DataFrame
 
-        result_df = result_df.append(pd.DataFrame({
-            'output': output_name,
-            'mean_auc': mean_auc, 
-            'sd_auc': sd_auc,
-            }, index=[output_name]))  # Add mean scores to DataFrame
-
-    result_df = result_df.sort_values(by="mean_auc", ascending=False)
-    print("\n", result_df)
+    #result_df = result_df.sort_values(by="mean_auc", ascending=False)
+    #print("\n", result_df)
 
     # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
     #optimal_number_of_features = {}
@@ -315,7 +488,7 @@ def main(models_from_file = 1):
     # Save models, optimal # features, and cross_val_score at each # features
     #dump(rs, dirs["models_dir"]+f'rs_{model}.joblib')
     #dump(optimal_number_of_features, dirs["models_dir"]+f'optimal_number_of_features_{model}.joblib')
-    dump(result_df, dirs["models_dir"]+f'cv_perf_scores_lr_debug.joblib')
+    #dump(result_df, dirs["models_dir"]+f'cv_perf_scores_lr_debug.joblib')
     dump(scores_objects, dirs["models_dir"]+f'scores_objects_lr_debug.joblib')
     ###########
 
@@ -323,4 +496,4 @@ def main(models_from_file = 1):
     print("\n\nExecution time:", time.time() - start_time)
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main()
