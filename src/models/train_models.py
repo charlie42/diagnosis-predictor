@@ -20,6 +20,7 @@ from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.model_selection import HalvingRandomSearchCV
 from sklearn.model_selection import cross_val_score, cross_validate
+from sklearn.metrics import roc_auc_score, recall_score, make_scorer
 import mlxtend
 import multiprocessing
 
@@ -201,12 +202,17 @@ def parallel_grid_search(args):
     #     n_jobs = -1, 
     #     verbose=1)
     
+    cv_scoring = {
+        'roc_auc': make_scorer(roc_auc_score, needs_proba=True),
+    }
+
     scores = cross_validate(
         rs, 
         dataset["X_train"], 
         dataset["y_train"], 
         cv=cv_perf, 
-        scoring="roc_auc", 
+        #scoring="roc_auc", 
+        scoring=cv_scoring, 
         return_estimator=True, 
         return_indices=True,
         n_jobs=-1, 
@@ -287,12 +293,19 @@ def main(models_from_file = 1):
 
         scores_objects[output_name] = scores  # Add rs object to list of objects
 
-        mean_score = pd.Series(scores['test_score']).mean()  # Calculate mean score using .mean()
-        result_df[output_name] = [mean_score]  # Add mean score to DataFrame
+        #mean_auc = pd.Series(scores['test_score']).mean()  # Calculate mean AUC using .mean()
 
-    result_df = result_df.T  
-    print(result_df)
+        mean_auc = pd.Series(scores['test_roc_auc']).mean()  # Calculate mean AUC using .mean()
+        sd_auc = pd.Series(scores['test_roc_auc']).std()  # Calculate sd AUC using .std()
 
+        result_df = result_df.append(pd.DataFrame({
+            'output': output_name,
+            'mean_auc': mean_auc, 
+            'sd_auc': sd_auc,
+            }, index=[output_name]))  # Add mean scores to DataFrame
+
+    result_df = result_df.sort_values(by="mean_auc", ascending=False)
+    print("\n", result_df)
 
     # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
     #optimal_number_of_features = {}
