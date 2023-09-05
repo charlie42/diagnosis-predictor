@@ -15,8 +15,11 @@ To run on an empty system:
 
 - Install python 3.9
 - Install pip
+- Navigate to the directory root
 - Install pipenv using pip
-- `pipenv install`
+- Run `pipenv install`
+
+`requirements.txt` is also available for installing dependencies with pip directly
 
 ## 1 step:
 
