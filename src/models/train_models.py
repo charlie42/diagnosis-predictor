@@ -37,6 +37,7 @@ import util, models, util
 
 DEBUG_MODE = True
 DEV_MODE = True
+N_FEATURES_TO_CHECK = 2 if DEV_MODE else 27
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
@@ -143,46 +144,52 @@ def get_opt_thresh(y_test, y_pred_proba, opt_sens):
     '''
     
     # Make a df with sens and spec on each thereshold
-    df = pd.DataFrame(columns=["threshold", "sens", "spec"])
     thresholds = np.arange(0, 1.01, 0.01)
+    df = pd.DataFrame(columns=["sens", "spec"], index=thresholds)
     for threshold in thresholds:
-        y_pred_binary = (y_pred_proba[:,1] >= threshold).astype(bool) 
+        y_pred_binary = (y_pred_proba >= threshold).astype(bool) 
         sens = recall_score(y_test, y_pred_binary)
         spec = recall_score(y_test, y_pred_binary, pos_label=0)
 
-        df = df.append({"threshold": threshold, "sens": sens, "spec": spec}, ignore_index=True)
-
-    print(df)
+        df.loc[threshold] = [sens, spec]
+        
+    df = df.drop_duplicates(subset=["sens"], keep="last") # Keep the last duplicate (the one with the highest spec)
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+        print(df)
 
     sens_closest_to_opt_sens = 2 # sensitivity closest to optimal (search will start with the highest sensitivity)
     # Find the threshold where sensitivity is the closest to opt_sens
-    for threshold in thresholds:
-        sens = df[df["threshold"] == threshold]["sens"].values[0]
+    print("Looking for sensitivity closest to", opt_sens)
+    for threshold in df.index:
+        sens = df.loc[threshold,"sens"].item()
         # If sens is closer to opt_sens than the current closest
-        if abs(sens - opt_sens) < abs(sens_closest_to_opt_sens - opt_sens):
+        if abs(sens - opt_sens) <= abs(sens_closest_to_opt_sens - opt_sens):
             sens_closest_to_opt_sens = sens
+    print("Sensitivity closest to", opt_sens, "is", sens_closest_to_opt_sens, "at threshold", df[df["sens"] == sens_closest_to_opt_sens].index[0])
 
     # Find the threshold with the highest specificity where sensitivity is the closest to opt_sens
+    print("Looking for highest specificity where sensitivity is closest to", sens_closest_to_opt_sens)
     spec_highest = 0
     opt_thresh = None
-    for threshold in thresholds:
-        sens = df[df["threshold"] == threshold]["sens"].values[0]
-        spec = df[df["threshold"] == threshold]["spec"].values[0]
-        if sens == sens_closest_to_opt_sens and spec > spec_highest:
+    for threshold in df.index:
+        sens = df.loc[threshold,"sens"].item()
+        spec = df.loc[threshold,"spec"].item()
+        if sens == sens_closest_to_opt_sens and spec >= spec_highest:
             spec_highest = spec
             opt_thresh = threshold
+    print("Highest specificity where sensitivity is closest to", sens_closest_to_opt_sens, "is", spec_highest, "at threshold", opt_thresh)
 
     # If found spec is higher than sens, return the threshold with the highest sensitivity where sensitivity is > specificity and sensitivity > opt_sens
-    if spec_highest < sens_closest_to_opt_sens:
-        for threshold in thresholds:
-            sens = df[df["threshold"] == threshold]["sens"].values[0]
-            spec = df[df["threshold"] == threshold]["spec"].values[0]
-            if sens > spec and sens > opt_sens:
+    if spec_highest > sens_closest_to_opt_sens:
+        print(f"Looks like specicify is higher than sensitivity: sens {sens_closest_to_opt_sens}, spec {spec_highest}. Looking for highest sensitivity where sensitivity is > specificity and sensitivity is > opt_sens")
+        for threshold in df.index:
+            sens = df.loc[threshold,"sens"].item()
+            spec = df.loc[threshold,"spec"].item()
+            if sens > spec and sens >= opt_sens:
                 sens_closest_to_opt_sens = sens
                 spec_highest = spec
                 opt_thresh = threshold
-
-    print(opt_thresh, sens_closest_to_opt_sens, spec_highest)
+    print("Highest sensitivity where sensitivity is > specificity and sensitivity is > opt_sens is", sens_closest_to_opt_sens, "at threshold", opt_thresh)
 
     return opt_thresh
 
@@ -205,7 +212,7 @@ def get_subset_at_n(sfs, n):
     '''
     features = sfs.get_metric_dict()[n]["feature_idx"]
 
-    return features
+    return list(features)
 
 
 def parallel_grid_search(args):
@@ -260,7 +267,7 @@ def parallel_grid_search(args):
     fs = SFS(
     #fs = CSequentialFeatureSelector(
         estimator=pipeline_for_fs,
-        k_features=2 if DEV_MODE else 27,
+        k_features=N_FEATURES_TO_CHECK,
         cv=cv_fs,
         forward=True, 
         floating=True, 
@@ -304,41 +311,69 @@ def parallel_grid_search(args):
 
     # Get cross_val_score at each number of features for each diagnosis
     cv_perf_scores = {
+        "auc_all_features": [],
         "auc_27": [],
         "opt_ns": [],
-        "perf_on_features": {x:[{"auc":[], "opt_thresh":[]}] for x in range(1, 28)}
+        "perf_on_features": {x:{"auc":[], "opt_thresh":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
     }
+    rs_objects = []
 
     # Get cross_val_score at each number of features for each diagnosis
     for fold in cv_perf.split(dataset["X_train"], dataset["y_train"]):
         X_train, y_train = dataset["X_train"].iloc[fold[0]], dataset["y_train"].iloc[fold[0]]
         X_test, y_test = dataset["X_train"].iloc[fold[1]], dataset["y_train"].iloc[fold[1]]
 
-        # Fit the model to get subsets and performance on 27 features
-        rs.fit(X_train, y_train)
+        rs_objects.append(clone(rs))
 
-        # Get perforamnce
-        y_pred = rs.predict_proba(X_test)[:, 1]
+        # Fit rs to get best model and feature subsets
+        rs.fit(X_train, y_train)
+    
+        # Get perforamnce on all features
+        model = clone(rs.best_estimator_.named_steps["model"])
+        pipe_with_best_model = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy="median")),
+            ("scale",StandardScaler()),
+            ("model", model)])
+        pipe_with_best_model.fit(X_train, y_train)
+        y_pred = pipe_with_best_model.predict_proba(X_test)[:, 1]
+        auc = roc_auc_score(y_test, y_pred)
+        cv_perf_scores["auc_all_features"].append(auc)
+        print("DEBUG auc all features", auc)
+
+        # Get SFS object
+        sfs = rs.best_estimator_.named_steps["selector"]
+
+        # Get perforamcne at 27 features
+        features = sfs.get_metric_dict()[N_FEATURES_TO_CHECK]["feature_idx"]
+        model = clone(rs.best_estimator_.named_steps["model"])
+        pipe_with_best_model = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy="median")),
+            ("scale",StandardScaler()),
+            ("model", model)])
+        pipe_with_best_model.fit(X_train.iloc[:, list(features)], y_train)
+        y_pred = pipe_with_best_model.predict_proba(X_test.iloc[:, list(features)])[:, 1]
         auc = roc_auc_score(y_test, y_pred)
         cv_perf_scores["auc_27"].append(auc)
         print("DEBUG auc 27", auc)
 
         # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
         # (get aurocs from sfs object)
-        sfs = rs.best_estimator_.named_steps["selector"]
         opt_n = get_opt_n(sfs, 0.95)
         cv_perf_scores["opt_ns"].append(opt_n)
         print("DEBUG opt n", opt_n)
 
         # Get performance on each subset
-        for subset in range(1, 28):
+        for subset in range(1, N_FEATURES_TO_CHECK+1):
             # Fit the model to the subset
-            features = sfs.get_metric_dict()[subset]["feature_idx"]
-            new_model = clone(rs.best_estimator_.named_steps["model"])
-            new_model.fit(X_train.iloc[:, features], y_train)
+            model = clone(rs.best_estimator_.named_steps["model"])
+            pipe_with_best_model = Pipeline(steps=[
+                ('imputer', SimpleImputer(strategy="median")),
+                ("scale",StandardScaler()),
+                ("model", model)])
+            pipe_with_best_model.fit(X_train.iloc[:, list(features)], y_train)
 
             # Get perforamnce
-            y_pred = new_model.predict_proba(X_test.iloc[:, features])[:, 1]
+            y_pred = pipe_with_best_model.predict_proba(X_test.iloc[:, list(features)])[:, 1]
             auc = roc_auc_score(y_test, y_pred)
             cv_perf_scores["perf_on_features"][subset]["auc"].append(auc)
             print("DEBUG auc", subset, auc)
@@ -359,7 +394,7 @@ def parallel_grid_search(args):
         ("model", rs.best_estimator_.named_steps["model"])
         ])
     
-    subset_at_opt_n = get_subset_at_n(sfs)
+    subset_at_opt_n = get_subset_at_n(sfs, average_opt_n)
     print("DEBUG subset at opt n", subset_at_opt_n)
     pipe_with_best_model.fit(dataset["X_train"].iloc[:, subset_at_opt_n], dataset["y_train"])
 
@@ -367,12 +402,10 @@ def parallel_grid_search(args):
     y_pred = pipe_with_best_model.predict_proba(dataset["X_test"].iloc[:, subset_at_opt_n])[:, 1]
     # Get sens, spec at optimal threshold
     average_opt_thresh = np.mean(cv_perf_scores["perf_on_features"][average_opt_n]["opt_thresh"])
-    print("DEBUG average opt thresh", average_opt_thresh)
     auc = roc_auc_score(dataset["y_test"], y_pred)
     y_pred_binary = (y_pred >= average_opt_thresh).astype(bool)
     sens = recall_score(dataset["y_test"], y_pred_binary)
     spec = recall_score(dataset["y_test"], y_pred_binary, pos_label=0)
-    print("DEBUG test set", auc, sens, spec)
 
     cv_perf_scores["auc_test_set"] = auc
     cv_perf_scores["sens_test_set"] = sens
@@ -394,7 +427,7 @@ def parallel_grid_search(args):
     #     n_jobs=-1, 
     #     verbose=1)
 
-    return output_name, cv_perf_scores
+    return output_name, cv_perf_scores, rs_objects
 
 
 def main():
@@ -460,12 +493,15 @@ def main():
 
     # Aggregate the results into a DataFrame and a list of objects
     #result_df = pd.DataFrame()
-    scores_objects = {}
+    scores_dict = {}
+    rs_dict = {}
     for result in results:
         # Recevice otuput_name, scores, rs object
-        output_name, scores = result
+        output_name, scores, rs_objects = result
 
-        scores_objects[output_name] = scores  # Add rs object to list of objects
+        scores_dict[output_name] = scores  # Add scores to dict
+        rs_dict[output_name] = rs_objects  # Add rs object to list of objects
+
         
         #mean_auc = pd.Series(scores['test_score']).mean()  # Calculate mean AUC using .mean()
         # mean_auc = pd.Series(scores['test_roc_auc']).mean()  # Calculate mean AUC using .mean()
@@ -489,7 +525,9 @@ def main():
     #dump(rs, dirs["models_dir"]+f'rs_{model}.joblib')
     #dump(optimal_number_of_features, dirs["models_dir"]+f'optimal_number_of_features_{model}.joblib')
     #dump(result_df, dirs["models_dir"]+f'cv_perf_scores_lr_debug.joblib')
-    dump(scores_objects, dirs["models_dir"]+f'scores_objects_lr_debug.joblib')
+    print(scores_dict)
+    dump(scores_dict, dirs["models_dir"]+f'scores_objects_lr_debug.joblib')
+    dump(rs_dict, dirs["models_dir"]+f'rs_objects_lr_debug.joblib')
     ###########
 
 
