@@ -36,7 +36,7 @@ sys.path.insert(0, parentdir)
 import util, models, util
 
 DEBUG_MODE = True
-DEV_MODE = True
+DEV_MODE = False
 N_FEATURES_TO_CHECK = 2 if DEV_MODE else 27
 
 def build_output_dir_name(params_from_create_datasets):
