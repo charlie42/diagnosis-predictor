@@ -36,8 +36,8 @@ sys.path.insert(0, parentdir)
 import util, models, util
 
 DEBUG_MODE = True
-DEV_MODE = False
-N_FEATURES_TO_CHECK = 2 if DEV_MODE else 27
+DEV_MODE = True
+N_FEATURES_TO_CHECK = 3 if DEV_MODE else 27
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
@@ -314,11 +314,12 @@ def parallel_grid_search(args):
         "auc_all_features": [],
         "auc_27": [],
         "opt_ns": [],
-        "perf_on_features": {x:{"auc":[], "opt_thresh":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
+        "perf_on_features": {x:{"auc":[], "opt_thresh":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
     }
     rs_objects = []
 
     # Get cross_val_score at each number of features for each diagnosis
+    # If model is logistic regression, get average of coefficients for each feature subset
     for fold in cv_perf.split(dataset["X_train"], dataset["y_train"]):
         X_train, y_train = dataset["X_train"].iloc[fold[0]], dataset["y_train"].iloc[fold[0]]
         X_test, y_test = dataset["X_train"].iloc[fold[1]], dataset["y_train"].iloc[fold[1]]
@@ -364,6 +365,9 @@ def parallel_grid_search(args):
 
         # Get performance on each subset
         for subset in range(1, N_FEATURES_TO_CHECK+1):
+            features = sfs.get_metric_dict()[subset]["feature_idx"]
+            print("DEBUG subset", subset, "features", features, len(features))
+
             # Fit the model to the subset
             model = clone(rs.best_estimator_.named_steps["model"])
             pipe_with_best_model = Pipeline(steps=[
@@ -383,10 +387,18 @@ def parallel_grid_search(args):
             cv_perf_scores["perf_on_features"][subset]["opt_thresh"].append(opt_thresh)
             print("DEBUG opt thresh", subset, opt_thresh)
 
+            # Get coefficients
+            if isinstance(model, LogisticRegression):
+                coefs = pipe_with_best_model.named_steps["model"].coef_[0]
+                print("DEBUG subset", subset, "coefs", coefs, len(features), len(coefs))
+                cv_perf_scores["perf_on_features"][subset]["coefs"].append(coefs)
+                print("DEBUG coefs", subset, coefs)
+
     print(cv_perf_scores)
 
     average_opt_n = np.mean(cv_perf_scores["opt_ns"])
     print("DEBUG average opt n", average_opt_n)
+
     # Fit the model to get sensitivity and specificity on optimal n features
     pipe_with_best_model = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy="median")),
@@ -398,7 +410,7 @@ def parallel_grid_search(args):
     print("DEBUG subset at opt n", subset_at_opt_n)
     pipe_with_best_model.fit(dataset["X_train"].iloc[:, subset_at_opt_n], dataset["y_train"])
 
-    # Get perforamnce
+    # Get perforamnce on test set
     y_pred = pipe_with_best_model.predict_proba(dataset["X_test"].iloc[:, subset_at_opt_n])[:, 1]
     # Get sens, spec at optimal threshold
     average_opt_thresh = np.mean(cv_perf_scores["perf_on_features"][average_opt_n]["opt_thresh"])
@@ -406,10 +418,13 @@ def parallel_grid_search(args):
     y_pred_binary = (y_pred >= average_opt_thresh).astype(bool)
     sens = recall_score(dataset["y_test"], y_pred_binary)
     spec = recall_score(dataset["y_test"], y_pred_binary, pos_label=0)
-
+    
     cv_perf_scores["auc_test_set"] = auc
     cv_perf_scores["sens_test_set"] = sens
     cv_perf_scores["spec_test_set"] = spec
+
+    
+
     
     # cv_scoring = {
     #     'roc_auc': make_scorer(roc_auc_score, needs_proba=True),
