@@ -1,0 +1,10 @@
+pandas==1.5.3
+numpy
+matplotlib 
+scikit-learn
+pyyaml
+joblib
+ipython
+mlxtend 
+
+
