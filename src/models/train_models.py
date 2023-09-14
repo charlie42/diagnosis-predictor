@@ -214,6 +214,13 @@ def get_subset_at_n(sfs, n):
 
     return list(features)
 
+def remove_patients_with_other_diags(X_test, y_test, dataset):
+    # Remove patients who are not in the dataset["X_test_only_healthy_controls"] 
+    # boolean matrix (i.e. patients with other diagnoses)
+    
+
+    return X_train, y_train
+
 
 def parallel_grid_search(args):
 
@@ -313,6 +320,7 @@ def parallel_grid_search(args):
     cv_perf_scores = {
         "auc_all_features": [],
         "auc_27": [],
+        "auc_27_healthy": [],
         "opt_ns": [],
         "perf_on_features": {x:{"auc":[], "opt_thresh":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
     }
@@ -323,6 +331,10 @@ def parallel_grid_search(args):
     for fold in cv_perf.split(dataset["X_train"], dataset["y_train"]):
         X_train, y_train = dataset["X_train"].iloc[fold[0]], dataset["y_train"].iloc[fold[0]]
         X_test, y_test = dataset["X_train"].iloc[fold[1]], dataset["y_train"].iloc[fold[1]]
+        # Use dataset["X_train_only_healthy_controls"] mask to get only healthy controls
+        X_test_only_healthy_controls = X_test[dataset["X_train_only_healthy_controls"].iloc[fold[1]]]
+        y_test_only_healthy_controls = y_test[dataset["X_train_only_healthy_controls"].iloc[fold[1]]]
+        # DEBUG :TODO assign X_train, check how many positives there
 
         rs_objects.append(clone(rs))
 
@@ -330,11 +342,7 @@ def parallel_grid_search(args):
         rs.fit(X_train, y_train)
     
         # Get perforamnce on all features
-        model = clone(rs.best_estimator_.named_steps["model"])
-        pipe_with_best_model = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy="median")),
-            ("scale",StandardScaler()),
-            ("model", model)])
+        pipe_with_best_model = clone(rs.best_estimator_)
         pipe_with_best_model.fit(X_train, y_train)
         y_pred = pipe_with_best_model.predict_proba(X_test)[:, 1]
         auc = roc_auc_score(y_test, y_pred)
@@ -346,16 +354,42 @@ def parallel_grid_search(args):
 
         # Get perforamcne at 27 features
         features = sfs.get_metric_dict()[N_FEATURES_TO_CHECK]["feature_idx"]
-        model = clone(rs.best_estimator_.named_steps["model"])
-        pipe_with_best_model = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy="median")),
-            ("scale",StandardScaler()),
-            ("model", model)])
+        pipe_with_best_model = clone(rs.best_estimator_)
         pipe_with_best_model.fit(X_train.iloc[:, list(features)], y_train)
         y_pred = pipe_with_best_model.predict_proba(X_test.iloc[:, list(features)])[:, 1]
         auc = roc_auc_score(y_test, y_pred)
         cv_perf_scores["auc_27"].append(auc)
         print("DEBUG auc 27", auc)
+
+        # Get performance on only healthy controls on 27 features
+        y_pred = pipe_with_best_model.predict_proba(X_test_only_healthy_controls.iloc[:, list(features)])[:, 1]
+        print("DEBUG y_test_only_healthy_controls", y_test_only_healthy_controls, len(y_test_only_healthy_controls), sum(y_test_only_healthy_controls))
+        auc = roc_auc_score(y_test_only_healthy_controls, y_pred)
+        cv_perf_scores["auc_27_healthy"].append(auc)
+        print("DEBUG auc 27 healthy", auc)
+
+        # Stratified by age
+        age_col = "BasicDemos,Age"
+        X_test_under_8, y_test_under_8 = X_test[X_test[age_col] < 8], y_test[X_test[age_col] < 8]
+        X_test_8_11, y_test_8_11 = X_test[(X_test[age_col] >= 8) & (X_test[age_col] <= 11)], y_test[(X_test[age_col] >= 8) & (X_test[age_col] <= 11)]
+        X_test_12_15, y_test_12_15 = X_test[(X_test[age_col] >= 12) & (X_test[age_col] <= 15)], y_test[(X_test[age_col] >= 12) & (X_test[age_col] <= 15)]
+        X_test_over_15, y_test_over_15 = X_test[X_test[age_col] > 15], y_test[X_test[age_col] > 15]
+        y_pred = pipe_with_best_model.predict_proba(X_test_under_8.iloc[:, list(features)])[:, 1]
+        auc = roc_auc_score(y_test_under_8, y_pred)
+        cv_perf_scores["auc_27_under_8"].append(auc)
+        print("DEBUG auc 27 under 8", auc)
+        y_pred = pipe_with_best_model.predict_proba(X_test_8_11.iloc[:, list(features)])[:, 1]
+        auc = roc_auc_score(y_test_8_11, y_pred)
+        cv_perf_scores["auc_27_8_11"].append(auc)
+        print("DEBUG auc 27 8-11", auc)
+        y_pred = pipe_with_best_model.predict_proba(X_test_12_15.iloc[:, list(features)])[:, 1]
+        auc = roc_auc_score(y_test_12_15, y_pred)
+        cv_perf_scores["auc_27_12_15"].append(auc)
+        print("DEBUG auc 27 12-15", auc)
+        y_pred = pipe_with_best_model.predict_proba(X_test_over_15.iloc[:, list(features)])[:, 1]
+        auc = roc_auc_score(y_test_over_15, y_pred)
+        cv_perf_scores["auc_27_over_15"].append(auc)
+        print("DEBUG auc 27 over 15", auc)
 
         # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
         # (get aurocs from sfs object)
@@ -467,39 +501,6 @@ def main():
     if DEV_MODE:
         diag_cols = diag_cols[0:2]
         pass
-
-    ### TEST print value counts when doing 3 nested kfolds
-
-    kf1 = StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
-    kf2 = StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
-    kf3 = StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
-    for diag in diag_cols:
-        print(diag)
-        for train, test in kf1.split(datasets[diag]["X_train"], datasets[diag]["y_train"]):
-            #print("kf1")
-            #print(datasets[diag]["y_train"].iloc[test].value_counts())
-            for train2, test2 in kf2.split(datasets[diag]["X_train"].iloc[train], datasets[diag]["y_train"].iloc[train]):
-                #print("kf2")
-                #print(datasets[diag]["y_train"].iloc[test2].value_counts())
-                for train3, test3 in kf3.split(datasets[diag]["X_train"].iloc[train].iloc[train2], datasets[diag]["y_train"].iloc[train].iloc[train2]):
-                    #print("kf3")
-                    if datasets[diag]["y_train"].iloc[test3].value_counts()[1] < 10:
-                        print(datasets[diag]["y_train"].iloc[test3].value_counts())
-    #sys.exit()
-    ###
-    
-    # Get cross_val_score at each number of features for each diagnosis
-    #cv_perf_scores = {}
-    #for diag in diag_cols:
-        # for train, test in cv_perf.split(datasets[diag]["X_train"], datasets[diag]["y_train"]):
-        #     rs.fit(datasets[diag]["X_train"].iloc[train], datasets[diag]["y_train"].iloc[train])
-        #     print("Best subset", rs.best_estimator_.k_feature_names_)
-        #     print("Best score", rs.best_score_)
-        #     print("Best params", rs.best_params_)
-        #     print("Best estimator", rs.best_estimator_)
-    #    cv_perf_scores[diag] = np.mean(cross_val_score(rs, datasets[diag]["X_train"], datasets[diag]["y_train"], cv=cv_perf, scoring="roc_auc", n_jobs=-1, verbose=1))
-
-    #print(cv_perf_scores)
 
     args_list = [(dataset, output_name) for dataset, output_name in zip([datasets[diag] for diag in diag_cols], diag_cols)]
 

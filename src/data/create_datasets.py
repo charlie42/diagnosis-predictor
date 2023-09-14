@@ -82,6 +82,12 @@ def keep_only_healthy_controls(X, y):
 
     return X_new, y_new
 
+def get_healthy_control_indices(X, y):
+    # Get boolean mask for healthy controls
+    healthy_control_indices = (y == 0) & (X["Diag.No Diagnosis Given"] == 1)
+    
+    return healthy_control_indices
+
 def split_datasets_per_diag(data, diag_cols, split_percentage, use_other_diags_as_input, clinical_config, learning):
     datasets = {}
     for diag in diag_cols:
@@ -95,8 +101,15 @@ def split_datasets_per_diag(data, diag_cols, split_percentage, use_other_diags_a
         X_train_train, X_val, y_train_train, y_val = train_test_split(X_train, y_train, test_size=split_percentage, 
                                                                       stratify=y_train, random_state=1)
         
-        X_test_only_healthy_controls, y_test_only_healthy_controls = keep_only_healthy_controls(X_test, y_test)
-        X_val_only_healthy_controls, y_val_only_healthy_controls = keep_only_healthy_controls(X_val, y_val)
+        X_train_only_healthy_controls = get_healthy_control_indices(X_train, y_train)
+        y_train_only_healthy_controls = get_healthy_control_indices(X_train, y_train)
+        X_test_only_healthy_controls = get_healthy_control_indices(X_test, y_test)
+        y_test_only_healthy_controls = get_healthy_control_indices(X_test, y_test)
+        X_val_only_healthy_controls = get_healthy_control_indices(X_val, y_val)
+        y_val_only_healthy_controls = get_healthy_control_indices(X_val, y_val)
+
+        print(f"Number of healthy controls in train set for {diag}: {X_train_only_healthy_controls.sum()}/{X_train.shape[0]}")
+        print(f"Number of positive examples in train set for {diag}: {y_train.sum()}/{y_train.shape[0]}")
 
         # Drop columns from input that we don't want there
         input_cols = get_input_cols_per_diag(data, diag, use_other_diags_as_input, learning)
@@ -104,8 +117,6 @@ def split_datasets_per_diag(data, diag_cols, split_percentage, use_other_diags_a
         X_test = X_test[input_cols]
         X_train_train = X_train_train[input_cols]
         X_val = X_val[input_cols]
-        X_test_only_healthy_controls = X_test_only_healthy_controls[input_cols]
-        X_val_only_healthy_controls = X_val_only_healthy_controls[input_cols]
     
         datasets[diag] = { "X_train": X_train,
                         "X_test": X_test,
@@ -115,6 +126,8 @@ def split_datasets_per_diag(data, diag_cols, split_percentage, use_other_diags_a
                         "X_val": X_val,
                         "y_train_train": y_train_train,
                         "y_val": y_val,
+                        "X_train_only_healthy_controls": X_train_only_healthy_controls,
+                        "y_train_only_healthy_controls": y_train_only_healthy_controls,
                         "X_test_only_healthy_controls": X_test_only_healthy_controls,
                         "y_test_only_healthy_controls": y_test_only_healthy_controls,
                         "X_val_only_healthy_controls": X_val_only_healthy_controls,
