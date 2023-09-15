@@ -321,10 +321,22 @@ def parallel_grid_search(args):
         "auc_all_features": [],
         "auc_27": [],
         "auc_27_healthy": [],
+        "auc_27_under_8": [],
+        "auc_27_8_11": [],
+        "auc_27_12_15": [],
+        "auc_27_over_15": [],
         "opt_ns": [],
         "perf_on_features": {x:{"auc":[], "opt_thresh":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
     }
     rs_objects = []
+
+    # DEBUG
+    y_train_only_healthy_controls = dataset["y_train"][dataset["y_train_only_healthy_controls"]]
+    y_test_only_healthy_controls = dataset["y_test"][dataset["y_test_only_healthy_controls"]]
+    print("DEBUG y_train_only_healthy_controls", len(y_train_only_healthy_controls), sum(y_train_only_healthy_controls))
+    print("DEBUG y_test_only_healthy_controls", len(y_test_only_healthy_controls), sum(y_test_only_healthy_controls))
+    print("DEBUG y_train", len(dataset["y_train"]), sum(dataset["y_train"]))
+    print("DEBUG y_test", len(dataset["y_test"]), sum(dataset["y_test"]))
 
     # Get cross_val_score at each number of features for each diagnosis
     # If model is logistic regression, get average of coefficients for each feature subset
@@ -335,6 +347,13 @@ def parallel_grid_search(args):
         X_test_only_healthy_controls = X_test[dataset["X_train_only_healthy_controls"].iloc[fold[1]]]
         y_test_only_healthy_controls = y_test[dataset["X_train_only_healthy_controls"].iloc[fold[1]]]
         # DEBUG :TODO assign X_train, check how many positives there
+        X_train_only_healthy_controls = X_train[dataset["X_train_only_healthy_controls"].iloc[fold[0]]]
+        y_train_only_healthy_controls = y_train[dataset["X_train_only_healthy_controls"].iloc[fold[0]]]
+        print("DEBUG FOLD")
+        print("DEBUG y_train_only_healthy_controls", len(y_train_only_healthy_controls), sum(y_train_only_healthy_controls))
+        print("DEBUG y_test_only_healthy_controls", len(y_test_only_healthy_controls), sum(y_test_only_healthy_controls))
+        print("DEBUG y_train", len(y_train), sum(y_train))
+        print("DEBUG y_test", len(y_test), sum(y_test))
 
         rs_objects.append(clone(rs))
 
@@ -361,15 +380,20 @@ def parallel_grid_search(args):
         cv_perf_scores["auc_27"].append(auc)
         print("DEBUG auc 27", auc)
 
-        # Get performance on only healthy controls on 27 features
-        y_pred = pipe_with_best_model.predict_proba(X_test_only_healthy_controls.iloc[:, list(features)])[:, 1]
-        print("DEBUG y_test_only_healthy_controls", y_test_only_healthy_controls, len(y_test_only_healthy_controls), sum(y_test_only_healthy_controls))
-        auc = roc_auc_score(y_test_only_healthy_controls, y_pred)
-        cv_perf_scores["auc_27_healthy"].append(auc)
-        print("DEBUG auc 27 healthy", auc)
+        # Get performance on only healthy controls on 27 features, only if 
+        # more than 20 positive examples in the test set
+        if sum(y_test_only_healthy_controls) > 20:
+            y_pred = pipe_with_best_model.predict_proba(X_test_only_healthy_controls.iloc[:, list(features)])[:, 1]
+            print("DEBUG y_test_only_healthy_controls", y_test_only_healthy_controls, len(y_test_only_healthy_controls), sum(y_test_only_healthy_controls))
+            auc = roc_auc_score(y_test_only_healthy_controls, y_pred)
+            cv_perf_scores["auc_27_healthy"].append(auc)
+            print("DEBUG auc 27 healthy", auc)
+        else:
+            cv_perf_scores["auc_27_healthy"].append(None)
+            print("DEBUG auc 27 healthy", None)
 
         # Stratified by age
-        age_col = "BasicDemos,Age"
+        age_col = "Basic_Demos,Age"
         X_test_under_8, y_test_under_8 = X_test[X_test[age_col] < 8], y_test[X_test[age_col] < 8]
         X_test_8_11, y_test_8_11 = X_test[(X_test[age_col] >= 8) & (X_test[age_col] <= 11)], y_test[(X_test[age_col] >= 8) & (X_test[age_col] <= 11)]
         X_test_12_15, y_test_12_15 = X_test[(X_test[age_col] >= 12) & (X_test[age_col] <= 15)], y_test[(X_test[age_col] >= 12) & (X_test[age_col] <= 15)]
@@ -430,7 +454,7 @@ def parallel_grid_search(args):
 
     print(cv_perf_scores)
 
-    average_opt_n = np.mean(cv_perf_scores["opt_ns"])
+    average_opt_n = round(np.mean(cv_perf_scores["opt_ns"]))
     print("DEBUG average opt n", average_opt_n)
 
     # Fit the model to get sensitivity and specificity on optimal n features
