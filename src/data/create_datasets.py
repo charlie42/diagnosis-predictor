@@ -83,8 +83,8 @@ def keep_only_healthy_controls(X, y):
     return X_new, y_new
 
 def get_healthy_control_indices(X, y):
-    # Get boolean mask for healthy controls
-    healthy_control_indices = (y == 0) & (X["Diag.No Diagnosis Given"] == 1)
+    # Get boolean mask for healthy controls or people with the diagnosis
+    healthy_control_indices = (y == 1) | ((y == 0) & (X["Diag.No Diagnosis Given"] == 1))
     
     return healthy_control_indices
 
