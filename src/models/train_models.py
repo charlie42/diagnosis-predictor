@@ -214,13 +214,26 @@ def get_subset_at_n(sfs, n):
 
     return list(features)
 
-def remove_patients_with_other_diags(X_test, y_test, dataset):
-    # Remove patients who are not in the dataset["X_test_only_healthy_controls"] 
-    # boolean matrix (i.e. patients with other diagnoses)
-    
+def agg_features_and_coefs(feature_lists, coefs_lists):
+    '''''
+    Use features most folds agreed on
+    If no consensus, take one from the first fold
+    '''
+    print("DEBUG feature_lists", feature_lists)
+    print("DEBUG coefs_lists", coefs_lists)
+    final_subset = []
+    final_coefs = []
+    for subset in np.arange(0, len(feature_lists[0]))+1:
+        # Get the most common feature at this index from each fold
+        features_at_index = [feature_list[subset] for feature_list in feature_lists] # eg AAB
+        coefs_at_index = [coefs_list[subset] for coefs_list in coefs_lists] # eg 0.1, 0.2, 0.3 (coefs for A, A, B)
+        most_common_feature = max(set(features_at_index), key=features_at_index.count) # eg A
+        coef_for_most_common_feature = coefs_at_index[features_at_index.index(most_common_feature)] # eg 0.1
 
-    return X_train, y_train
+        final_subset.append(most_common_feature)
+        final_coefs.append(coef_for_most_common_feature)
 
+    return final_subset, final_coefs
 
 def parallel_grid_search(args):
 
@@ -326,7 +339,9 @@ def parallel_grid_search(args):
         "auc_27_12_15": [],
         "auc_27_over_15": [],
         "opt_ns": [],
-        "perf_on_features": {x:{"auc":[], "opt_thresh":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
+        "avg_features": [],
+        "avg_coefs": [],
+        "perf_on_features": {x:{"auc":[], "opt_thresh":[], "features":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
     }
     rs_objects = []
 
@@ -445,6 +460,9 @@ def parallel_grid_search(args):
             cv_perf_scores["perf_on_features"][subset]["opt_thresh"].append(opt_thresh)
             print("DEBUG opt thresh", subset, opt_thresh)
 
+            # Get features
+            cv_perf_scores["perf_on_features"][subset]["features"].append(features)
+
             # Get coefficients
             if isinstance(model, LogisticRegression):
                 coefs = pipe_with_best_model.named_steps["model"].coef_[0]
@@ -457,29 +475,32 @@ def parallel_grid_search(args):
     average_opt_n = round(np.mean(cv_perf_scores["opt_ns"]))
     print("DEBUG average opt n", average_opt_n)
 
-    # Fit the model to get sensitivity and specificity on optimal n features
-    pipe_with_best_model = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy="median")),
-        ("scale",StandardScaler()),
-        ("model", rs.best_estimator_.named_steps["model"])
-        ])
-    
-    subset_at_opt_n = get_subset_at_n(sfs, average_opt_n)
-    print("DEBUG subset at opt n", subset_at_opt_n)
-    pipe_with_best_model.fit(dataset["X_train"].iloc[:, subset_at_opt_n], dataset["y_train"])
+    # Aggregate features subsets
+    cv_perf_scores["avg_features"], cv_perf_scores["avg_coefs"] = agg_features_and_coefs(
+        cv_perf_scores["perf_on_features"][average_opt_n]["features"], 
+        cv_perf_scores["perf_on_features"][average_opt_n]["coefs"])
+    subset_at_opt_n = cv_perf_scores["avg_features"]
 
-    # Get perforamnce on test set
-    y_pred = pipe_with_best_model.predict_proba(dataset["X_test"].iloc[:, subset_at_opt_n])[:, 1]
-    # Get sens, spec at optimal threshold
-    average_opt_thresh = np.mean(cv_perf_scores["perf_on_features"][average_opt_n]["opt_thresh"])
-    auc = roc_auc_score(dataset["y_test"], y_pred)
-    y_pred_binary = (y_pred >= average_opt_thresh).astype(bool)
-    sens = recall_score(dataset["y_test"], y_pred_binary)
-    spec = recall_score(dataset["y_test"], y_pred_binary, pos_label=0)
-    
-    cv_perf_scores["auc_test_set"] = auc
-    cv_perf_scores["sens_test_set"] = sens
-    cv_perf_scores["spec_test_set"] = spec
+    print("DEBUG subset at opt n", subset_at_opt_n)
+
+    cv_perf_scores["avg_threshold"] = np.mean(cv_perf_scores["perf_on_features"][average_opt_n]["opt_thresh"])
+
+    # Get performance using average coefficients for features from the opt n features subset
+    if isinstance(model, LogisticRegression):
+        coefs = cv_perf_scores["avg_coefs"]
+        print("DEBUG coefs", coefs, len(subset_at_opt_n), len(coefs))
+        
+        # Use coefficients to get performance on test set
+        y_pred = np.dot(dataset["X_test"].iloc[:, subset_at_opt_n], coefs)
+
+        # Get auroc, specificity, and sensitivity
+        auc = roc_auc_score(dataset["y_test"], y_pred)
+        sens = recall_score(dataset["y_test"], y_pred >= cv_perf_scores["avg_threshold"])
+        spec = recall_score(dataset["y_test"], y_pred < cv_perf_scores["avg_threshold"], pos_label=0)
+
+        cv_perf_scores["auc_test_set"] = auc
+        cv_perf_scores["sens_test_set"] = sens
+        cv_perf_scores["spec_test_set"] = spec
 
     
 
