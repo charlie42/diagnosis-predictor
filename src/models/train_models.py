@@ -246,7 +246,7 @@ def parallel_grid_search(args):
     # Parameters
     lr_param_grid = {'model__C': loguniform(1e-5, 1e4)} if DEV_MODE else {
         'model__C': loguniform(1e-5, 1e4), 
-        'model__penalty': ['l1', 'l2', 'elasticnet'], 
+        'model__penalty': ['elasticnet'], 
         'model__class_weight': ['balanced', None], 
         'model__l1_ratio': uniform(0, 1) 
     }
@@ -331,6 +331,7 @@ def parallel_grid_search(args):
 
     # Get cross_val_score at each number of features for each diagnosis
     cv_perf_scores = {
+        "hp_search_best_score": [],
         "auc_all_features": [],
         "auc_27": [],
         "auc_27_healthy": [],
@@ -374,6 +375,7 @@ def parallel_grid_search(args):
 
         # Fit rs to get best model and feature subsets
         rs.fit(X_train, y_train)
+        cv_perf_scores["hp_search_best_score"].append(rs.best_score_)
     
         # Get perforamnce on all features
         pipe_with_best_model = clone(rs.best_estimator_)
