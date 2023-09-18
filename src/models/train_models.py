@@ -223,7 +223,7 @@ def agg_features_and_coefs(feature_lists, coefs_lists):
     print("DEBUG coefs_lists", coefs_lists)
     final_subset = []
     final_coefs = []
-    for subset in np.arange(0, len(feature_lists[0]))+1:
+    for subset in np.arange(0, len(feature_lists[0])):
         # Get the most common feature at this index from each fold
         features_at_index = [feature_list[subset] for feature_list in feature_lists] # eg AAB
         coefs_at_index = [coefs_list[subset] for coefs_list in coefs_lists] # eg 0.1, 0.2, 0.3 (coefs for A, A, B)
@@ -489,9 +489,18 @@ def parallel_grid_search(args):
     if isinstance(model, LogisticRegression):
         coefs = cv_perf_scores["avg_coefs"]
         print("DEBUG coefs", coefs, len(subset_at_opt_n), len(coefs))
-        
+
+        # Apply scaler and imputer to X_test
+        X_test = dataset["X_test"].iloc[:, subset_at_opt_n]
+        X_train = dataset["X_train"].iloc[:, subset_at_opt_n]
+        imputer = SimpleImputer(strategy="median")
+        scaler = StandardScaler()
+        imputer.fit_transform(X_train)
+        scaler.fit_transform(X_train)
+        X_test = scaler.transform(imputer.transform(X_test))
+
         # Use coefficients to get performance on test set
-        y_pred = np.dot(dataset["X_test"].iloc[:, subset_at_opt_n], coefs)
+        y_pred = np.dot(X_test, coefs)
 
         # Get auroc, specificity, and sensitivity
         auc = roc_auc_score(dataset["y_test"], y_pred)
@@ -502,7 +511,6 @@ def parallel_grid_search(args):
         cv_perf_scores["sens_test_set"] = sens
         cv_perf_scores["spec_test_set"] = spec
 
-    
 
     
     # cv_scoring = {
