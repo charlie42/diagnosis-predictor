@@ -24,7 +24,7 @@ from sklearn.metrics import roc_auc_score, recall_score, make_scorer
 from sklearn.base import clone
 import mlxtend
 import multiprocessing
-
+from copy import deepcopy
 import sys, inspect
 from joblib import load, dump
 import time
@@ -37,7 +37,7 @@ import util, models, util
 
 DEBUG_MODE = True
 DEV_MODE = True
-N_FEATURES_TO_CHECK = 3 if DEV_MODE else 27
+N_FEATURES_TO_CHECK = 7 if DEV_MODE else 27
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
@@ -129,8 +129,13 @@ def get_opt_n(sfs, performance_fraction):
     '''
 
     avg_performances = [sfs.get_metric_dict()[n]["avg_score"] for n in sfs.get_metric_dict().keys()]
+    print("DEBUG avg_performances", avg_performances)
     max_performance = np.max(avg_performances)
-    opt_n = np.argmax(avg_performances >= max_performance * performance_fraction) + 1
+    print("DEBUG max_performance", max_performance)
+    optimal_performance = max_performance * performance_fraction
+    print("DEBUG optimal_performance", optimal_performance)
+    opt_n = np.argmax(avg_performances >= optimal_performance) + 1
+    print("DEBUG opt_n", opt_n)
 
     return opt_n
 
@@ -214,48 +219,23 @@ def get_subset_at_n(sfs, n):
 
     return list(features)
 
-def agg_features_and_coefs(feature_lists, coefs_lists):
-    '''''
-    Use features most folds agreed on
-    If no consensus, take one from the first fold
-    '''
-    print("DEBUG feature_lists", feature_lists)
-    print("DEBUG coefs_lists", coefs_lists)
-    final_subset = []
-    final_coefs = []
-    for subset in np.arange(0, len(feature_lists[0])):
-        # Get the most common feature at this index from each fold
-        features_at_index = [feature_list[subset] for feature_list in feature_lists] # eg AAB
-        coefs_at_index = [coefs_list[subset] for coefs_list in coefs_lists] # eg 0.1, 0.2, 0.3 (coefs for A, A, B)
-        most_common_feature = max(set(features_at_index), key=features_at_index.count) # eg A
-        coef_for_most_common_feature = coefs_at_index[features_at_index.index(most_common_feature)] # eg 0.1
-
-        final_subset.append(most_common_feature)
-        final_coefs.append(coef_for_most_common_feature)
-
-    return final_subset, final_coefs
-
 def parallel_grid_search(args):
 
     dataset, output_name = args
 
     # Model
     lr = LogisticRegression(solver="saga")
-    lgbm = HistGradientBoostingClassifier()
 
     # Parameters
-    lr_param_grid = {'model__C': loguniform(1e-5, 1e4)} if DEV_MODE else {
+    lr_param_grid = {
+        'model__C': loguniform(1e-5, 1e4),
+        'model__penalty': ['elasticnet'], 
+        'model__l1_ratio': uniform(0, 1) 
+    } if DEV_MODE else {
         'model__C': loguniform(1e-5, 1e4), 
         'model__penalty': ['elasticnet'], 
         'model__class_weight': ['balanced', None], 
         'model__l1_ratio': uniform(0, 1) 
-    }
-    lgbm_param_grid = {
-        'model__learning_rate': np.logspace(-3, 0, num=100),  # Learning rate values from 0.001 to 1
-        'model__max_depth': [3, 5, 7, None],  # Maximum depth of the trees
-        'model__max_iter': np.arange(100, 1001, 100),  # Number of boosting iterations
-        'model__min_samples_leaf': [1, 2, 4],  # Minimum number of samples required to be at a leaf node
-        'model__l2_regularization': np.logspace(-3, 3, num=100)  # L2 regularization values from 0.001 to 1000
     }
 
     #for model, grid in zip([lr, lgbm], [lr_param_grid, lgbm_param_grid]):
@@ -270,7 +250,7 @@ def parallel_grid_search(args):
         ("scale",StandardScaler()),
         ("model",model)])
     
-    n_splits = 2 if DEV_MODE else 4 if DEBUG_MODE else 10
+    n_splits = 3 if DEV_MODE else 4 if DEBUG_MODE else 10 #2
     cv_rs = StratifiedKFold(n_splits, shuffle=True, random_state=0) #n_splits, shuffle=True, random_state=0)
     cv_fs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
     cv_perf = StratifiedKFold(n_splits, shuffle=True, random_state=0)
@@ -279,7 +259,7 @@ def parallel_grid_search(args):
         estimator=pipeline_for_fs,
         importance_getter="named_steps.model.coef_",
         step=1, 
-        n_features_to_select=840 if DEV_MODE else 100,
+        n_features_to_select=800 if DEV_MODE else 100, #840
         verbose=1
     )
 
@@ -308,7 +288,7 @@ def parallel_grid_search(args):
     rs = RandomizedSearchCV(
         estimator=pipeline_for_rs,
         param_distributions=grid,
-        n_iter=2 if DEV_MODE else 50 if DEBUG_MODE else 200, 
+        n_iter=20 if DEV_MODE else 50 if DEBUG_MODE else 200, #2
         scoring='roc_auc',
         n_jobs=-1,
         cv=cv_rs,
@@ -344,7 +324,7 @@ def parallel_grid_search(args):
         "avg_coefs": [],
         "perf_on_features": {x:{"auc":[], "opt_thresh":[], "features":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
     }
-    rs_objects = []
+    cv_rs_objects = []
 
     # DEBUG
     y_train_only_healthy_controls = dataset["y_train"][dataset["y_train_only_healthy_controls"]]
@@ -362,22 +342,14 @@ def parallel_grid_search(args):
         # Use dataset["X_train_only_healthy_controls"] mask to get only healthy controls
         X_test_only_healthy_controls = X_test[dataset["X_train_only_healthy_controls"].iloc[fold[1]]]
         y_test_only_healthy_controls = y_test[dataset["X_train_only_healthy_controls"].iloc[fold[1]]]
-        # DEBUG :TODO assign X_train, check how many positives there
-        X_train_only_healthy_controls = X_train[dataset["X_train_only_healthy_controls"].iloc[fold[0]]]
-        y_train_only_healthy_controls = y_train[dataset["X_train_only_healthy_controls"].iloc[fold[0]]]
-        print("DEBUG FOLD")
-        print("DEBUG y_train_only_healthy_controls", len(y_train_only_healthy_controls), sum(y_train_only_healthy_controls))
-        print("DEBUG y_test_only_healthy_controls", len(y_test_only_healthy_controls), sum(y_test_only_healthy_controls))
-        print("DEBUG y_train", len(y_train), sum(y_train))
-        print("DEBUG y_test", len(y_test), sum(y_test))
-
-        rs_objects.append(clone(rs))
+        
+        cv_rs_objects.append(deepcopy(rs))
 
         # Fit rs to get best model and feature subsets
         rs.fit(X_train, y_train)
         cv_perf_scores["hp_search_best_score"].append(rs.best_score_)
     
-        # Get perforamnce on all features
+        # Get perforamnce on all features for this fold
         pipe_with_best_model = clone(rs.best_estimator_)
         pipe_with_best_model.fit(X_train, y_train)
         y_pred = pipe_with_best_model.predict_proba(X_test)[:, 1]
@@ -385,10 +357,10 @@ def parallel_grid_search(args):
         cv_perf_scores["auc_all_features"].append(auc)
         print("DEBUG auc all features", auc)
 
-        # Get SFS object
+        # Get SFS object for this fold
         sfs = rs.best_estimator_.named_steps["selector"]
 
-        # Get perforamcne at 27 features
+        # Get perforamcne at 27 features for this fold
         features = sfs.get_metric_dict()[N_FEATURES_TO_CHECK]["feature_idx"]
         pipe_with_best_model = clone(rs.best_estimator_)
         pipe_with_best_model.fit(X_train.iloc[:, list(features)], y_train)
@@ -477,43 +449,21 @@ def parallel_grid_search(args):
     average_opt_n = round(np.mean(cv_perf_scores["opt_ns"]))
     print("DEBUG average opt n", average_opt_n)
 
-    # Aggregate features subsets
-    cv_perf_scores["avg_features"], cv_perf_scores["avg_coefs"] = agg_features_and_coefs(
-        cv_perf_scores["perf_on_features"][average_opt_n]["features"], 
-        cv_perf_scores["perf_on_features"][average_opt_n]["coefs"])
-    subset_at_opt_n = cv_perf_scores["avg_features"]
-
-    print("DEBUG subset at opt n", subset_at_opt_n)
-
     cv_perf_scores["avg_threshold"] = np.mean(cv_perf_scores["perf_on_features"][average_opt_n]["opt_thresh"])
 
-    # Get performance using average coefficients for features from the opt n features subset
-    if isinstance(model, LogisticRegression):
-        coefs = cv_perf_scores["avg_coefs"]
-        print("DEBUG coefs", coefs, len(subset_at_opt_n), len(coefs))
+    # :TODO for each # of subsets get features from the best model, fit, get y_pred for test set
+    # then get spec and sens
+    
+    # # Get auroc, specificity, and sensitivity
+    # auc = roc_auc_score(dataset["y_test"], y_pred)
+    # sens = recall_score(dataset["y_test"], y_pred >= cv_perf_scores["avg_threshold"])
+    # spec = recall_score(dataset["y_test"], y_pred < cv_perf_scores["avg_threshold"], pos_label=0)
 
-        # Apply scaler and imputer to X_test
-        X_test = dataset["X_test"].iloc[:, subset_at_opt_n]
-        X_train = dataset["X_train"].iloc[:, subset_at_opt_n]
-        imputer = SimpleImputer(strategy="median")
-        scaler = StandardScaler()
-        imputer.fit_transform(X_train)
-        scaler.fit_transform(X_train)
-        X_test = scaler.transform(imputer.transform(X_test))
+    # cv_perf_scores["auc_test_set"] = auc
+    # cv_perf_scores["sens_test_set"] = sens
+    # cv_perf_scores["spec_test_set"] = spec
 
-        # Use coefficients to get performance on test set
-        y_pred = np.dot(X_test, coefs)
-
-        # Get auroc, specificity, and sensitivity
-        auc = roc_auc_score(dataset["y_test"], y_pred)
-        sens = recall_score(dataset["y_test"], y_pred >= cv_perf_scores["avg_threshold"])
-        spec = recall_score(dataset["y_test"], y_pred < cv_perf_scores["avg_threshold"], pos_label=0)
-
-        cv_perf_scores["auc_test_set"] = auc
-        cv_perf_scores["sens_test_set"] = sens
-        cv_perf_scores["spec_test_set"] = spec
-
-
+    
     
     # cv_scoring = {
     #     'roc_auc': make_scorer(roc_auc_score, needs_proba=True),
@@ -531,7 +481,7 @@ def parallel_grid_search(args):
     #     n_jobs=-1, 
     #     verbose=1)
 
-    return output_name, cv_perf_scores, rs_objects
+    return output_name, cv_perf_scores, cv_rs_objects, rs
 
 
 def main():
@@ -554,7 +504,7 @@ def main():
         pass
 
     if DEV_MODE:
-        diag_cols = diag_cols[0:2]
+        diag_cols = diag_cols[0:3]
         pass
 
     args_list = [(dataset, output_name) for dataset, output_name in zip([datasets[diag] for diag in diag_cols], diag_cols)]
@@ -565,13 +515,16 @@ def main():
     # Aggregate the results into a DataFrame and a list of objects
     #result_df = pd.DataFrame()
     scores_dict = {}
-    rs_dict = {}
+    cv_rs_dict = {}
+    final_rs_dict = {}
     for result in results:
         # Recevice otuput_name, scores, rs object
-        output_name, scores, rs_objects = result
+        output_name, scores, cv_rs_objects, final_rs_object = result
 
         scores_dict[output_name] = scores  # Add scores to dict
-        rs_dict[output_name] = rs_objects  # Add rs object to list of objects
+        cv_rs_dict[output_name] = cv_rs_objects  # Add rs object to list of objects
+        final_rs_dict[output_name] = final_rs_object  # Add rs object to list of objects
+
 
         
         #mean_auc = pd.Series(scores['test_score']).mean()  # Calculate mean AUC using .mean()
@@ -598,7 +551,8 @@ def main():
     #dump(result_df, dirs["models_dir"]+f'cv_perf_scores_lr_debug.joblib')
     print(scores_dict)
     dump(scores_dict, dirs["models_dir"]+f'scores_objects_lr_debug.joblib')
-    dump(rs_dict, dirs["models_dir"]+f'rs_objects_lr_debug.joblib')
+    dump(cv_rs_dict, dirs["models_dir"]+f'cv_rs_objects_lr_debug.joblib')
+    dump(final_rs_dict, dirs["models_dir"]+f'final_rs_objects_lr_debug.joblib')
     ###########
 
 
