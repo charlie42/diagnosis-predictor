@@ -30,6 +30,8 @@ Arguments:
 - `--free-only`: Include only free assessments.
 - `--learning`: Include additional assessments like C3SR (which reduces the number of examples).
 - `--nih`: Include NIH toolbox scores.
+- `--fix-n-all` Fix number of training examples to the smallest one up to WHODAS
+- `--fix-n-learning` Fix number of training examples to the smallest one with C3SR
 
 ### 2 step (optional):
 
