@@ -31,7 +31,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util, models, util
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
@@ -148,13 +148,13 @@ def get_base_models_and_param_grids():
     # }
     
     base_models_and_param_grids = [
-        (rf_pipe, rf_param_grid),
-        (svc_pipe, svc_param_grid),
+        #(rf_pipe, rf_param_grid),
+        #(svc_pipe, svc_param_grid),
         (lr_pipe, lr_param_grid),
-        (lgbm_pipe, lgbm_param_grid)
+        #(lgbm_pipe, lgbm_param_grid)
     ]
     if DEBUG_MODE:
-        base_models_and_param_grids = [base_models_and_param_grids[-2]] # Only do LR in debug mode
+       #base_models_and_param_grids = [base_models_and_param_grids[-2]] # Only do LR in debug mode
         #base_models_and_param_grids = [base_models_and_param_grids[-1], base_models_and_param_grids[-2]] # Only do LR and LGBM in debug mode
         pass
     
@@ -162,7 +162,7 @@ def get_base_models_and_param_grids():
 
 def get_best_estimator(base_model, grid, X_train, y_train):
     cv = StratifiedKFold(n_splits=3 if DEBUG_MODE else 8)
-    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 200, n_jobs = -1, verbose=1)
+    rs = RandomizedSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc", n_iter=50 if DEBUG_MODE else 500, n_jobs = -1, verbose=1)
     #rs = HalvingRandomSearchCV(estimator=base_model, param_distributions=grid, cv=cv, scoring="roc_auc",
     #                            random_state=0,
     #                            max_resources=100,
