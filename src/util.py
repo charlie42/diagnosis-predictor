@@ -89,8 +89,8 @@ def get_dir_names_with_args(args, dir_names):
         if type(value) == bool:
             value = int(value)
 
-        if arg_name == "fix_n_all" and value == 1: # REMOVE THIS WHEN GENERATED NEW DATA
-            arg_name = "fix_n" 
+        #if arg_name == "fix_n_all" and value == 1: # REMOVE THIS WHEN GENERATED NEW DATA
+        #    arg_name = "fix_n" 
 
         print("DEBUG", f"{arg_name}__{value}")
 
