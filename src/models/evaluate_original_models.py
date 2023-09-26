@@ -102,8 +102,7 @@ def main():
     parser = argparse.ArgumentParser()
     # New args
     parser.add_argument("--val-set", action='store_true', help="Use the validation set instead of the test set")
-    use_test_set = 0 if parser.parse_args().val_set else 1
-
+    
     # Args to read data from previous step
     parser.add_argument('--distrib-only', action='store_true', help='Only generate assessment distribution, do not create datasets')
     parser.add_argument('--parent-only', action='store_true', help='Only use parent-report assessments')
@@ -114,6 +113,7 @@ def main():
     parser.add_argument('--fix-n-all', action='store_true', help='Fix number of training examples when using less assessments')
     parser.add_argument('--fix-n-learning', action='store_true', help='Fix number of training examples when using less assessments')
 
+    use_test_set = 0 if parser.parse_args().val_set else 1
     args_to_read_data = {
         "only_parent_report": parser.parse_args().parent_only,
         "use_other_diags_as_input": parser.parse_args().use_other_diags,
