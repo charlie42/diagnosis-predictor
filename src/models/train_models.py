@@ -36,8 +36,8 @@ sys.path.insert(0, parentdir)
 import util, models, util
 
 DEBUG_MODE = True
-DEV_MODE = True
-N_FEATURES_TO_CHECK = 7 if DEV_MODE else 27
+DEV_MODE = False
+N_FEATURES_TO_CHECK = 10 if DEV_MODE else 10 # 27
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
@@ -350,19 +350,32 @@ def parallel_grid_search(args):
         cv_perf_scores["hp_search_best_score"].append(rs.best_score_)
     
         # Get perforamnce on all features for this fold
-        pipe_with_best_model = clone(rs.best_estimator_)
-        pipe_with_best_model.fit(X_train, y_train)
+
+        ## Get model with optimal hyperparameters, without the rfe and sfs 
+        ## of the pipeline 
+        model = clone(rs.best_estimator_.named_steps["model"])
+        pipe_with_best_model = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy="median")),
+            ("scale",StandardScaler()),
+            ("model", model)])
+        pipe_with_best_model.fit(X_train.iloc[:, list(features)], y_train)
+
         y_pred = pipe_with_best_model.predict_proba(X_test)[:, 1]
         auc = roc_auc_score(y_test, y_pred)
         cv_perf_scores["auc_all_features"].append(auc)
         print("DEBUG auc all features", auc)
 
-        # Get SFS object for this fold
+        # Get perforamcne at 27 features for this fold
+        
+        ## Get SFS object for this fold
         sfs = rs.best_estimator_.named_steps["selector"]
 
-        # Get perforamcne at 27 features for this fold
         features = sfs.get_metric_dict()[N_FEATURES_TO_CHECK]["feature_idx"]
-        pipe_with_best_model = clone(rs.best_estimator_)
+        model = clone(rs.best_estimator_.named_steps["model"])
+        pipe_with_best_model = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy="median")),
+            ("scale",StandardScaler()),
+            ("model", model)])
         pipe_with_best_model.fit(X_train.iloc[:, list(features)], y_train)
         y_pred = pipe_with_best_model.predict_proba(X_test.iloc[:, list(features)])[:, 1]
         auc = roc_auc_score(y_test, y_pred)
@@ -501,6 +514,7 @@ def main():
 
     if DEBUG_MODE:
         #diag_cols = ["Diag.Any Diag"]
+        diag_cols = diag_cols[0:3]
         pass
 
     if DEV_MODE:
