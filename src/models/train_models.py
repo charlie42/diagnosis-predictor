@@ -37,7 +37,7 @@ import util, models, util
 
 DEBUG_MODE = True
 DEV_MODE = False
-N_FEATURES_TO_CHECK = 10 if DEV_MODE else 10 # 27
+N_FEATURES_TO_CHECK = 10 if DEV_MODE else 27 # 27
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
@@ -259,7 +259,7 @@ def parallel_grid_search(args):
         estimator=pipeline_for_fs,
         importance_getter="named_steps.model.coef_",
         step=1, 
-        n_features_to_select=800 if DEV_MODE else 100, #840
+        n_features_to_select=800 if DEV_MODE else 100, #840 # all features, just sorted
         verbose=1
     )
 
@@ -288,7 +288,7 @@ def parallel_grid_search(args):
     rs = RandomizedSearchCV(
         estimator=pipeline_for_rs,
         param_distributions=grid,
-        n_iter=20 if DEV_MODE else 50 if DEBUG_MODE else 200, #2
+        n_iter=20 if DEV_MODE else 200, #2
         scoring='roc_auc',
         n_jobs=-1,
         cv=cv_rs,
@@ -358,7 +358,7 @@ def parallel_grid_search(args):
             ('imputer', SimpleImputer(strategy="median")),
             ("scale",StandardScaler()),
             ("model", model)])
-        pipe_with_best_model.fit(X_train.iloc[:, list(features)], y_train)
+        pipe_with_best_model.fit(X_train, y_train)
 
         y_pred = pipe_with_best_model.predict_proba(X_test)[:, 1]
         auc = roc_auc_score(y_test, y_pred)
@@ -395,27 +395,27 @@ def parallel_grid_search(args):
             print("DEBUG auc 27 healthy", None)
 
         # Stratified by age
-        age_col = "Basic_Demos,Age"
-        X_test_under_8, y_test_under_8 = X_test[X_test[age_col] < 8], y_test[X_test[age_col] < 8]
-        X_test_8_11, y_test_8_11 = X_test[(X_test[age_col] >= 8) & (X_test[age_col] <= 11)], y_test[(X_test[age_col] >= 8) & (X_test[age_col] <= 11)]
-        X_test_12_15, y_test_12_15 = X_test[(X_test[age_col] >= 12) & (X_test[age_col] <= 15)], y_test[(X_test[age_col] >= 12) & (X_test[age_col] <= 15)]
-        X_test_over_15, y_test_over_15 = X_test[X_test[age_col] > 15], y_test[X_test[age_col] > 15]
-        y_pred = pipe_with_best_model.predict_proba(X_test_under_8.iloc[:, list(features)])[:, 1]
-        auc = roc_auc_score(y_test_under_8, y_pred)
-        cv_perf_scores["auc_27_under_8"].append(auc)
-        print("DEBUG auc 27 under 8", auc)
-        y_pred = pipe_with_best_model.predict_proba(X_test_8_11.iloc[:, list(features)])[:, 1]
-        auc = roc_auc_score(y_test_8_11, y_pred)
-        cv_perf_scores["auc_27_8_11"].append(auc)
-        print("DEBUG auc 27 8-11", auc)
-        y_pred = pipe_with_best_model.predict_proba(X_test_12_15.iloc[:, list(features)])[:, 1]
-        auc = roc_auc_score(y_test_12_15, y_pred)
-        cv_perf_scores["auc_27_12_15"].append(auc)
-        print("DEBUG auc 27 12-15", auc)
-        y_pred = pipe_with_best_model.predict_proba(X_test_over_15.iloc[:, list(features)])[:, 1]
-        auc = roc_auc_score(y_test_over_15, y_pred)
-        cv_perf_scores["auc_27_over_15"].append(auc)
-        print("DEBUG auc 27 over 15", auc)
+        # age_col = "Basic_Demos,Age"
+        # X_test_under_8, y_test_under_8 = X_test[X_test[age_col] < 8], y_test[X_test[age_col] < 8]
+        # X_test_8_11, y_test_8_11 = X_test[(X_test[age_col] >= 8) & (X_test[age_col] <= 11)], y_test[(X_test[age_col] >= 8) & (X_test[age_col] <= 11)]
+        # X_test_12_15, y_test_12_15 = X_test[(X_test[age_col] >= 12) & (X_test[age_col] <= 15)], y_test[(X_test[age_col] >= 12) & (X_test[age_col] <= 15)]
+        # X_test_over_15, y_test_over_15 = X_test[X_test[age_col] > 15], y_test[X_test[age_col] > 15]
+        # y_pred = pipe_with_best_model.predict_proba(X_test_under_8.iloc[:, list(features)])[:, 1]
+        # auc = roc_auc_score(y_test_under_8, y_pred)
+        # cv_perf_scores["auc_27_under_8"].append(auc)
+        # print("DEBUG auc 27 under 8", auc)
+        # y_pred = pipe_with_best_model.predict_proba(X_test_8_11.iloc[:, list(features)])[:, 1]
+        # auc = roc_auc_score(y_test_8_11, y_pred)
+        # cv_perf_scores["auc_27_8_11"].append(auc)
+        # print("DEBUG auc 27 8-11", auc)
+        # y_pred = pipe_with_best_model.predict_proba(X_test_12_15.iloc[:, list(features)])[:, 1]
+        # auc = roc_auc_score(y_test_12_15, y_pred)
+        # cv_perf_scores["auc_27_12_15"].append(auc)
+        # print("DEBUG auc 27 12-15", auc)
+        # y_pred = pipe_with_best_model.predict_proba(X_test_over_15.iloc[:, list(features)])[:, 1]
+        # auc = roc_auc_score(y_test_over_15, y_pred)
+        # cv_perf_scores["auc_27_over_15"].append(auc)
+        # print("DEBUG auc 27 over 15", auc)
 
         # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
         # (get aurocs from sfs object)
@@ -514,7 +514,7 @@ def main():
 
     if DEBUG_MODE:
         #diag_cols = ["Diag.Any Diag"]
-        diag_cols = diag_cols[0:3]
+        #diag_cols = diag_cols[0:3]
         pass
 
     if DEV_MODE:
