@@ -514,7 +514,7 @@ def main():
 
     if DEBUG_MODE:
         #diag_cols = ["Diag.Any Diag"]
-        #diag_cols = diag_cols[0:3]
+        diag_cols = diag_cols[0:1]
         pass
 
     if DEV_MODE:
