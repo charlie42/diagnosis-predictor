@@ -37,7 +37,7 @@ import util, models, util
 
 DEBUG_MODE = True
 DEV_MODE = False
-N_FEATURES_TO_CHECK = 10 if DEV_MODE else 27 # 27
+N_FEATURES_TO_CHECK = 10 if DEV_MODE else 15 # 27
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
