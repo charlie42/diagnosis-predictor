@@ -35,8 +35,8 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util, models, util
 
-import os
-os.environ["NUMEXPR_NUM_THREADS"] = "25"
+import joblib
+joblib.parallel_backend('loky', n_jobs=-1)
 
 DEBUG_MODE = True
 DEV_MODE = False
