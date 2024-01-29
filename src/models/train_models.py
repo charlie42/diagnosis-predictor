@@ -35,6 +35,9 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util, models, util
 
+import os
+os.environ["NUMEXPR_NUM_THREADS"] = "25"
+
 DEBUG_MODE = True
 DEV_MODE = False
 N_FEATURES_TO_CHECK = 10 if DEV_MODE else 15 # 27
