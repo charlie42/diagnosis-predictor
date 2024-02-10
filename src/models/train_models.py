@@ -301,56 +301,30 @@ def parallel_grid_search(args):
         verbose=1
     )
 
-    # rs = HalvingRandomSearchCV( # Need a lot of folds, otherwise ValueError: This solver needs samples of at least 2 classes in the data, but the data contains only one class: 0
-    #     estimator=pipeline_for_rs, 
-    #     param_distributions=grid, 
-    #     cv=cv_rs, 
-    #     scoring="roc_auc",
-    #     random_state=0,
-    #     max_resources=200, #max_resources=100,
-    #     #error_score='raise',
-    #     n_jobs = -1, 
-    #     verbose=1)
-
     # Get cross_val_score at each number of features for each diagnosis
     cv_perf_scores = {
         "hp_search_best_score": [],
         "auc_all_features": [],
-        "auc_27": [],
-        "auc_27_healthy": [],
-        "auc_27_under_8": [],
-        "auc_27_8_11": [],
-        "auc_27_12_15": [],
-        "auc_27_over_15": [],
         "opt_ns": [],
-        "avg_features": [],
-        "avg_coefs": [],
-        "perf_on_features": {x:{"auc":[], "opt_thresh":[], "features":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
+        "perf_on_features": {x:{"auc":[], "auc_healthy_controls":[], "opt_thresh":[], "features":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
     }
     cv_rs_objects = []
 
     # DEBUG
-    y_train_only_healthy_controls = dataset["y_train"][dataset["y_train_only_healthy_controls"]]
-    y_test_only_healthy_controls = dataset["y_test"][dataset["y_test_only_healthy_controls"]]
-    print("DEBUG y_train_only_healthy_controls", len(y_train_only_healthy_controls), sum(y_train_only_healthy_controls))
-    print("DEBUG y_test_only_healthy_controls", len(y_test_only_healthy_controls), sum(y_test_only_healthy_controls))
     print("DEBUG y_train", len(dataset["y_train"]), sum(dataset["y_train"]))
     print("DEBUG y_test", len(dataset["y_test"]), sum(dataset["y_test"]))
 
     # Get cross_val_score at each number of features for each diagnosis
     # If model is logistic regression, get average of coefficients for each feature subset
-    for fold in cv_perf.split(dataset["X_train"], dataset["y_train"]):
-        X_train, y_train = dataset["X_train"].iloc[fold[0]], dataset["y_train"].iloc[fold[0]]
-        X_test, y_test = dataset["X_train"].iloc[fold[1]], dataset["y_train"].iloc[fold[1]]
-        # Use dataset["X_train_only_healthy_controls"] mask to get only healthy controls
-        X_test_only_healthy_controls = X_test[dataset["X_train_only_healthy_controls"].iloc[fold[1]]]
-        y_test_only_healthy_controls = y_test[dataset["X_train_only_healthy_controls"].iloc[fold[1]]]
+    for fold in cv_perf.split(dataset["X_full"], dataset["y_full"]):
+        X_train, y_train = dataset["X_full"].iloc[fold[0]], dataset["y_full"].iloc[fold[0]]
+        X_test, y_test = dataset["X_full"].iloc[fold[1]], dataset["y_full"].iloc[fold[1]]
         
-        cv_rs_objects.append(deepcopy(rs))
-
         # Fit rs to get best model and feature subsets
         rs.fit(X_train, y_train)
         cv_perf_scores["hp_search_best_score"].append(rs.best_score_)
+
+        cv_rs_objects.append(deepcopy(rs))
     
         # Get perforamnce on all features for this fold
 
@@ -368,57 +342,8 @@ def parallel_grid_search(args):
         cv_perf_scores["auc_all_features"].append(auc)
         print("DEBUG auc all features", auc)
 
-        # Get perforamcne at 27 features for this fold
-        
         ## Get SFS object for this fold
         sfs = rs.best_estimator_.named_steps["selector"]
-
-        features = sfs.get_metric_dict()[N_FEATURES_TO_CHECK]["feature_idx"]
-        model = clone(rs.best_estimator_.named_steps["model"])
-        pipe_with_best_model = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy="median")),
-            ("scale",StandardScaler()),
-            ("model", model)])
-        pipe_with_best_model.fit(X_train.iloc[:, list(features)], y_train)
-        y_pred = pipe_with_best_model.predict_proba(X_test.iloc[:, list(features)])[:, 1]
-        auc = roc_auc_score(y_test, y_pred)
-        cv_perf_scores["auc_27"].append(auc)
-        print("DEBUG auc 27", auc)
-
-        # Get performance on only healthy controls on 27 features, only if 
-        # more than 20 positive examples in the test set
-        if sum(y_test_only_healthy_controls) > 20:
-            y_pred = pipe_with_best_model.predict_proba(X_test_only_healthy_controls.iloc[:, list(features)])[:, 1]
-            print("DEBUG y_test_only_healthy_controls", y_test_only_healthy_controls, len(y_test_only_healthy_controls), sum(y_test_only_healthy_controls))
-            auc = roc_auc_score(y_test_only_healthy_controls, y_pred)
-            cv_perf_scores["auc_27_healthy"].append(auc)
-            print("DEBUG auc 27 healthy", auc)
-        else:
-            cv_perf_scores["auc_27_healthy"].append(None)
-            print("DEBUG auc 27 healthy", None)
-
-        # Stratified by age
-        # age_col = "Basic_Demos,Age"
-        # X_test_under_8, y_test_under_8 = X_test[X_test[age_col] < 8], y_test[X_test[age_col] < 8]
-        # X_test_8_11, y_test_8_11 = X_test[(X_test[age_col] >= 8) & (X_test[age_col] <= 11)], y_test[(X_test[age_col] >= 8) & (X_test[age_col] <= 11)]
-        # X_test_12_15, y_test_12_15 = X_test[(X_test[age_col] >= 12) & (X_test[age_col] <= 15)], y_test[(X_test[age_col] >= 12) & (X_test[age_col] <= 15)]
-        # X_test_over_15, y_test_over_15 = X_test[X_test[age_col] > 15], y_test[X_test[age_col] > 15]
-        # y_pred = pipe_with_best_model.predict_proba(X_test_under_8.iloc[:, list(features)])[:, 1]
-        # auc = roc_auc_score(y_test_under_8, y_pred)
-        # cv_perf_scores["auc_27_under_8"].append(auc)
-        # print("DEBUG auc 27 under 8", auc)
-        # y_pred = pipe_with_best_model.predict_proba(X_test_8_11.iloc[:, list(features)])[:, 1]
-        # auc = roc_auc_score(y_test_8_11, y_pred)
-        # cv_perf_scores["auc_27_8_11"].append(auc)
-        # print("DEBUG auc 27 8-11", auc)
-        # y_pred = pipe_with_best_model.predict_proba(X_test_12_15.iloc[:, list(features)])[:, 1]
-        # auc = roc_auc_score(y_test_12_15, y_pred)
-        # cv_perf_scores["auc_27_12_15"].append(auc)
-        # print("DEBUG auc 27 12-15", auc)
-        # y_pred = pipe_with_best_model.predict_proba(X_test_over_15.iloc[:, list(features)])[:, 1]
-        # auc = roc_auc_score(y_test_over_15, y_pred)
-        # cv_perf_scores["auc_27_over_15"].append(auc)
-        # print("DEBUG auc 27 over 15", auc)
 
         # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
         # (get aurocs from sfs object)
@@ -440,7 +365,9 @@ def parallel_grid_search(args):
             pipe_with_best_model.fit(X_train.iloc[:, list(features)], y_train)
 
             # Get perforamnce
-            y_pred = pipe_with_best_model.predict_proba(X_test.iloc[:, list(features)])[:, 1]
+            y_pred = pipe_with_best_model.predict_proba(
+                X_test.iloc[:, list(features)]
+            )[:, 1]
             auc = roc_auc_score(y_test, y_pred)
             cv_perf_scores["perf_on_features"][subset]["auc"].append(auc)
             print("DEBUG auc", subset, auc)
@@ -461,6 +388,7 @@ def parallel_grid_search(args):
                 print("DEBUG coefs", subset, coefs)
 
     print(cv_perf_scores)
+    
 
     average_opt_n = round(np.mean(cv_perf_scores["opt_ns"]))
     print("DEBUG average opt n", average_opt_n)
