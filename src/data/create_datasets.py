@@ -118,7 +118,10 @@ def split_datasets_per_diag(data, diag_cols, split_percentage, use_other_diags_a
         X_train_train = X_train_train[input_cols]
         X_val = X_val[input_cols]
     
-        datasets[diag] = { "X_train": X_train,
+        datasets[diag] = { 
+                        "X_full": data.drop(columns = output_col),
+                        "y_full": data[output_col],
+                        "X_train": X_train,
                         "X_test": X_test,
                         "y_train": y_train,
                         "y_test": y_test,
@@ -141,15 +144,13 @@ def get_positive_examples_in_ds(full_dataset, diags):
         positive_ex_in_ds[diag] = full_dataset[full_dataset[diag] == 1].shape[0]
     return positive_ex_in_ds
     
-def find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, all_diags, split_percentage, min_pos_examples_val_set):
-    diags_w_enough_positive_examples_in_val_set = []
-    for diag in all_diags:
-        # First get # of positive examples in the train set, then from those, get # of positive examples in the validation set 
-        # (first we split the dataset into train and test set, then we split the train set into train and validation set)
-        positive_examples_val_set = positive_examples_in_ds[diag] * (1-split_percentage) * split_percentage 
-        if positive_examples_val_set >= min_pos_examples_val_set:
-            diags_w_enough_positive_examples_in_val_set.append(diag)
-    return diags_w_enough_positive_examples_in_val_set
+def find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, all_diags, min_pos_examples_val_set):
+    diags_w_enough_positive_examples = []
+    for diag in positive_examples_in_ds:
+        if positive_examples_in_ds[diag] > min_pos_examples_val_set:
+            diags_w_enough_positive_examples.append(diag)
+
+    return diags_w_enough_positive_examples
 
 def add_cols_from_total_and_subscale_to_input(item_level_ds, cog_tasks_ds, subscales_ds, clinical_config):
     if "add cols to input" in clinical_config and clinical_config["add cols to input"]:
@@ -227,17 +228,18 @@ def main(only_assessment_distribution, only_parent_report, use_other_diags_as_in
 
         # Get list of column names with "Diag." prefix, where number of 
         # positive examples is > threshold
-        min_pos_examples_val_set = 20
-        split_percentage = 0.2
+        min_pos_examples = 100
+        
         all_diags = [x for x in item_level_ds.columns if x.startswith("Diag.")]
         if clinical_config["predict consensus diags"] == False: # Remove consensus diags, only keep new diags
             all_diags = [x for x in all_diags if x not in consensus_diags]
         positive_examples_in_ds = get_positive_examples_in_ds(item_level_ds, all_diags)
         dump(positive_examples_in_ds, dirs["data_output_dir"]+'positive_examples_in_ds.joblib', compress=1)
         
-        diag_cols = find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, all_diags, split_percentage, min_pos_examples_val_set)
+        diag_cols = find_diags_w_enough_positive_examples_in_val_set(positive_examples_in_ds, all_diags, min_pos_examples)
 
         # Create datasets for each diagnosis (different input and output columns)
+        split_percentage=0.2
         datasets = split_datasets_per_diag(item_level_ds, diag_cols, split_percentage, use_other_diags_as_input, clinical_config, learning)
 
         dump(datasets, dirs["data_output_dir"]+'datasets.joblib', compress=1)        
