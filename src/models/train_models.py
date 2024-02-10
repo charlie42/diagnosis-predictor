@@ -316,9 +316,9 @@ def parallel_grid_search(args):
 
     # Get cross_val_score at each number of features for each diagnosis
     # If model is logistic regression, get average of coefficients for each feature subset
-    for fold in cv_perf.split(dataset["X_full"], dataset["y_full"]):
-        X_train, y_train = dataset["X_full"].iloc[fold[0]], dataset["y_full"].iloc[fold[0]]
-        X_test, y_test = dataset["X_full"].iloc[fold[1]], dataset["y_full"].iloc[fold[1]]
+    for fold in cv_perf.split(dataset["X_train"], dataset["y_train"]):
+        X_train, y_train = dataset["X_train"].iloc[fold[0]], dataset["y_train"].iloc[fold[0]]
+        X_test, y_test = dataset["X_train"].iloc[fold[1]], dataset["y_train"].iloc[fold[1]]
         
         # Fit rs to get best model and feature subsets
         rs.fit(X_train, y_train)
@@ -388,12 +388,7 @@ def parallel_grid_search(args):
                 print("DEBUG coefs", subset, coefs)
 
     print(cv_perf_scores)
-    
 
-    average_opt_n = round(np.mean(cv_perf_scores["opt_ns"]))
-    print("DEBUG average opt n", average_opt_n)
-
-    cv_perf_scores["avg_threshold"] = np.mean(cv_perf_scores["perf_on_features"][average_opt_n]["opt_thresh"])
 
     # :TODO for each # of subsets get features from the best model, fit, get y_pred for test set
     # then get spec and sens
