@@ -389,6 +389,8 @@ def parallel_grid_search(args):
 
     print(cv_perf_scores)
 
+    
+
 
     # :TODO for each # of subsets get features from the best model, fit, get y_pred for test set
     # then get spec and sens
@@ -419,6 +421,18 @@ def parallel_grid_search(args):
     #     return_indices=True,
     #     n_jobs=-1, 
     #     verbose=1)
+
+    # Re-train the full pipeline to get the final trained model and feature sets
+    rs.fit(dataset["X_full"], dataset["y_full"])
+    final_trained_model = clone(rs.best_estimator_.named_steps["model"])
+    final_feature_sets = {}
+    sfs = rs.best_estimator_.named_steps["selector"]
+    for subset in range(1, N_FEATURES_TO_CHECK+1):
+        features = sfs.get_metric_dict()[subset]["feature_idx"]
+        final_feature_sets[subset] = features
+
+    cv_perf_scores["final_trained_model"] = final_trained_model
+    cv_perf_scores["final_feature_sets"] = final_feature_sets
 
     return output_name, cv_perf_scores, cv_rs_objects, rs
 
