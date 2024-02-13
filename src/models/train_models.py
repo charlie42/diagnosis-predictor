@@ -39,8 +39,8 @@ import joblib
 joblib.parallel_backend('loky', n_jobs=-1)
 
 DEBUG_MODE = True
-DEV_MODE = False
-N_FEATURES_TO_CHECK = 2 if DEV_MODE else 27 # 10
+DEV_MODE = True
+N_FEATURES_TO_CHECK = 5 if DEV_MODE else 27 # 2
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
