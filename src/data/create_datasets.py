@@ -113,13 +113,14 @@ def split_datasets_per_diag(data, diag_cols, split_percentage, use_other_diags_a
 
         # Drop columns from input that we don't want there
         input_cols = get_input_cols_per_diag(data, diag, use_other_diags_as_input, learning)
+        X_full = data[input_cols]
         X_train = X_train[input_cols]
         X_test = X_test[input_cols]
         X_train_train = X_train_train[input_cols]
         X_val = X_val[input_cols]
     
         datasets[diag] = { 
-                        "X_full": data.drop(columns = output_col),
+                        "X_full": X_full,
                         "y_full": data[output_col],
                         "X_train": X_train,
                         "X_test": X_test,
