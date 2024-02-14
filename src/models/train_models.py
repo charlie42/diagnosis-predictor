@@ -40,7 +40,7 @@ joblib.parallel_backend('loky', n_jobs=-1)
 
 DEBUG_MODE = True
 DEV_MODE = True
-N_FEATURES_TO_CHECK = 5 if DEV_MODE else 27 # 2
+N_FEATURES_TO_CHECK = 27 if DEV_MODE else 27 # 2
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
@@ -270,7 +270,8 @@ def parallel_grid_search(args):
         estimator=pipeline_for_fs,
         importance_getter="named_steps.model.coef_",
         step=1, 
-        n_features_to_select=840 if DEV_MODE else N_FEATURES_TO_CHECK, 
+        n_features_to_select=27 if DEV_MODE else N_FEATURES_TO_CHECK, # Originally was 1 because used ranking of all 
+        # features, can't no easy way to do this in a pipeline
         verbose=1
     )
 
@@ -469,6 +470,7 @@ def main():
         diag_cols = ["Diag.Autism Spectrum Disorder", 
                      "Diag.ADHD-Combined Type",
                      "Diag.Specific Learning Disorder with Impairment in Reading (test)"]
+        diag_cols = ["Diag.Autism Spectrum Disorder" ]
         pass
 
     args_list = [(dataset, output_name) for dataset, output_name in zip([datasets[diag] for diag in diag_cols], diag_cols)]
