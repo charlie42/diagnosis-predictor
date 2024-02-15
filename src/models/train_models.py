@@ -27,7 +27,7 @@ import multiprocessing
 from copy import deepcopy
 import sys, inspect
 from joblib import load, dump
-import time
+import time, math
 
 # To import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -403,7 +403,7 @@ def parallel_grid_search(args):
 
     # Get sensitivity and specificity on test set with average optimal threshold
     # and average optiman n features
-    avg_opt_n = np.mean(cv_perf_scores["opt_ns"])
+    avg_opt_n = math.ceil(np.mean(cv_perf_scores["opt_ns"]))
     avg_opt_thresh = np.mean(cv_perf_scores["perf_on_features"][avg_opt_n]["opt_thresh"])
 
     rs.fit(dataset["X_train"], dataset["y_train"])
