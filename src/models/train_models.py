@@ -47,8 +47,8 @@ def build_output_dir_name(params_from_create_datasets):
     datetime_part = util.get_string_with_current_datetime()
 
     # Part with the params
-    params_part = util.build_param_string_for_dir_name(params_from_create_datasets) + "___" +\
                   util.build_param_string_for_dir_name({"debug_mode": DEBUG_MODE})
+    params_part = util.build_param_string_for_dir_name(params_from_create_datasets) + "___" +\
     
     return datetime_part + "___" + params_part
 
@@ -260,8 +260,8 @@ def parallel_grid_search(args):
         ('imputer', SimpleImputer(strategy="median")),
         ("scale",StandardScaler()),
         ("model",model)])
-    
     n_splits = 2 if DEV_MODE else 4 if DEBUG_MODE else 10 #2
+    
     cv_rs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
     cv_fs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
     cv_perf = StratifiedKFold(n_splits, shuffle=True, random_state=0)
@@ -444,7 +444,7 @@ def parallel_grid_search(args):
     #sfs = rs.best_estimator_.named_steps["selector"]
     feature_rankings = pd.DataFrame(rfe.ranking_, index=X_train.columns, columns=["Rank"]).sort_values(by="Rank", ascending=True)
     #features = sfs.get_metric_dict()[avg_opt_n]["feature_idx"]
-    features = feature_rankings[feature_rankings["Rank"] <= subset].index.tolist()
+    features = feature_rankings[feature_rankings["Rank"] <= avg_opt_n].index.tolist()
 
     pipe_with_best_model = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy="median")),
@@ -499,8 +499,8 @@ def main():
     datasets = load(load_dirs["load_data_dir"]+'datasets.joblib')
     diag_cols = list(datasets.keys())
     print("Train set shape: ", datasets[diag_cols[0]]["X_train_train"].shape)
-
     if DEBUG_MODE:
+
         #diag_cols = ["Diag.Any Diag"]
         #diag_cols = diag_cols[0:1]
         diag_cols = ["Diag.Autism Spectrum Disorder", 
