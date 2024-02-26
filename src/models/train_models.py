@@ -374,7 +374,7 @@ def parallel_grid_search(args):
     cv_perf_scores["spec_test_set"] = spec
 
     # Re-train the full pipeline to get the final trained model and feature sets
-    X_train, y_train = dataset["X_train"], dataset["y_train"]
+    X_train, y_train = dataset["X_full"], dataset["y_full"]
     rs.fit(X_train, y_train)
     final_trained_model = deepcopy(rs.best_estimator_.named_steps["model"])
     model = clone(rs.best_estimator_.named_steps["model"]) # Unfitted, with same params
@@ -438,9 +438,9 @@ def main():
     if DEBUG_MODE:
         #diag_cols = ["Diag.Any Diag"]
         #diag_cols = diag_cols[0:1]
-        diag_cols = ["Diag.Autism Spectrum Disorder", 
-                     "Diag.ADHD-Combined Type",
-                     "Diag.Specific Learning Disorder with Impairment in Reading (test)"]
+        #diag_cols = ["Diag.Autism Spectrum Disorder", 
+        #             "Diag.ADHD-Combined Type",
+        #             "Diag.Specific Learning Disorder with Impairment in Reading (test)"]
         pass
 
     if DEV_MODE:
