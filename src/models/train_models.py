@@ -39,8 +39,8 @@ import joblib
 joblib.parallel_backend('loky', n_jobs=-1)
 
 DEBUG_MODE = True
-DEV_MODE = True
-N_FEATURES_TO_CHECK = 27 if DEV_MODE else 27 # 2
+DEV_MODE = False
+N_FEATURES_TO_CHECK = 2 if DEV_MODE else 27 # 27
 
 def build_output_dir_name(params_from_create_datasets):
     # Part with the datetime
@@ -91,28 +91,6 @@ def set_up_load_directories(models_from_file):
     
     return {"load_data_dir": load_data_dir, "load_models_dir": load_models_dir, "load_reports_dir": load_reports_dir}
 
-class MyPipeline(Pipeline): # Needed to expose feature importances for RFE
-    @property
-    def coef_(self):
-        return self._final_estimator.coef_
-    @property
-    def feature_importances_(self):
-        return self._final_estimator.feature_importances_
-
-class CSequentialFeatureSelector(mlxtend.feature_selection.SequentialFeatureSelector):
-    def predict(self, X):
-        X = self.transform(X)
-        return self.estimator.predict(X)
-
-    def predict_proba(self, X):
-        X = self.transform(X)
-        return self.estimator.predict_proba(X)
-
-    #def fit(self, X, y):
-     #   self.fit(X, y) # fit helper is the 'old' fit method, which I copied and renamed to fit_helper
-     #   self.estimator.fit(self.transform(X), y)
-     #   return self
-
 def get_opt_n(sfs, performance_fraction):
     '''
     Format of sfs.get_metric_dict() (dict): {
@@ -132,11 +110,11 @@ def get_opt_n(sfs, performance_fraction):
     '''
 
     avg_performances = [sfs.get_metric_dict()[n]["avg_score"] for n in sfs.get_metric_dict().keys()]
-    print("DEBUG avg_performances", avg_performances)
+    print("DEBUG SFS avg_performances", avg_performances)
     max_performance = np.max(avg_performances)
-    print("DEBUG max_performance", max_performance)
+    print("DEBUG SFS max_performance", max_performance)
     optimal_performance = max_performance * performance_fraction
-    print("DEBUG optimal_performance", optimal_performance)
+    print("DEBUG SFS optimal_performance", optimal_performance)
     opt_n = np.argmax(avg_performances >= optimal_performance) + 1
     print("DEBUG opt_n", opt_n)
 
@@ -204,32 +182,6 @@ def get_opt_thresh(df, opt_sens):
 
     return opt_thresh
 
-def get_subset_at_n(sfs, n):
-    '''
-    Format of sfs.get_metric_dict() (dict): {
-        1: {
-            'feature_idx': (306,), 
-            'cv_scores': array([0.79714058, 0.737824  ]), 
-            'avg_score': 0.7674822865269321, 
-            'feature_names': ('306',), 
-            'ci_bound': 0.12760932885928136, 
-            'std_dev': 0.029658291493562583, 
-            'std_err': 0.02965829149356258
-            }, 
-        2: {
-            'feature_idx': (306, 313),
-            ...
-        }
-    '''
-    features = sfs.get_metric_dict()[n]["feature_idx"]
-
-    return list(features)
-
-def get_feature_names_from_ids(feature_id_list, dataset):
-    print("DEBUG", dataset, type(dataset), feature_id_list, type(feature_id_list))
-    feature_name_list = dataset.columns[list(feature_id_list)]
-    return feature_name_list
-
 def parallel_grid_search(args):
 
     dataset, output_name = args
@@ -254,47 +206,16 @@ def parallel_grid_search(args):
     model = lr
     grid = lr_param_grid
 
-    print("Model", model)
-
-    pipeline_for_fs = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy="median")),
-        ("scale",StandardScaler()),
-        ("model",model)])
-    
     n_splits = 2 if DEV_MODE else 4 if DEBUG_MODE else 10 #2
     cv_rs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
     cv_fs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
     cv_perf = StratifiedKFold(n_splits, shuffle=True, random_state=0)
 
-    rfe = RFE(
-        estimator=pipeline_for_fs,
-        importance_getter="named_steps.model.coef_",
-        step=1, 
-        n_features_to_select=27 if DEV_MODE else N_FEATURES_TO_CHECK, # Originally was 1 because used ranking of all 
-        # features, can't no easy way to do this in a pipeline
-        verbose=1
-    )
-
-    # Feature selection
-    fs = SFS(
-    #fs = CSequentialFeatureSelector(
-        estimator=pipeline_for_fs,
-        k_features=N_FEATURES_TO_CHECK,
-        cv=cv_fs,
-        forward=True, 
-        floating=True, 
-        scoring='roc_auc', 
-        n_jobs=-1, 
-        verbose=1 if DEV_MODE else 2
-    )
-    
     # Pipeline
     pipeline_for_rs = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy="median")),
         ("scale",StandardScaler()),
-        ("rfe", rfe),
-        ('selector', fs),
-        ("model", model)])
+        ('model', model)])
 
     # Search
     rs = RandomizedSearchCV(
@@ -309,7 +230,7 @@ def parallel_grid_search(args):
         random_state=0,
         verbose=1
     )
-
+    
     # Get cross_val_score at each number of features for each diagnosis
     cv_perf_scores = {
         "hp_search_best_score": [],
@@ -318,6 +239,7 @@ def parallel_grid_search(args):
         "perf_on_features": {x:{"auc":[], "opt_thresh":[], "features":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
     }
     cv_rs_objects = []
+    fitted_models = {x:[] for x in range(1, N_FEATURES_TO_CHECK+1)}
 
     # DEBUG
     print("DEBUG y_train", len(dataset["y_train"]), sum(dataset["y_train"]))
@@ -339,20 +261,54 @@ def parallel_grid_search(args):
 
         ## Get model with optimal hyperparameters, without the rfe and sfs 
         ## from the pipeline 
-        model = clone(rs.best_estimator_.named_steps["model"])
+        model = clone(rs.best_estimator_.named_steps["model"]) # Unfitted, with same params
+        print("BEST MODEL", model)
         pipe_with_best_model = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy="median")),
             ("scale",StandardScaler()),
             ("model", model)])
-        pipe_with_best_model.fit(X_train, y_train)
 
-        y_pred = pipe_with_best_model.predict_proba(X_test)[:, 1]
-        auc = roc_auc_score(y_test, y_pred)
-        cv_perf_scores["auc_all_features"].append(auc)
-        print("DEBUG auc all features", auc)
+        rfe = RFE(
+            estimator=pipe_with_best_model,
+            importance_getter="named_steps.model.coef_",
+            step=1, 
+            n_features_to_select=840 if DEV_MODE else 1, # all features sorted
+            verbose=1
+        )
+        rfe_pipe = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy="median")),
+            ("scale",StandardScaler()),
+            ("rfe", rfe)])
+        rfe_pipe.fit(X_train, y_train)
+        rfe = rfe_pipe.named_steps["rfe"]
+        feature_rankings = pd.DataFrame(rfe.ranking_, index=X_train.columns, columns=["Rank"]).sort_values(by="Rank", ascending=True)
+        print("FEATURE FOR ", output_name)
+        print(feature_rankings)
+        features = feature_rankings[feature_rankings["Rank"] <= N_FEATURES_TO_CHECK].index.tolist()
+        print("top N features", features)
+        print("dataset of top N features", X_train[features])
+
+        sfs = SFS(
+        #fs = CSequentialFeatureSelector(
+            estimator=pipe_with_best_model,
+            k_features=N_FEATURES_TO_CHECK,
+            cv=cv_fs,
+            forward=True, 
+            floating=True, 
+            scoring='roc_auc', 
+            n_jobs=-1, 
+            verbose=1 if DEV_MODE else 2
+        )        
+        sfs.fit(X_train[features], y_train)
+        print("Subsets ID'd by SFS:", sfs.get_metric_dict())
+
+        # y_pred = pipe_with_best_model.predict_proba(X_test)[:, 1]
+        # auc = roc_auc_score(y_test, y_pred)
+        # cv_perf_scores["auc_all_features"].append(auc)
+        # print("DEBUG auc all features", auc)
 
         ## Get SFS object for this fold
-        sfs = rs.best_estimator_.named_steps["selector"]
+        #sfs = rs.best_estimator_.named_steps["selector"]
 
         # Get optimal # features for each diagnosis -- where performance reaches 95% of max performance among all # features
         # (get aurocs from sfs object)
@@ -362,20 +318,22 @@ def parallel_grid_search(args):
 
         # Get performance on each subset
         for subset in range(1, N_FEATURES_TO_CHECK+1):
-            features = sfs.get_metric_dict()[subset]["feature_idx"]
-            print("DEBUG subset", subset, "features", features, len(features))
+            features = list(sfs.get_metric_dict()[subset]["feature_names"])
+            #print("DEBUG subset", subset, "features", features, len(features))
 
             # Fit the model to the subset
-            model = clone(rs.best_estimator_.named_steps["model"])
+            model = clone(rs.best_estimator_.named_steps["model"]) # Unfitted, with same params
             pipe_with_best_model = Pipeline(steps=[
                 ('imputer', SimpleImputer(strategy="median")),
                 ("scale",StandardScaler()),
                 ("model", model)])
-            pipe_with_best_model.fit(X_train.iloc[:, list(features)], y_train)
+            print(f"Fitting new model to {subset} features, dataset:", X_train[features])
+            pipe_with_best_model.fit(X_train[features], y_train)
+            fitted_models[subset].append(deepcopy(pipe_with_best_model))
 
             # Get perforamnce
             y_pred = pipe_with_best_model.predict_proba(
-                X_test.iloc[:, list(features)]
+                X_test[features]
             )[:, 1]
             auc = roc_auc_score(y_test, y_pred)
             cv_perf_scores["perf_on_features"][subset]["auc"].append(auc)
@@ -395,9 +353,7 @@ def parallel_grid_search(args):
                 cv_perf_scores["perf_on_features"][subset]["coefs"].append(coefs)
                 print("DEBUG coefs", subset, coefs)
 
-            # Get feature names
-            feature_names = get_feature_names_from_ids(features, dataset["X_train"])
-            cv_perf_scores["perf_on_features"][subset]["features"].append(feature_names)
+            cv_perf_scores["perf_on_features"][subset]["features"].append(features)
 
     print(cv_perf_scores)
 
@@ -406,17 +362,9 @@ def parallel_grid_search(args):
     avg_opt_n = math.ceil(np.mean(cv_perf_scores["opt_ns"]))
     avg_opt_thresh = np.mean(cv_perf_scores["perf_on_features"][avg_opt_n]["opt_thresh"])
 
-    rs.fit(dataset["X_train"], dataset["y_train"])
-    model = clone(rs.best_estimator_.named_steps["model"])
-    sfs = rs.best_estimator_.named_steps["selector"]
-    features = sfs.get_metric_dict()[avg_opt_n]["feature_idx"]
-
-    pipe_with_best_model = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy="median")),
-        ("scale",StandardScaler()),
-        ("model", model)])
-    pipe_with_best_model.fit(dataset["X_train"].iloc[:, list(features)], dataset["y_train"])
-    y_pred = pipe_with_best_model.predict_proba(dataset["X_test"].iloc[:, list(features)])[:, 1]
+    opt_model = fitted_models[avg_opt_n][0] # Fitted model from any fold would work, taking first
+    features = cv_perf_scores["perf_on_features"][avg_opt_n]["features"][0]
+    y_pred = opt_model.predict_proba(dataset["X_test"][features])[:, 1]
     auc = roc_auc_score(dataset["y_test"], y_pred)
     sens = recall_score(dataset["y_test"], y_pred >= avg_opt_thresh)
     spec = recall_score(dataset["y_test"], y_pred < avg_opt_thresh, pos_label=0)
@@ -426,18 +374,48 @@ def parallel_grid_search(args):
     cv_perf_scores["spec_test_set"] = spec
 
     # Re-train the full pipeline to get the final trained model and feature sets
-    rs.fit(dataset["X_full"], dataset["y_full"])
-    final_trained_model = clone(rs.best_estimator_.named_steps["model"])
+    X_train, y_train = dataset["X_train"], dataset["y_train"]
+    rs.fit(X_train, y_train)
+    final_trained_model = deepcopy(rs.best_estimator_.named_steps["model"])
+    model = clone(rs.best_estimator_.named_steps["model"]) # Unfitted, with same params
+    pipe_with_best_model = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy="median")),
+        ("scale",StandardScaler()),
+        ("model", model)])
+    rfe = RFE(
+        estimator=pipe_with_best_model,
+        importance_getter="named_steps.model.coef_",
+        step=1, 
+        n_features_to_select=840 if DEV_MODE else 1, # all features sorted (DEV 845)
+        verbose=1
+    )
+    rfe_pipe = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy="median")),
+        ("scale",StandardScaler()),
+        ("rfe", rfe)])
+    rfe_pipe.fit(X_train, y_train)
+    rfe = rfe_pipe.named_steps["rfe"]
+    feature_rankings = pd.DataFrame(rfe.ranking_, index=X_train.columns, columns=["Rank"]).sort_values(by="Rank", ascending=True)
+    features = feature_rankings[feature_rankings["Rank"] <= N_FEATURES_TO_CHECK].index.tolist()
+    sfs = SFS(
+        estimator=pipe_with_best_model,
+        k_features=N_FEATURES_TO_CHECK,
+        cv=cv_fs,
+        forward=True, 
+        floating=True, 
+        scoring='roc_auc', 
+        n_jobs=-1, 
+        verbose=1 if DEV_MODE else 2
+    )        
+    sfs.fit(X_train[features], y_train)
+    
     final_feature_sets = {}
-    sfs = rs.best_estimator_.named_steps["selector"]
     for subset in range(1, N_FEATURES_TO_CHECK+1):
-        features = sfs.get_metric_dict()[subset]["feature_idx"]
-        feature_names = get_feature_names_from_ids(features, dataset["X_train"])
-        final_feature_sets[subset] = feature_names
+        features = list(sfs.get_metric_dict()[subset]["feature_names"])
+        final_feature_sets[subset] = features
 
     cv_perf_scores["final_trained_model"] = final_trained_model
     cv_perf_scores["final_feature_sets"] = final_feature_sets
-
 
     return output_name, cv_perf_scores, cv_rs_objects, deepcopy(rs)
 
