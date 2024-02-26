@@ -249,7 +249,7 @@ def parallel_grid_search(args):
         estimator=pipeline_for_fs,
         importance_getter="named_steps.model.coef_",
         step=1, 
-        n_features_to_select=1 if DEV_MODE else N_FEATURES_TO_CHECK, # Originally was 1 because used ranking of all 
+        n_features_to_select=N_FEATURES_TO_CHECK if DEV_MODE else N_FEATURES_TO_CHECK, # Originally was 1 because used ranking of all 
         # features, can't no easy way to do this in a pipeline
         verbose=1
     )
