@@ -39,7 +39,7 @@ import joblib
 joblib.parallel_backend('loky', n_jobs=-1)
 
 DEBUG_MODE = True
-DEV_MODE = False
+DEV_MODE = True
 N_FEATURES_TO_CHECK = 2 if DEV_MODE else 27 # 27
 
 def build_output_dir_name(params_from_create_datasets):
@@ -236,7 +236,7 @@ def parallel_grid_search(args):
         "hp_search_best_score": [],
         "auc_all_features": [],
         "opt_ns": [],
-        "perf_on_features": {x:{"auc":[], "opt_thresh":[], "features":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
+        "perf_on_features": {x:{"auc":[], "auc_sum_score":[], "opt_thresh":[], "features":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
     }
     cv_rs_objects = []
     fitted_models = {x:[] for x in range(1, N_FEATURES_TO_CHECK+1)}
@@ -272,7 +272,7 @@ def parallel_grid_search(args):
             estimator=pipe_with_best_model,
             importance_getter="named_steps.model.coef_",
             step=1, 
-            n_features_to_select=840 if DEV_MODE else 1, # all features sorted
+            n_features_to_select=845 if DEV_MODE else 1, # all features sorted
             verbose=1
         )
         rfe_pipe = Pipeline(steps=[
@@ -322,7 +322,7 @@ def parallel_grid_search(args):
             #print("DEBUG subset", subset, "features", features, len(features))
 
             # Fit the model to the subset
-            model = clone(rs.best_estimator_.named_steps["model"]) # Unfitted, with same params
+            model = clone(rs.best_estimator_.named_steps["model"]) # Unfitted, with same hyperparams
             pipe_with_best_model = Pipeline(steps=[
                 ('imputer', SimpleImputer(strategy="median")),
                 ("scale",StandardScaler()),
@@ -331,7 +331,7 @@ def parallel_grid_search(args):
             pipe_with_best_model.fit(X_train[features], y_train)
             fitted_models[subset].append(deepcopy(pipe_with_best_model))
 
-            # Get perforamnce
+            # Get perforamnce ML
             y_pred = pipe_with_best_model.predict_proba(
                 X_test[features]
             )[:, 1]
@@ -339,9 +339,18 @@ def parallel_grid_search(args):
             cv_perf_scores["perf_on_features"][subset]["auc"].append(auc)
             print("DEBUG auc", subset, auc)
 
+            # Get performance using sum-scores
+            sum_score_calculator = models.SumScoreCalculator(
+                X_test[features], 
+                pipe_with_best_model
+            )
+            y_pred_sum_score = sum_score_calculator.calculate_sum_score()
+            sum_score_auc = roc_auc_score(y_test, y_pred_sum_score)
+            cv_perf_scores["perf_on_features"][subset]["auc_sum_score"].append(sum_score_auc)
+
             # Find optimal threshold
             all_sens_and_specs_df = get_sens_spec_every_thresh(y_test, y_pred)
-            cv_perf_scores["perf_on_features"][subset]["spec_sens_df"] = all_sens_and_specs_df
+            #cv_perf_scores["perf_on_features"][subset]["spec_sens_df"] = all_sens_and_specs_df
             opt_thresh = get_opt_thresh(all_sens_and_specs_df, opt_sens=0.8)
             cv_perf_scores["perf_on_features"][subset]["opt_thresh"].append(opt_thresh)
             print("DEBUG opt thresh", subset, opt_thresh)
@@ -386,7 +395,7 @@ def parallel_grid_search(args):
         estimator=pipe_with_best_model,
         importance_getter="named_steps.model.coef_",
         step=1, 
-        n_features_to_select=840 if DEV_MODE else 1, # all features sorted (DEV 845)
+        n_features_to_select=845 if DEV_MODE else 1, # all features sorted (DEV 845)
         verbose=1
     )
     rfe_pipe = Pipeline(steps=[
