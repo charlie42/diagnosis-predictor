@@ -9,3 +9,4 @@ from models.helpers.lr_coefficients_helpers import *
 from models.helpers.get_optimal_nb_features import get_optimal_nb_features
 from models.helpers.get_cv_auc_from_sfs import get_cv_auc_from_sfs
 from models.helpers.find_opt_thresholds import find_thresholds_sens_over_n
+from models.helpers.sum_score_calculator import SumScoreCalculator

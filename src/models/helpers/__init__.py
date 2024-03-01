@@ -8,3 +8,4 @@ from helpers.re_train_models_on_subsets import re_train_models_on_feature_subset
 from helpers.write_feature_subsets_to_file import write_feature_subsets_to_file
 from helpers.get_optimal_nb_features import get_optimal_nb_features
 from helpers.get_cv_auc_from_sfs import get_cv_auc_from_sfs
+from helpers.sum_score_calculator import SumScoreCalculator
