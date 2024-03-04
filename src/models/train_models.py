@@ -208,7 +208,7 @@ def parallel_grid_search(args):
 
     n_splits = 2 if DEV_MODE else 4 if DEBUG_MODE else 10 #2
     cv_rs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
-    cv_fs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
+    cv_fs = StratifiedKFold(8, shuffle=True, random_state=0)
     cv_perf = StratifiedKFold(n_splits, shuffle=True, random_state=0)
 
     # Pipeline
@@ -269,26 +269,26 @@ def parallel_grid_search(args):
             ("scale",StandardScaler()),
             ("model", model)])
 
-        rfe = RFE(
-            estimator=pipe_with_best_model,
-            importance_getter="named_steps.model.coef_",
-            step=1, 
-            n_features_to_select=845 if DEV_MODE else 1, # all features sorted
-            verbose=1
-        )
-        rfe_pipe = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy="median")),
-            ("scale",StandardScaler()),
-            ("rfe", rfe)])
-        rfe_pipe.fit(X_train, y_train)
-        rfe = rfe_pipe.named_steps["rfe"]
-        feature_rankings = pd.DataFrame(rfe.ranking_, index=X_train.columns, columns=["Rank"]).sort_values(by="Rank", ascending=True)
-        print("FEATURE FOR ", output_name)
-        print(feature_rankings)
-        features = feature_rankings[feature_rankings["Rank"] <= N_FEATURES_TO_CHECK].index.tolist()
-        cv_perf_scores["rfe_features"].append(features)
-        print("top N features", features)
-        print("dataset of top N features", X_train[features])
+        # rfe = RFE(
+        #     estimator=pipe_with_best_model,
+        #     importance_getter="named_steps.model.coef_",
+        #     step=1, 
+        #     n_features_to_select=845 if DEV_MODE else 1, # all features sorted
+        #     verbose=1
+        # )
+        # rfe_pipe = Pipeline(steps=[
+        #     ('imputer', SimpleImputer(strategy="median")),
+        #     ("scale",StandardScaler()),
+        #     ("rfe", rfe)])
+        # rfe_pipe.fit(X_train, y_train)
+        # rfe = rfe_pipe.named_steps["rfe"]
+        # feature_rankings = pd.DataFrame(rfe.ranking_, index=X_train.columns, columns=["Rank"]).sort_values(by="Rank", ascending=True)
+        # print("FEATURE FOR ", output_name)
+        # print(feature_rankings)
+        # features = feature_rankings[feature_rankings["Rank"] <= N_FEATURES_TO_CHECK].index.tolist()
+        # cv_perf_scores["rfe_features"].append(features)
+        # print("top N features", features)
+        # print("dataset of top N features", X_train[features])
 
         sfs = SFS(
         #fs = CSequentialFeatureSelector(
@@ -301,7 +301,7 @@ def parallel_grid_search(args):
             n_jobs=-1, 
             verbose=1 if DEV_MODE else 2
         )        
-        sfs.fit(X_train[features], y_train)
+        sfs.fit(X_train, y_train)
         print("Subsets ID'd by SFS:", sfs.get_metric_dict())
 
         # y_pred = pipe_with_best_model.predict_proba(X_test)[:, 1]
@@ -393,21 +393,21 @@ def parallel_grid_search(args):
         ('imputer', SimpleImputer(strategy="median")),
         ("scale",StandardScaler()),
         ("model", model)])
-    rfe = RFE(
-        estimator=pipe_with_best_model,
-        importance_getter="named_steps.model.coef_",
-        step=1, 
-        n_features_to_select=845 if DEV_MODE else 1, # all features sorted (DEV 845)
-        verbose=1
-    )
-    rfe_pipe = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy="median")),
-        ("scale",StandardScaler()),
-        ("rfe", rfe)])
-    rfe_pipe.fit(X_train, y_train)
-    rfe = rfe_pipe.named_steps["rfe"]
-    feature_rankings = pd.DataFrame(rfe.ranking_, index=X_train.columns, columns=["Rank"]).sort_values(by="Rank", ascending=True)
-    features = feature_rankings[feature_rankings["Rank"] <= N_FEATURES_TO_CHECK].index.tolist()
+    # rfe = RFE(
+    #     estimator=pipe_with_best_model,
+    #     importance_getter="named_steps.model.coef_",
+    #     step=1, 
+    #     n_features_to_select=845 if DEV_MODE else 1, # all features sorted (DEV 845)
+    #     verbose=1
+    # )
+    # rfe_pipe = Pipeline(steps=[
+    #     ('imputer', SimpleImputer(strategy="median")),
+    #     ("scale",StandardScaler()),
+    #     ("rfe", rfe)])
+    # rfe_pipe.fit(X_train, y_train)
+    # rfe = rfe_pipe.named_steps["rfe"]
+    # feature_rankings = pd.DataFrame(rfe.ranking_, index=X_train.columns, columns=["Rank"]).sort_values(by="Rank", ascending=True)
+    # features = feature_rankings[feature_rankings["Rank"] <= N_FEATURES_TO_CHECK].index.tolist()
     sfs = SFS(
         estimator=pipe_with_best_model,
         k_features=N_FEATURES_TO_CHECK,
@@ -418,7 +418,7 @@ def parallel_grid_search(args):
         n_jobs=-1, 
         verbose=1 if DEV_MODE else 2
     )        
-    sfs.fit(X_train[features], y_train)
+    sfs.fit(X_train, y_train)
     
     final_feature_sets = {}
     for subset in range(1, N_FEATURES_TO_CHECK+1):
