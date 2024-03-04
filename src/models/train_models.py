@@ -236,6 +236,7 @@ def parallel_grid_search(args):
         "hp_search_best_score": [],
         "auc_all_features": [],
         "opt_ns": [],
+        "rfe_features": [],
         "perf_on_features": {x:{"auc":[], "auc_sum_score":[], "opt_thresh":[], "features":[], "coefs":[]} for x in range(1, N_FEATURES_TO_CHECK+1)}
     }
     cv_rs_objects = []
@@ -285,6 +286,7 @@ def parallel_grid_search(args):
         print("FEATURE FOR ", output_name)
         print(feature_rankings)
         features = feature_rankings[feature_rankings["Rank"] <= N_FEATURES_TO_CHECK].index.tolist()
+        cv_perf_scores["rfe_features"].append(features)
         print("top N features", features)
         print("dataset of top N features", X_train[features])
 
@@ -454,10 +456,10 @@ def main():
 
     if DEV_MODE:
         #diag_cols = diag_cols[0:1]
-        diag_cols = ["Diag.Autism Spectrum Disorder", 
-                     "Diag.ADHD-Combined Type",
-                     "Diag.Specific Learning Disorder with Impairment in Reading (test)"]
-        diag_cols = ["Diag.Autism Spectrum Disorder" ]
+        #diag_cols = ["Diag.Autism Spectrum Disorder", 
+        #             "Diag.ADHD-Combined Type",
+        #             "Diag.Specific Learning Disorder with Impairment in Reading (test)"]
+        #diag_cols = ["Diag.Autism Spectrum Disorder" ]
         pass
 
     args_list = [(dataset, output_name) for dataset, output_name in zip([datasets[diag] for diag in diag_cols], diag_cols)]
