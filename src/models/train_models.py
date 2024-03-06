@@ -124,18 +124,20 @@ def get_sens_spec_every_thresh(y_test, y_pred_proba):
     # Make a df with sens and spec on each thereshold
     thresholds = np.arange(0, 1.01, 0.01)
     df = pd.DataFrame(columns=["sens", "spec"], index=thresholds)
+    dict = {}
     for threshold in thresholds:
         y_pred_binary = (y_pred_proba >= threshold).astype(bool) 
         sens = recall_score(y_test, y_pred_binary)
         spec = recall_score(y_test, y_pred_binary, pos_label=0)
 
         df.loc[threshold] = [sens, spec]
+        dict[threshold] = [sens, spec]
         
     df = df.drop_duplicates(subset=["sens"], keep="last") # Keep the last duplicate (the one with the highest spec)
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
         print(df)
 
-    return df
+    return df, dict
 
 def get_opt_thresh(df, opt_sens):
     ''''
@@ -351,8 +353,9 @@ def parallel_grid_search(args):
             cv_perf_scores["perf_on_features"][subset]["auc_sum_score"].append(sum_score_auc)
 
             # Find optimal threshold
-            all_sens_and_specs_df = get_sens_spec_every_thresh(y_test, y_pred)
+            all_sens_and_specs_df, all_sens_and_specs_dict = get_sens_spec_every_thresh(y_test, y_pred)
             #cv_perf_scores["perf_on_features"][subset]["spec_sens_df"] = all_sens_and_specs_df
+            cv_perf_scores["perf_on_features"][subset]["spec_sens_dict"] = all_sens_and_specs_dict
             opt_thresh = get_opt_thresh(all_sens_and_specs_df, opt_sens=0.8)
             cv_perf_scores["perf_on_features"][subset]["opt_thresh"].append(opt_thresh)
             print("DEBUG opt thresh", subset, opt_thresh)
@@ -376,13 +379,15 @@ def parallel_grid_search(args):
     opt_model = fitted_models[avg_opt_n][0] # Fitted model from any fold would work, taking first
     features = cv_perf_scores["perf_on_features"][avg_opt_n]["features"][0]
     y_pred = opt_model.predict_proba(dataset["X_test"][features])[:, 1]
+    sens_spec_df, sens_spec_dict = get_sens_spec_every_thresh(y_test, y_pred)
     auc = roc_auc_score(dataset["y_test"], y_pred)
     sens = recall_score(dataset["y_test"], y_pred >= avg_opt_thresh)
-    spec = recall_score(dataset["y_test"], y_pred < avg_opt_thresh, pos_label=0)
+    spec = recall_score(dataset["y_test"], y_pred >= avg_opt_thresh, pos_label=0)
 
     cv_perf_scores["auc_test_set"] = auc
     cv_perf_scores["sens_test_set"] = sens
     cv_perf_scores["spec_test_set"] = spec
+    cv_perf_scores["sens_spec_test_set"] = sens_spec_dict
 
     # Re-train the full pipeline to get the final trained model and feature sets
     X_train, y_train = dataset["X_full"], dataset["y_full"]
