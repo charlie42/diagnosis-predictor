@@ -379,7 +379,7 @@ def parallel_grid_search(args):
     opt_model = fitted_models[avg_opt_n][0] # Fitted model from any fold would work, taking first
     features = cv_perf_scores["perf_on_features"][avg_opt_n]["features"][0]
     y_pred = opt_model.predict_proba(dataset["X_test"][features])[:, 1]
-    sens_spec_df, sens_spec_dict = get_sens_spec_every_thresh(y_test, y_pred)
+    sens_spec_df, sens_spec_dict = get_sens_spec_every_thresh(dataset["y_test"], y_pred)
     auc = roc_auc_score(dataset["y_test"], y_pred)
     sens = recall_score(dataset["y_test"], y_pred >= avg_opt_thresh)
     spec = recall_score(dataset["y_test"], y_pred >= avg_opt_thresh, pos_label=0)
