@@ -302,7 +302,7 @@ def parallel_grid_search(args):
         rfe_pipe.fit(X_train, y_train)
         rfe = rfe_pipe.named_steps["rfe"]
         feature_rankings = pd.DataFrame(rfe.ranking_, index=X_train.columns, columns=["Rank"]).sort_values(by="Rank", ascending=True)
-        features = feature_rankings[feature_rankings["Rank"] <= 100].index.tolist()
+        features = feature_rankings[feature_rankings["Rank"] <= N_FEATURES_TO_CHECK].index.tolist()
         cv_perf_scores["rfe_features"].append(features)
         
         sfs = SFS(
@@ -414,7 +414,7 @@ def parallel_grid_search(args):
     rfe_pipe.fit(X_train, y_train)
     rfe = rfe_pipe.named_steps["rfe"]
     feature_rankings = pd.DataFrame(rfe.ranking_, index=X_train.columns, columns=["Rank"]).sort_values(by="Rank", ascending=True)
-    features = feature_rankings[feature_rankings["Rank"] <= 100].index.tolist()
+    features = feature_rankings[feature_rankings["Rank"] <= N_FEATURES_TO_CHECK].index.tolist()
     sfs = SFS(
         estimator=pipe_with_best_model,
         k_features=N_FEATURES_TO_CHECK,
