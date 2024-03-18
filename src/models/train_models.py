@@ -6,7 +6,7 @@ import pandas as pd
 
 from scipy.stats import loguniform, uniform
 
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn import svm
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import HistGradientBoostingClassifier
@@ -220,9 +220,10 @@ def parallel_grid_search(args):
     grid = lr_param_grid
 
     n_splits = 2 if DEV_MODE else 4 if DEBUG_MODE else 10 #2
-    cv_rs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
-    cv_fs = StratifiedKFold(n_splits, shuffle=True, random_state=0)
-    cv_perf = StratifiedKFold(n_splits, shuffle=True, random_state=0)
+    test_size = 0.2
+    cv_rs = StratifiedShuffleSplit(n_splits, test_size=test_size, random_state=0)
+    cv_fs = StratifiedShuffleSplit(n_splits, test_size=test_size, random_state=0)
+    cv_perf = StratifiedShuffleSplit(n_splits, test_size=test_size, random_state=0)
 
     # Pipeline
     pipeline_for_rs = Pipeline(steps=[
