@@ -377,7 +377,7 @@ def parallel_grid_search(args):
     # Get sensitivity and specificity on test set with average optimal threshold
     # and average optiman n features
     avg_opt_n = math.ceil(np.mean(cv_perf_scores["opt_ns"]))
-    avg_opt_thresh = np.mean(cv_perf_scores["perf_on_features"][avg_opt_n]["opt_thresh"])
+    avg_opt_thresh = np.median(cv_perf_scores["perf_on_features"][avg_opt_n]["opt_thresh"])
 
     opt_model = fitted_models[avg_opt_n][0] # Fitted model from any fold would work, taking first
     features = cv_perf_scores["perf_on_features"][avg_opt_n]["features"][0]
