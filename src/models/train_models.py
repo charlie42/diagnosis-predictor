@@ -200,7 +200,7 @@ def parallel_grid_search(args):
     dataset, output_name = args
 
     # Model
-    lr = LogisticRegression(solver="saga")
+    lr = LogisticRegression(solver="saga", class_weight="balanced")
 
     # Parameters
     lr_param_grid = {
@@ -210,7 +210,7 @@ def parallel_grid_search(args):
     } if DEV_MODE else {
         'model__C': loguniform(1e-5, 1e4), 
         'model__penalty': ['elasticnet'], 
-        'model__class_weight': ['balanced', None], 
+        #'model__class_weight': ['balanced', None], 
         'model__l1_ratio': uniform(0, 1) 
     }
 
@@ -248,6 +248,7 @@ def parallel_grid_search(args):
     # Get cross_val_score at each number of features for each diagnosis
     cv_perf_scores = {
         "hp_search_best_score": [],
+        "models": [],
         "auc_all_features": [],
         "opt_ns": [],
         "rfe_features": [],
@@ -283,6 +284,9 @@ def parallel_grid_search(args):
         ## Get model with optimal hyperparameters, without the rfe and sfs 
         ## from the pipeline 
         model = clone(rs.best_estimator_.named_steps["model"]) # Unfitted, with same params
+        print("DEBUG model string", str(rs.best_estimator_.named_steps["model"]))
+        cv_perf_scores["models"].append(str(rs.best_estimator_.named_steps["model"]))
+
         #print("BEST MODEL", model)
         pipe_with_best_model = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy="median")),
@@ -463,7 +467,7 @@ def main():
         pass
 
     if DEV_MODE:
-        #diag_cols = diag_cols[0:1]
+        diag_cols = diag_cols[0:1]
         #diag_cols = ["Diag.Autism Spectrum Disorder", 
         #             "Diag.ADHD-Combined Type",
         #             "Diag.Specific Learning Disorder with Impairment in Reading (test)"]
