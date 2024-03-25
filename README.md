@@ -22,36 +22,28 @@ To run on an empty system:
 `requirements.txt` is also available for installing dependencies with pip directly
 
 ## 1 step:
-
-`pipenv run python -W ignore src/data/create_datasets.py 0 0 0 0 0`
-
-Arguments: only_assessment_distribution, only_parent_report, use_other_diags_as_input = 0, only_free_assessments = 0, learning = 0
-
-### 2 step (optional):
-
-`pipenv run python -W ignore src/data/create_data_reports.py`
+Copy data from LORIS to `data/raw/` directory, `LORIS-realease.csv`
 
 ## 2 step:
+Check that you're happy with the clinical and technical config values (`config/` directory)
 
-`pipenv run python -W ignore src/models/train_models.py 0`
+## 3 step:
 
-Arguments: models_from_file = 1
+Run `pipenv run python -W ignore src/data/create_datasets.py 0 0 0 0 0` to prepare the data
 
-## 3 step (optional):
+Arguments: 
+- `only_assessment_distribution`: do not create data, only vizualize assessment distribution 
+- `only_parent_report`: only use parent-report assessments
+- `use_other_diags_as_input` = 0: use presence of other diagnoses as input variables
+- `only_free_assessments` = 0: use only non-proprietary assessments
+- `learning` = 0: use `learning.yml` config file with extended set of input assessments
 
-`pipenv run python -W ignore src/models/evaluate_original_models.py 1`
+### Optional:
 
-Arguments: use_test_set=1
+Run `pipenv run python -W ignore src/data/create_data_reports.py` to create reports on the dataset
 
 ## 4 step:
 
-`pipenv run python -W ignore src/models/identify_feature_subsets.py 0`
+Run `pipenv run python -W ignore src/models/train_models.py` train models and generate report file
 
-Arguments: importances_from_file = 0
-
-## 5 step
-
-`pipenv run python -W ignore src/models/evaluate_models_on_feature_subsets.py 0`
-
-Arguments: models_from_file = 1
-
+Output files will be saved in a sister directory `diagnosis_predictor_data`
