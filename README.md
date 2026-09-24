@@ -1,5 +1,14 @@
 # diagnosis-predictor
 
+## Author and citation
+
+Author: Charlie Faure.
+
+Faure C, Leventhal BL, Koyama M, Panda S, Vogelstein JT, Milham MP, Lindner AB, Klein A. Accurate and efficient data-driven psychiatric assessment using machine learning. BMC Medical Informatics and Decision Making. 2026;26(1):40. https://doi.org/10.1186/s12911-025-03329-5
+
+See `CITATION.cff` for a machine-readable citation.
+
+
 File structure: http://drivendata.github.io/cookiecutter-data-science/#directory-structure 
 
 Predicting HBN consensus diagnoses, and test-based disagnoses for:
