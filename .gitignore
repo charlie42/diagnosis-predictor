@@ -130,3 +130,11 @@ dmypy.json
 
 .DS_Store
 /data/
+
+# Virtual environment
+bin/
+lib/
+lib64
+include/
+share/
+pyvenv.cfg
