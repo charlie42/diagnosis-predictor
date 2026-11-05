@@ -15,7 +15,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import models, util
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 def build_output_dir_name(params_from_previous_script):
     # Part with the datetime

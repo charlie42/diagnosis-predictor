@@ -28,8 +28,8 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import util, models, util
 
-DEBUG_MODE = True # Run with less folds and iterations to debug code
-DEV_MODE = True # The fastest, with the crudest models, can run on local machine
+DEBUG_MODE = False # Run with less folds and iterations to debug code
+DEV_MODE = False # The fastest, with the crudest models, can run on local machine
 N_FEATURES_TO_CHECK = 2 if DEV_MODE else 27 # Max n features in final assessment
 
 def build_output_dir_name(params_from_create_datasets):
